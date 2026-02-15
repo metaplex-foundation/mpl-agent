@@ -1,0 +1,14 @@
+.anchor
+.DS_Store
+**/.DS_Store
+**/target
+**/*.rs.bk
+node_modules
+test-ledger
+dist
+.amman
+.crates
+.bin
+.idea
+clients/js/output.json
+8oo41DdXLnERYxrjU26Byuh3kii6YQY6eqVZUae1Tndk.json

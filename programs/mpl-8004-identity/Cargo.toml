@@ -1,0 +1,19 @@
+[package]
+name = "mpl-8004-identity-program"
+version = "0.1.0"
+edition = "2021"
+readme = "./README.md"
+license-file = "../../LICENSE"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[dependencies]
+bytemuck = { version = "1.23", features = ["derive", "min_const_generics"] }
+podded = "0.5"
+shank = "0.4.5"
+num-derive = "^0.4"
+num-traits = "^0.2"
+solana-program = "^2.3"
+thiserror = "^2.0"
