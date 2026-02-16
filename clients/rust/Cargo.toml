@@ -21,6 +21,7 @@ num-traits = "^0.2"
 serde = { version = "^1.0", features = ["derive"], optional = true }
 serde_with = { version = "^3.14", optional = true }
 solana-program = "^2.3"
+solana-program-error = "3.0"
 thiserror = "^1.0"
 
 [dev-dependencies]

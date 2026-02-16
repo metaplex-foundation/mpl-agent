@@ -10,8 +10,8 @@ import { Serializer, scalarEnum } from '@metaplex-foundation/umi/serializers';
 
 export enum Key {
   Uninitialized,
-  MyAccount,
-  MyPdaAccount,
+  AgentIdentityV1,
+  CollectionConfigV1,
 }
 
 export type KeyArgs = Key;

@@ -17,6 +17,6 @@ use num_derive::FromPrimitive;
 #[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Hash, FromPrimitive)]
 pub enum Key {
     Uninitialized,
-    MyAccount,
-    MyPdaAccount,
+    AgentIdentityV1,
+    CollectionConfigV1,
 }

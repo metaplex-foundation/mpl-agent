@@ -18,12 +18,16 @@ kinobi.update(
 // Update accounts.
 kinobi.update(
   new k.updateAccountsVisitor({
-    myPdaAccount: {
+    agentIdentityV1: {
       seeds: [
-        k.constantPdaSeedNodeFromString("myPdaAccount"),
-        k.programIdPdaSeedNode(),
-        k.variablePdaSeedNode("authority", k.publicKeyTypeNode(), "The address of the authority"),
-        k.variablePdaSeedNode("name", k.stringTypeNode(), "The name of the account"),
+        k.constantPdaSeedNodeFromString("agent_identity"),
+        k.variablePdaSeedNode("asset", k.publicKeyTypeNode(), "The address of the asset"),
+      ],
+    },
+    collectionConfigV1: {
+      seeds: [
+        k.constantPdaSeedNodeFromString("collection_config"),
+        k.variablePdaSeedNode("collection", k.publicKeyTypeNode(), "The address of the collection"),
       ],
     },
   })
@@ -32,10 +36,11 @@ kinobi.update(
 // Update instructions.
 kinobi.update(
   new k.updateInstructionsVisitor({
-    create: {
-      byteDeltas: [
-        k.instructionByteDeltaNode(k.accountLinkNode("myAccount")),
-      ],
+    registerV1: {
+      accounts: {
+        agentIdentity: {defaultValue: k.pdaValueNode("agentIdentityV1")},
+        collectionConfig: {defaultValue: k.pdaValueNode("collectionConfigV1")},
+      },
     },
   })
 );
@@ -44,8 +49,8 @@ kinobi.update(
 const key = (name) => ({ field: "key", value: k.enumValueNode("Key", name) });
 kinobi.update(
   new k.setAccountDiscriminatorFromFieldVisitor({
-    myAccount: key("MyAccount"),
-    myPdaAccount: key("MyPdaAccount"),
+    agentIdentityV1: key("AgentIdentityV1"),
+    collectionConfigV1: key("CollectionConfigV1"),
   })
 );
 

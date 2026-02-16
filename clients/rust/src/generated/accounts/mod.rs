@@ -5,8 +5,8 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
-pub(crate) mod r#my_account;
-pub(crate) mod r#my_pda_account;
+pub(crate) mod r#agent_identity_v1;
+pub(crate) mod r#collection_config_v1;
 
-pub use self::r#my_account::*;
-pub use self::r#my_pda_account::*;
+pub use self::r#agent_identity_v1::*;
+pub use self::r#collection_config_v1::*;

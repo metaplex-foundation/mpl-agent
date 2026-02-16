@@ -6,6 +6,7 @@
 //!
 
 use num_derive::FromPrimitive;
+use solana_program_error::{ProgramError, ToStr};
 use thiserror::Error;
 
 #[derive(Clone, Debug, Eq, Error, FromPrimitive, PartialEq)]
@@ -19,10 +20,42 @@ pub enum Mpl8004IdentityError {
     /// 2 (0x2) - Invalid account data
     #[error("Invalid account data")]
     InvalidAccountData,
+    /// 3 (0x3) - Invalid MPL Core Program
+    #[error("Invalid MPL Core Program")]
+    InvalidMplCoreProgram,
+    /// 4 (0x4) - Invalid Core Asset
+    #[error("Invalid Core Asset")]
+    InvalidCoreAsset,
 }
 
-impl solana_program::program_error::PrintProgramError for Mpl8004IdentityError {
-    fn print<E>(&self) {
-        solana_program::msg!(&self.to_string());
+impl From<Mpl8004IdentityError> for ProgramError {
+    fn from(e: Mpl8004IdentityError) -> Self {
+        ProgramError::Custom(e as u32)
+    }
+}
+
+impl TryFrom<u32> for Mpl8004IdentityError {
+    type Error = ProgramError;
+    fn try_from(error: u32) -> Result<Self, Self::Error> {
+        match error {
+            0 => Ok(Mpl8004IdentityError::InvalidSystemProgram),
+            1 => Ok(Mpl8004IdentityError::InvalidInstructionData),
+            2 => Ok(Mpl8004IdentityError::InvalidAccountData),
+            3 => Ok(Mpl8004IdentityError::InvalidMplCoreProgram),
+            4 => Ok(Mpl8004IdentityError::InvalidCoreAsset),
+            _ => Err(ProgramError::InvalidArgument),
+        }
+    }
+}
+
+impl ToStr for Mpl8004IdentityError {
+    fn to_str(&self) -> &'static str {
+        match self {
+            Mpl8004IdentityError::InvalidSystemProgram => "Invalid System Program",
+            Mpl8004IdentityError::InvalidInstructionData => "Invalid instruction data",
+            Mpl8004IdentityError::InvalidAccountData => "Invalid account data",
+            Mpl8004IdentityError::InvalidMplCoreProgram => "Invalid MPL Core Program",
+            Mpl8004IdentityError::InvalidCoreAsset => "Invalid Core Asset",
+        }
     }
 }

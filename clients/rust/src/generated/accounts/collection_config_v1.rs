@@ -6,7 +6,6 @@
 //!
 
 use crate::generated::types::Key;
-use crate::generated::types::MyData;
 #[cfg(feature = "anchor")]
 use anchor_lang::prelude::{AnchorDeserialize, AnchorSerialize};
 #[cfg(not(feature = "anchor"))]
@@ -17,19 +16,44 @@ use solana_program::pubkey::Pubkey;
 #[cfg_attr(not(feature = "anchor"), derive(BorshSerialize, BorshDeserialize))]
 #[cfg_attr(feature = "anchor", derive(AnchorSerialize, AnchorDeserialize))]
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct MyAccount {
+pub struct CollectionConfigV1 {
     pub key: Key,
-    pub padding: [u8; 7],
+    pub bump: u8,
+    pub padding: [u8; 6],
     #[cfg_attr(
         feature = "serde",
         serde(with = "serde_with::As::<serde_with::DisplayFromStr>")
     )]
-    pub authority: Pubkey,
-    pub data: MyData,
+    pub collection: Pubkey,
 }
 
-impl MyAccount {
-    pub const LEN: usize = 48;
+impl CollectionConfigV1 {
+    pub const LEN: usize = 40;
+
+    /// Prefix values used to generate a PDA for this account.
+    ///
+    /// Values are positional and appear in the following order:
+    ///
+    ///   0. `CollectionConfigV1::PREFIX`
+    ///   1. collection (`Pubkey`)
+    pub const PREFIX: &'static [u8] = "collection_config".as_bytes();
+
+    pub fn create_pda(
+        collection: Pubkey,
+        bump: u8,
+    ) -> Result<solana_program::pubkey::Pubkey, solana_program::pubkey::PubkeyError> {
+        solana_program::pubkey::Pubkey::create_program_address(
+            &["collection_config".as_bytes(), collection.as_ref(), &[bump]],
+            &crate::MPL8004_IDENTITY_ID,
+        )
+    }
+
+    pub fn find_pda(collection: &Pubkey) -> (solana_program::pubkey::Pubkey, u8) {
+        solana_program::pubkey::Pubkey::find_program_address(
+            &["collection_config".as_bytes(), collection.as_ref()],
+            &crate::MPL8004_IDENTITY_ID,
+        )
+    }
 
     #[inline(always)]
     pub fn from_bytes(data: &[u8]) -> Result<Self, std::io::Error> {
@@ -38,7 +62,7 @@ impl MyAccount {
     }
 }
 
-impl<'a> TryFrom<&solana_program::account_info::AccountInfo<'a>> for MyAccount {
+impl<'a> TryFrom<&solana_program::account_info::AccountInfo<'a>> for CollectionConfigV1 {
     type Error = std::io::Error;
 
     fn try_from(

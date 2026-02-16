@@ -1,4 +1,4 @@
-mod create;
+mod register;
 
 use bytemuck::try_from_bytes;
 use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, msg, pubkey::Pubkey};
@@ -6,7 +6,7 @@ use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, msg, 
 use crate::error::Mpl8004IdentityError;
 use crate::instruction::Mpl8004IdentityInstructionDiscriminant;
 
-pub use create::*;
+pub use register::{register_v1, RegisterV1Args};
 
 /// Process incoming instructions.
 ///
@@ -27,9 +27,9 @@ pub fn process_instruction<'a>(
 
     // Route by discriminant (first byte).
     match Mpl8004IdentityInstructionDiscriminant::try_from(instruction_data[0]) {
-        Ok(Mpl8004IdentityInstructionDiscriminant::Create) => {
-            msg!("Instruction: Create");
-            create(
+        Ok(Mpl8004IdentityInstructionDiscriminant::RegisterV1) => {
+            msg!("Instruction: RegisterV1");
+            register_v1(
                 accounts,
                 try_from_bytes(instruction_data)
                     .map_err(|_| Mpl8004IdentityError::InvalidInstructionData)?,

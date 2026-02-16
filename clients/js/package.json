@@ -26,15 +26,16 @@
   "author": "Metaplex Maintainers <contact@metaplex.com>",
   "license": "Apache-2.0",
   "dependencies": {
-    "@metaplex-foundation/mpl-toolbox": "^0.8.0"
+    "@metaplex-foundation/mpl-toolbox": "^0.10.0",
+    "@metaplex-foundation/mpl-core": "^1.7.0"
   },
   "peerDependencies": {
     "@metaplex-foundation/umi": "^1.0"
   },
   "devDependencies": {
     "@ava/typescript": "^5.0.0",
-    "@metaplex-foundation/umi": "^1.0.0",
-    "@metaplex-foundation/umi-bundle-tests": "^1.0.0",
+    "@metaplex-foundation/umi": "^1.5.1",
+    "@metaplex-foundation/umi-bundle-tests": "^1.5.1",
     "@solana/web3.js": "^1.73.0",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.46.1",

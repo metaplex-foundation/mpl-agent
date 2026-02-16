@@ -1,10 +1,8 @@
-mod my_account;
-mod my_data;
-mod my_pda_account;
+mod agent_identity;
+mod collection_config;
 
-pub use my_account::*;
-pub use my_data::*;
-pub use my_pda_account::*;
+pub use agent_identity::*;
+pub use collection_config::*;
 
 use shank::ShankType;
 
@@ -14,16 +12,16 @@ use shank::ShankType;
 #[derive(Clone, Copy, Debug, PartialEq, Eq, ShankType)]
 pub enum Key {
     Uninitialized,
-    MyAccount,
-    MyPdaAccount,
+    AgentIdentityV1,
+    CollectionConfigV1,
 }
 
 impl From<u8> for Key {
     fn from(value: u8) -> Self {
         match value {
             0 => Key::Uninitialized,
-            1 => Key::MyAccount,
-            2 => Key::MyPdaAccount,
+            1 => Key::AgentIdentityV1,
+            2 => Key::CollectionConfigV1,
             _ => Key::Uninitialized,
         }
     }

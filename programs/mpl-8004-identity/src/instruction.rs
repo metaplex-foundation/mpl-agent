@@ -1,13 +1,13 @@
 use shank::{ShankContext, ShankInstruction};
 
-use crate::processor::CreateArgs;
+use crate::processor::RegisterV1Args;
 
 /// Instruction discriminants for routing.
 /// The first byte of instruction data determines which instruction to execute.
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Mpl8004IdentityInstructionDiscriminant {
-    Create = 0,
+    RegisterV1 = 0,
 }
 
 impl TryFrom<u8> for Mpl8004IdentityInstructionDiscriminant {
@@ -15,7 +15,7 @@ impl TryFrom<u8> for Mpl8004IdentityInstructionDiscriminant {
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
-            0 => Ok(Mpl8004IdentityInstructionDiscriminant::Create),
+            0 => Ok(Mpl8004IdentityInstructionDiscriminant::RegisterV1),
             _ => Err(()),
         }
     }
@@ -27,11 +27,14 @@ impl TryFrom<u8> for Mpl8004IdentityInstructionDiscriminant {
 #[derive(Clone, Debug, ShankContext, ShankInstruction)]
 #[rustfmt::skip]
 pub enum Mpl8004IdentityInstruction {
-    /// Create My Account.
-    /// A detailed description of the instruction.
-    #[account(0, writable, signer, name="address", desc = "The address of the new account")]
-    #[account(1, name="authority", desc = "The authority of the new account")]
-    #[account(2, writable, signer, name="payer", desc = "The account paying for the storage fees")]
-    #[account(3, name="system_program", desc = "The system program")]
-    Create(CreateArgs),
+    /// Register an Agent Identity.
+    #[account(0, writable, name="agent_identity", desc = "The agent identity PDA")]
+    #[account(1, writable, name="collection_config", desc = "The collection config")]
+    #[account(2, writable, name="asset", desc = "The address of the Core asset")]
+    #[account(3, writable, name="collection", desc = "The address of the collection")]
+    #[account(4, writable, signer, name="payer", desc = "The payer for additional rent")]
+    #[account(5, optional, signer, name="authority", desc = "Authority for the collection. If not provided, the payer will be used.")]
+    #[account(6, name="mpl_core_program", desc = "The MPL Core program")]
+    #[account(7, name="system_program", desc = "The system program")]
+    RegisterV1(RegisterV1Args),
 }

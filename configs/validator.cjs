@@ -28,6 +28,11 @@ module.exports = {
         programId: "noopb9bkMVfRPU8AsbpTUg8AQkHtKwMYZiFUjNRtMmV",
         deployPath: getProgram("spl_noop.so"),
       },
+      {
+        label: "Mpl Core",
+        programId: "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d",
+        deployPath: getProgram("mpl_core.so"),
+      }
     ],
   },
 };

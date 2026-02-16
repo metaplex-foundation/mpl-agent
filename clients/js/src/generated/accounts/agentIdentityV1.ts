@@ -30,99 +30,109 @@ import {
 } from '@metaplex-foundation/umi/serializers';
 import { Key, KeyArgs, getKeySerializer } from '../types';
 
-export type MyPdaAccount = Account<MyPdaAccountAccountData>;
+export type AgentIdentityV1 = Account<AgentIdentityV1AccountData>;
 
-export type MyPdaAccountAccountData = {
+export type AgentIdentityV1AccountData = {
   key: Key;
   bump: number;
   padding: Array<number>;
+  asset: PublicKey;
 };
 
-export type MyPdaAccountAccountDataArgs = {
-  bump: number;
-  padding: Array<number>;
-};
+export type AgentIdentityV1AccountDataArgs = { bump: number; asset: PublicKey };
 
-export function getMyPdaAccountAccountDataSerializer(): Serializer<
-  MyPdaAccountAccountDataArgs,
-  MyPdaAccountAccountData
+export function getAgentIdentityV1AccountDataSerializer(): Serializer<
+  AgentIdentityV1AccountDataArgs,
+  AgentIdentityV1AccountData
 > {
   return mapSerializer<
-    MyPdaAccountAccountDataArgs,
+    AgentIdentityV1AccountDataArgs,
     any,
-    MyPdaAccountAccountData
+    AgentIdentityV1AccountData
   >(
-    struct<MyPdaAccountAccountData>(
+    struct<AgentIdentityV1AccountData>(
       [
         ['key', getKeySerializer()],
         ['bump', u8()],
         ['padding', array(u8(), { size: 6 })],
+        ['asset', publicKeySerializer()],
       ],
-      { description: 'MyPdaAccountAccountData' }
+      { description: 'AgentIdentityV1AccountData' }
     ),
-    (value) => ({ ...value, key: Key.MyPdaAccount })
-  ) as Serializer<MyPdaAccountAccountDataArgs, MyPdaAccountAccountData>;
+    (value) => ({
+      ...value,
+      key: Key.AgentIdentityV1,
+      padding: [0, 0, 0, 0, 0, 0],
+    })
+  ) as Serializer<AgentIdentityV1AccountDataArgs, AgentIdentityV1AccountData>;
 }
 
-export function deserializeMyPdaAccount(rawAccount: RpcAccount): MyPdaAccount {
-  return deserializeAccount(rawAccount, getMyPdaAccountAccountDataSerializer());
+export function deserializeAgentIdentityV1(
+  rawAccount: RpcAccount
+): AgentIdentityV1 {
+  return deserializeAccount(
+    rawAccount,
+    getAgentIdentityV1AccountDataSerializer()
+  );
 }
 
-export async function fetchMyPdaAccount(
+export async function fetchAgentIdentityV1(
   context: Pick<Context, 'rpc'>,
   publicKey: PublicKey | Pda,
   options?: RpcGetAccountOptions
-): Promise<MyPdaAccount> {
+): Promise<AgentIdentityV1> {
   const maybeAccount = await context.rpc.getAccount(
     toPublicKey(publicKey, false),
     options
   );
-  assertAccountExists(maybeAccount, 'MyPdaAccount');
-  return deserializeMyPdaAccount(maybeAccount);
+  assertAccountExists(maybeAccount, 'AgentIdentityV1');
+  return deserializeAgentIdentityV1(maybeAccount);
 }
 
-export async function safeFetchMyPdaAccount(
+export async function safeFetchAgentIdentityV1(
   context: Pick<Context, 'rpc'>,
   publicKey: PublicKey | Pda,
   options?: RpcGetAccountOptions
-): Promise<MyPdaAccount | null> {
+): Promise<AgentIdentityV1 | null> {
   const maybeAccount = await context.rpc.getAccount(
     toPublicKey(publicKey, false),
     options
   );
-  return maybeAccount.exists ? deserializeMyPdaAccount(maybeAccount) : null;
+  return maybeAccount.exists ? deserializeAgentIdentityV1(maybeAccount) : null;
 }
 
-export async function fetchAllMyPdaAccount(
+export async function fetchAllAgentIdentityV1(
   context: Pick<Context, 'rpc'>,
   publicKeys: Array<PublicKey | Pda>,
   options?: RpcGetAccountsOptions
-): Promise<MyPdaAccount[]> {
+): Promise<AgentIdentityV1[]> {
   const maybeAccounts = await context.rpc.getAccounts(
     publicKeys.map((key) => toPublicKey(key, false)),
     options
   );
   return maybeAccounts.map((maybeAccount) => {
-    assertAccountExists(maybeAccount, 'MyPdaAccount');
-    return deserializeMyPdaAccount(maybeAccount);
+    assertAccountExists(maybeAccount, 'AgentIdentityV1');
+    return deserializeAgentIdentityV1(maybeAccount);
   });
 }
 
-export async function safeFetchAllMyPdaAccount(
+export async function safeFetchAllAgentIdentityV1(
   context: Pick<Context, 'rpc'>,
   publicKeys: Array<PublicKey | Pda>,
   options?: RpcGetAccountsOptions
-): Promise<MyPdaAccount[]> {
+): Promise<AgentIdentityV1[]> {
   const maybeAccounts = await context.rpc.getAccounts(
     publicKeys.map((key) => toPublicKey(key, false)),
     options
   );
   return maybeAccounts
     .filter((maybeAccount) => maybeAccount.exists)
-    .map((maybeAccount) => deserializeMyPdaAccount(maybeAccount as RpcAccount));
+    .map((maybeAccount) =>
+      deserializeAgentIdentityV1(maybeAccount as RpcAccount)
+    );
 }
 
-export function getMyPdaAccountGpaBuilder(
+export function getAgentIdentityV1GpaBuilder(
   context: Pick<Context, 'rpc' | 'programs'>
 ) {
   const programId = context.programs.getPublicKey(
@@ -130,28 +140,32 @@ export function getMyPdaAccountGpaBuilder(
     '8oo41DdXLnERYxrjU26Byuh3kii6YQY6eqVZUae1Tndk'
   );
   return gpaBuilder(context, programId)
-    .registerFields<{ key: KeyArgs; bump: number; padding: Array<number> }>({
+    .registerFields<{
+      key: KeyArgs;
+      bump: number;
+      padding: Array<number>;
+      asset: PublicKey;
+    }>({
       key: [0, getKeySerializer()],
       bump: [1, u8()],
       padding: [2, array(u8(), { size: 6 })],
+      asset: [8, publicKeySerializer()],
     })
-    .deserializeUsing<MyPdaAccount>((account) =>
-      deserializeMyPdaAccount(account)
+    .deserializeUsing<AgentIdentityV1>((account) =>
+      deserializeAgentIdentityV1(account)
     )
-    .whereField('key', Key.MyPdaAccount);
+    .whereField('key', Key.AgentIdentityV1);
 }
 
-export function getMyPdaAccountSize(): number {
-  return 8;
+export function getAgentIdentityV1Size(): number {
+  return 40;
 }
 
-export function findMyPdaAccountPda(
+export function findAgentIdentityV1Pda(
   context: Pick<Context, 'eddsa' | 'programs'>,
   seeds: {
-    /** The address of the authority */
-    authority: PublicKey;
-    /** The name of the account */
-    name: string;
+    /** The address of the asset */
+    asset: PublicKey;
   }
 ): Pda {
   const programId = context.programs.getPublicKey(
@@ -159,33 +173,31 @@ export function findMyPdaAccountPda(
     '8oo41DdXLnERYxrjU26Byuh3kii6YQY6eqVZUae1Tndk'
   );
   return context.eddsa.findPda(programId, [
-    string({ size: 'variable' }).serialize('myPdaAccount'),
-    publicKeySerializer().serialize(programId),
-    publicKeySerializer().serialize(seeds.authority),
-    string().serialize(seeds.name),
+    string({ size: 'variable' }).serialize('agent_identity'),
+    publicKeySerializer().serialize(seeds.asset),
   ]);
 }
 
-export async function fetchMyPdaAccountFromSeeds(
+export async function fetchAgentIdentityV1FromSeeds(
   context: Pick<Context, 'eddsa' | 'programs' | 'rpc'>,
-  seeds: Parameters<typeof findMyPdaAccountPda>[1],
+  seeds: Parameters<typeof findAgentIdentityV1Pda>[1],
   options?: RpcGetAccountOptions
-): Promise<MyPdaAccount> {
-  return fetchMyPdaAccount(
+): Promise<AgentIdentityV1> {
+  return fetchAgentIdentityV1(
     context,
-    findMyPdaAccountPda(context, seeds),
+    findAgentIdentityV1Pda(context, seeds),
     options
   );
 }
 
-export async function safeFetchMyPdaAccountFromSeeds(
+export async function safeFetchAgentIdentityV1FromSeeds(
   context: Pick<Context, 'eddsa' | 'programs' | 'rpc'>,
-  seeds: Parameters<typeof findMyPdaAccountPda>[1],
+  seeds: Parameters<typeof findAgentIdentityV1Pda>[1],
   options?: RpcGetAccountOptions
-): Promise<MyPdaAccount | null> {
-  return safeFetchMyPdaAccount(
+): Promise<AgentIdentityV1 | null> {
+  return safeFetchAgentIdentityV1(
     context,
-    findMyPdaAccountPda(context, seeds),
+    findAgentIdentityV1Pda(context, seeds),
     options
   );
 }

@@ -54,6 +54,32 @@ export class InvalidAccountDataError extends ProgramError {
 codeToErrorMap.set(0x2, InvalidAccountDataError);
 nameToErrorMap.set('InvalidAccountData', InvalidAccountDataError);
 
+/** InvalidMplCoreProgram: Invalid MPL Core Program */
+export class InvalidMplCoreProgramError extends ProgramError {
+  override readonly name: string = 'InvalidMplCoreProgram';
+
+  readonly code: number = 0x3; // 3
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid MPL Core Program', program, cause);
+  }
+}
+codeToErrorMap.set(0x3, InvalidMplCoreProgramError);
+nameToErrorMap.set('InvalidMplCoreProgram', InvalidMplCoreProgramError);
+
+/** InvalidCoreAsset: Invalid Core Asset */
+export class InvalidCoreAssetError extends ProgramError {
+  override readonly name: string = 'InvalidCoreAsset';
+
+  readonly code: number = 0x4; // 4
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid Core Asset', program, cause);
+  }
+}
+codeToErrorMap.set(0x4, InvalidCoreAssetError);
+nameToErrorMap.set('InvalidCoreAsset', InvalidCoreAssetError);
+
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors

@@ -11,12 +11,22 @@ pub enum Mpl8004IdentityError {
     /// 0 - Invalid System Program
     #[error("Invalid System Program")]
     InvalidSystemProgram,
+
     /// 1 - Invalid instruction data
     #[error("Invalid instruction data")]
     InvalidInstructionData,
+
     /// 2 - Invalid account data
     #[error("Invalid account data")]
     InvalidAccountData,
+
+    /// 3 - Invalid MPL Core Program
+    #[error("Invalid MPL Core Program")]
+    InvalidMplCoreProgram,
+
+    /// 4 - Invalid Asset
+    #[error("Invalid Core Asset")]
+    InvalidCoreAsset,
 }
 
 impl PrintProgramError for Mpl8004IdentityError {
