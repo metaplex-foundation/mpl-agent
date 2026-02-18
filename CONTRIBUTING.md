@@ -1,6 +1,6 @@
-# Contributing to Mpl8004 Identity
+# Contributing to Mpl Agent Identity
 
-This is a quick guide to help you contribute to Mpl8004 Identity.
+This is a quick guide to help you contribute to Mpl Agent Identity.
 
 ## Getting started
 

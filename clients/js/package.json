@@ -1,7 +1,7 @@
 {
-  "name": "@metaplex-foundation/mpl-8004-identity",
+  "name": "@metaplex-foundation/mpl-agent-identity",
   "version": "0.1.0",
-  "description": "Identity Registry for MPL 8004",
+  "description": "Identity Registry for MPL Agent",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "scripts": {
@@ -22,7 +22,7 @@
     "registry": "https://registry.npmjs.org"
   },
   "homepage": "https://metaplex.com",
-  "repository": "https://github.com/metaplex-foundation/mpl-8004-identity.git",
+  "repository": "https://github.com/metaplex-foundation/mpl-agent-identity.git",
   "author": "Metaplex Maintainers <contact@metaplex.com>",
   "license": "Apache-2.0",
   "dependencies": {

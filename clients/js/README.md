@@ -1,4 +1,4 @@
-# JavaScript client for Mpl8004 Identity
+# JavaScript client for Mpl Agent Identity
 
 A Umi-compatible JavaScript library for the project.
 
@@ -6,19 +6,24 @@ A Umi-compatible JavaScript library for the project.
 
 1. First, if you're not already using Umi, [follow these instructions to install the Umi framework](https://github.com/metaplex-foundation/umi/blob/main/docs/installation.md).
 2. Next, install this library using the package manager of your choice.
+
    ```sh
-   npm install @metaplex-foundation/mpl-8004-identity
-   ```
-2. Finally, register the library with your Umi instance like so.
-   ```ts
-   import { mpl8004Identity } from '@metaplex-foundation/mpl-8004-identity';
-   umi.use(mpl8004Identity());
+   npm install @metaplex-foundation/mpl-agent-identity
    ```
 
-You can learn more about this library's API by reading its generated [TypeDoc documentation](https://mpl-8004-identity-js-docs.vercel.app).
+3. Finally, register the library with your Umi instance like so.
+
+   ```ts
+   import { mplAgentIdentity } from '@metaplex-foundation/mpl-agent-identity';
+   umi.use(mplAgentIdentity());
+   ```
+
+You can learn more about this library's API by reading its generated [TypeDoc documentation](https://mpl-agent-identity-js-docs.vercel.app).
 
 ## Setting up Benchmarks
+
 The GitHub workflow will automatically run benchmarks on pushes to the `main` branch, however it needs a gh-pages branch to deploy the hosted graph website to. Run the commands below to setup the gh-pages branch.
+
 ```sh
 git checkout --orphan gh-pages
 git reset --hard

@@ -1,0 +1,236 @@
+{
+  "version": "0.1.0",
+  "name": "mpl_agent_validation_program",
+  "instructions": [
+    {
+      "name": "RegisterValidationV1",
+      "accounts": [
+        {
+          "name": "agentValidation",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The agent validation PDA"
+          ]
+        },
+        {
+          "name": "collectionValidationConfig",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The collection validation config"
+          ]
+        },
+        {
+          "name": "asset",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The address of the Core asset"
+          ]
+        },
+        {
+          "name": "collection",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The address of the collection"
+          ]
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "The payer for additional rent"
+          ]
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true,
+          "isOptional": true,
+          "docs": [
+            "Authority for the collection. If not provided, the payer will be used."
+          ]
+        },
+        {
+          "name": "mplCoreProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The MPL Core program"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The system program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "registerValidationV1Args",
+          "type": {
+            "defined": "RegisterValidationV1Args"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 0
+      }
+    }
+  ],
+  "accounts": [
+    {
+      "name": "AgentValidationV1",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "key",
+            "type": {
+              "defined": "Key"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                6
+              ]
+            },
+            "attrs": [
+              "padding"
+            ]
+          },
+          {
+            "name": "asset",
+            "type": "publicKey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CollectionValidationConfigV1",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "key",
+            "type": {
+              "defined": "Key"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                6
+              ]
+            },
+            "attrs": [
+              "padding"
+            ]
+          },
+          {
+            "name": "collection",
+            "type": "publicKey"
+          }
+        ]
+      }
+    }
+  ],
+  "types": [
+    {
+      "name": "RegisterValidationV1Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                7
+              ]
+            },
+            "attrs": [
+              "padding"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "Key",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Uninitialized"
+          },
+          {
+            "name": "AgentValidationV1"
+          },
+          {
+            "name": "CollectionValidationConfigV1"
+          }
+        ]
+      }
+    }
+  ],
+  "errors": [
+    {
+      "code": 0,
+      "name": "InvalidSystemProgram",
+      "msg": "Invalid System Program"
+    },
+    {
+      "code": 1,
+      "name": "InvalidInstructionData",
+      "msg": "Invalid instruction data"
+    },
+    {
+      "code": 2,
+      "name": "InvalidAccountData",
+      "msg": "Invalid account data"
+    },
+    {
+      "code": 3,
+      "name": "InvalidMplCoreProgram",
+      "msg": "Invalid MPL Core Program"
+    },
+    {
+      "code": 4,
+      "name": "InvalidCoreAsset",
+      "msg": "Invalid Core Asset"
+    }
+  ],
+  "metadata": {
+    "origin": "shank",
+    "address": "VALREGY66A9ieJfFUNs5GrxFTy498KUoSU7TbmSePQi",
+    "binaryVersion": "0.4.8",
+    "libVersion": "0.4.8"
+  }
+}

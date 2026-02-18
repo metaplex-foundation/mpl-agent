@@ -6,10 +6,10 @@ on:
       program:
         description: Program
         required: true
-        default: mpl-8004-identity
+        default: mpl-agent-identity
         type: choice
         options:
-          - mpl-8004-identity
+          - mpl-agent-identity
       bump:
         description: Version bump
         required: true

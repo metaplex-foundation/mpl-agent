@@ -7,10 +7,30 @@ const programDir = path.join(__dirname, "..", "programs");
 
 generateIdl({
   generator: "shank",
-  programName: "mpl_8004_identity_program",
-  programId: "8oo41DdXLnERYxrjU26Byuh3kii6YQY6eqVZUae1Tndk",
+  programName: "mpl_agent_identity_program",
+  programId: "1DREGFgysWYxLnRnKQnwrxnJQeSMk2HmGaC6whw2B2p",
   idlDir,
-  idlName: "mpl_8004_identity",
+  idlName: "mpl_agent_identity",
   binaryInstallDir,
-  programDir: path.join(programDir, "mpl-8004-identity"),
+  programDir: path.join(programDir, "mpl-agent-identity"),
+});
+
+generateIdl({
+  generator: "shank",
+  programName: "mpl_agent_reputation_program",
+  programId: "REPREG5c1gPHuHukEyANpksLdHFaJCiTrm6zJgNhRZR",
+  idlDir,
+  idlName: "mpl_agent_reputation",
+  binaryInstallDir,
+  programDir: path.join(programDir, "mpl-agent-reputation"),
+});
+
+generateIdl({
+  generator: "shank",
+  programName: "mpl_agent_validation_program",
+  programId: "VALREGY66A9ieJfFUNs5GrxFTy498KUoSU7TbmSePQi",
+  idlDir,
+  idlName: "mpl_agent_validation",
+  binaryInstallDir,
+  programDir: path.join(programDir, "mpl-agent-validation"),
 });

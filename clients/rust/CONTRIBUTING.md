@@ -1,6 +1,6 @@
 # Contributing to the Rust client
 
-This is a quick guide to help you contribute to the Rust client of Mpl8004 Identity.
+This is a quick guide to help you contribute to the Rust client of Mpl Agent Identity.
 
 ## Getting started
 

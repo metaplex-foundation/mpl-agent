@@ -2538,7 +2538,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "mpl-8004-identity"
+name = "mpl-agent-identity"
 version = "0.1.0"
 dependencies = [
  "assert_matches",
@@ -2555,7 +2555,41 @@ dependencies = [
 ]
 
 [[package]]
-name = "mpl-8004-identity-program"
+name = "mpl-agent-identity-program"
+version = "0.1.0"
+dependencies = [
+ "bytemuck",
+ "mpl-core",
+ "mpl-utils",
+ "num-derive 0.4.1",
+ "num-traits",
+ "podded",
+ "rmp",
+ "rmp-serde",
+ "shank",
+ "solana-program",
+ "thiserror 2.0.16",
+]
+
+[[package]]
+name = "mpl-agent-reputation-program"
+version = "0.1.0"
+dependencies = [
+ "bytemuck",
+ "mpl-core",
+ "mpl-utils",
+ "num-derive 0.4.1",
+ "num-traits",
+ "podded",
+ "rmp",
+ "rmp-serde",
+ "shank",
+ "solana-program",
+ "thiserror 2.0.16",
+]
+
+[[package]]
+name = "mpl-agent-validation-program"
 version = "0.1.0"
 dependencies = [
  "bytemuck",

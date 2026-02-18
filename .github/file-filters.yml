@@ -11,12 +11,14 @@ program_common: &program_common
   - ".github/file-filters.yml"
   - ".github/.env"
 
-mpl_8004_identity_program: &mpl_8004_identity_program
+mpl_agent_identity_program: &mpl_agent_identity_program
   - *program_common
-  - "programs/mpl-8004-identity/**"
+  - "programs/mpl-agent-identity/**"
+  - "programs/mpl-agent-reputation/**"
 
 programs: &programs
-  - *mpl_8004_identity_program
+  - *mpl_agent_identity_program
+  - *mpl_agent_reputation_program
 
 # Clients.
 

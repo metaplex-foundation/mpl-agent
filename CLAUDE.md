@@ -4,104 +4,117 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Essential Commands
 
-### Build and Test Programs
 ```bash
 # Build all Solana programs
 pnpm programs:build
 
-# Run program tests
+# Run program tests (RUST_LOG=error)
 pnpm programs:test
 
 # Run program tests with debug logs
 pnpm programs:debug
 
-# Clean built programs
-pnpm programs:clean
-```
+# Test JavaScript client (installs, builds, then tests)
+pnpm clients:js:test
 
-### Client Testing
-```bash
-# Test Rust client
+# Test Rust client (cargo test-sbf)
 pnpm clients:rust:test
 
-# Test JavaScript client  
-pnpm clients:js:test
-```
-
-### Code Generation
-```bash
-# Generate IDLs and clients (run after program changes)
+# Generate IDLs and clients (MUST run after any program changes)
 pnpm generate
 
-# Generate IDLs only
+# Generate IDLs only (Shank extracts from Rust annotations)
 pnpm generate:idls
 
-# Generate clients only
+# Generate clients only (Kinobi renders from IDL JSON)
 pnpm generate:clients
-```
 
-### Local Validator
-```bash
-# Start local validator
-pnpm validator
-
-# Start with debug logs
-pnpm validator:debug
-
-# View logs
-pnpm validator:logs
-
-# Stop validator
-pnpm validator:stop
-```
-
-### Formatting and Linting
-```bash
-# Format and fix code style
+# Format and lint fix
 pnpm lint:fix
 
-# Check code style
-pnpm lint
+# Start/stop local Amman validator
+pnpm validator
+pnpm validator:stop
 ```
 
 ## Architecture
 
-### Program Structure
-The main Solana program is located in `programs/mpl-8004-identity/` with standard Rust program organization:
-- `src/lib.rs` - Main library file declaring the program ID
-- `src/entrypoint.rs` - Program entrypoint
-- `src/instruction.rs` - Instruction definitions with Shank macros for IDL generation
-- `src/processor.rs` - Instruction processing logic
-- `src/state.rs` - Account state definitions
-- `src/error.rs` - Custom error types
+### Two-Program Suite
+
+This repo contains two independent Solana programs that operate on **MPL Core** assets (NFTs):
+
+| Program | ID | Purpose |
+|---------|-----|---------|
+| `mpl-agent-identity` | `1DREGFgysWYxLnRnKQnwrxnJQeSMk2HmGaC6whw2B2p` | Registers agent identity for Core assets |
+| `mpl-agent-reputation` | `REPREG5c1gPHuHukEyANpksLdHFaJCiTrm6zJgNhRZR` | Registers agent reputation for Core assets |
+
+The programs are structurally parallel — each has one instruction (`RegisterIdentityV1` / `RegisterReputationV1`), two PDA account types, and the same validation flow. They do **not** CPI into each other; both only CPI into MPL Core.
+
+### Program Structure (both programs follow this pattern)
+
+```
+programs/mpl-agent-{identity,reputation}/src/
+├── lib.rs           # declare_id! macro
+├── entrypoint.rs    # Routes to processor
+├── instruction.rs   # ShankContext + ShankInstruction derive for IDL gen
+├── processor/
+│   ├── mod.rs       # Discriminant-based dispatch via bytemuck zero-copy
+│   └── register.rs  # Core logic: validate PDAs, create accounts, add LinkedAppData plugin
+├── state/
+│   ├── mod.rs       # IdentityKey/ReputationKey enum (account discriminator)
+│   ├── agent_*.rs   # Per-asset PDA (40 bytes, zero-copy Pod)
+│   └── collection_*_config.rs  # Per-collection PDA (40 bytes, zero-copy Pod)
+└── error.rs         # Custom errors via thiserror + num_derive
+```
+
+### PDA Derivation
+
+| Account | Seeds | Program |
+|---------|-------|---------|
+| `AgentIdentityV1` | `["agent_identity", asset_pubkey]` | identity |
+| `CollectionIdentityConfigV1` | `["collection_identity_config", collection_pubkey]` | identity |
+| `AgentReputationV1` | `["agent_reputation", asset_pubkey]` | reputation |
+| `CollectionReputationConfigV1` | `["collection_reputation_config", collection_pubkey]` | reputation |
+
+### Key Patterns
+
+- **Zero-copy via bytemuck**: All account structs and instruction args are `#[repr(C)]`, `Pod + Zeroable`, 8-byte aligned with compile-time size assertions. Instruction data is cast directly from the raw byte slice.
+- **Shank annotations**: `ShankContext`, `ShankInstruction`, `ShankAccount`, `ShankType` drive IDL generation. The `#[skip]` attribute excludes discriminator bytes from the IDL; `#[padding]` marks alignment bytes; `#[idl_type(IdentityKey)]`/`#[idl_type(ReputationKey)]` maps raw `u8` fields to enum types in the IDL.
+- **MPL Core LinkedAppData**: On registration, each program attaches a `LinkedAppData` external plugin to the MPL Core **collection** with the collection config PDA as `data_authority`. Both programs can add separate `LinkedAppData` entries to the same collection.
 
 ### Client Generation Pipeline
-1. **Shank** (`configs/shank.cjs`) - Extracts IDL from Rust program annotations, outputs to `idls/`
-2. **Kinobi** (`configs/kinobi.cjs`) - Generates TypeScript and Rust clients from IDL:
-   - JavaScript client: `clients/js/src/generated/`
-   - Rust client: `clients/rust/src/generated/`
 
-### Key Configuration Files
-- `configs/validator.cjs` - Amman validator configuration with program deployments
-- `configs/kinobi.cjs` - Client generation configuration including PDA seeds and account discriminators
-- `.github/.env` - CI/CD environment variables (Rust/Solana versions, program names)
+1. **Shank** (`configs/shank.cjs`) — Extracts IDL from Rust annotations → `idls/*.json`
+2. **Kinobi** (`configs/kinobi.cjs`) — Reads IDL JSON, configures PDA seeds and account defaults, renders:
+   - JS client → `clients/js/src/generated/`
+   - Rust client → `clients/rust/src/generated/`
 
-### Account Model
-The template uses discriminated accounts with a `Key` enum field for account type identification. PDAs are configured in Kinobi with seed definitions for deterministic address derivation.
+The `configs/kinobi.cjs` file is where PDA seed definitions, program name mappings, and instruction account defaults are configured. If you add/change accounts or instructions, update this file accordingly.
+
+### JS Client
+
+- Package: `@metaplex-foundation/mpl-agent-identity`
+- Uses **UMI** framework — `src/plugin.ts` exports a `mplAgentIdentity()` UMI plugin
+- Tests use **AVA** with a local Amman validator (programs must be built first)
+- `clients/js/src/generated/` is entirely auto-generated — never edit directly
+
+### Rust Client
+
+- Crate: `mpl-agent-identity`
+- `src/lib.rs` re-exports everything from `src/generated/`
+- `src/generated/` is entirely auto-generated — never edit directly
+- Tests gated behind `#[cfg(feature = "test-sbf")]`
 
 ## Development Workflow
 
-1. Make changes to the Rust program in `programs/mpl-8004-identity/`
-2. Run `pnpm programs:build` to build the program
-3. Run `pnpm programs:test` to test your changes
-4. Run `pnpm generate` to regenerate IDLs and clients
-5. Test clients with `pnpm clients:js:test` and `pnpm clients:rust:test`
-6. Use `pnpm validator` for integration testing with a local validator
+1. Edit program source in `programs/mpl-agent-{identity,reputation}/`
+2. `pnpm programs:build` to compile
+3. `pnpm programs:test` to run program tests
+4. `pnpm generate` to regenerate IDLs and clients
+5. `pnpm clients:js:test` / `pnpm clients:rust:test` to test clients
 
-## Important Notes
+## Environment
 
-- The project uses pnpm as the package manager (v8.9.0)
-- Solana version: 2.2.1, Rust version: 1.83.0
-- Programs are built to `programs/.bin/` for deployment
-- External programs (Token Metadata, SPL Noop) are fetched during build for local validator
-- Always regenerate clients after program changes using `pnpm generate`
+- pnpm 8.9.0, Rust 1.83.0, Solana 2.2.1
+- Programs build to `programs/.bin/` — external deps (mpl_core, token_metadata, spl_noop) are fetched via `configs/scripts/program/dump.sh`
+- CI config in `.github/.env` — program list, toolchain versions

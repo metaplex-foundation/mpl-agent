@@ -1,12 +1,12 @@
-# Mpl8004 Identity
+# Mpl Agent Identity
 
-Identity Registry for MPL 8004
+Identity Registry for MPL Agent
 
 ## Programs
 
 This project contains the following programs:
 
-- [Mpl8004 Identity](./programs/mpl-8004-identity/README.md) `8oo41DdXLnERYxrjU26Byuh3kii6YQY6eqVZUae1Tndk`
+- [Mpl Agent Identity](./programs/mpl-agent-identity/README.md) `1DREGFgysWYxLnRnKQnwrxnJQeSMk2HmGaC6whw2B2p`
 
 You will need a Rust version compatible with BPF to compile the program, currently we recommend using Rust 1.68.0.
 

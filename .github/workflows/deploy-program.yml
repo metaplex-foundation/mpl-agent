@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       git_ref:
-        description: Release tag (release/mpl-8004-identity@0.1.0) or commit to deploy
+        description: Release tag (release/mpl-agent-identity@0.1.0) or commit to deploy
         required: true
         type: string
-        default: release/mpl-8004-identity@0.1.0
+        default: release/mpl-agent-identity@0.1.0
       program:
         description: Program
         required: true
@@ -48,8 +48,8 @@ jobs:
     - name: Check tag
       id: set_program
       run: |
-        echo program="mpl-8004-identity" >> $GITHUB_OUTPUT
-        if [[ "${{ inputs.git_ref }}" =~ ^release/mpl-8004-identity@* ]]; then
+        echo program="mpl-agent-identity" >> $GITHUB_OUTPUT
+        if [[ "${{ inputs.git_ref }}" =~ ^release/mpl-agent-identity@* ]]; then
           echo type="release" >> $GITHUB_OUTPUT
         else
           echo type="ref" >> $GITHUB_OUTPUT
@@ -150,7 +150,7 @@ jobs:
 
       - name: Identify Program
         run: |
-          echo PROGRAM_NAME="mpl_8004_identity" >> $GITHUB_ENV
+          echo PROGRAM_NAME="mpl_agent_identity" >> $GITHUB_ENV
           echo ${{ secrets.PROGRAM_ID }} > ./program-id.json
           
           if [[ "${{ inputs.cluster }}" == "sonic"* ]]; then

@@ -2,10 +2,17 @@
 import { createUmi as basecreateUmi } from '@metaplex-foundation/umi-bundle-tests';
 import { generateSigner, PublicKey, Umi } from '@metaplex-foundation/umi';
 import { create, createCollection } from '@metaplex-foundation/mpl-core';
-import { mpl8004Identity } from '../src';
+import {
+  mplAgentIdentity,
+  mplAgentReputation,
+  mplAgentValidation,
+} from '../src';
 
 export const createUmi = async () =>
-  (await basecreateUmi()).use(mpl8004Identity());
+  (await basecreateUmi())
+    .use(mplAgentIdentity())
+    .use(mplAgentReputation())
+    .use(mplAgentValidation());
 
 export async function createCollectionAndAsset(
   umi: Umi

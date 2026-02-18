@@ -11,9 +11,19 @@ module.exports = {
     commitment: "processed",
     programs: [
       {
-        label: "Mpl8004 Identity",
-        programId: "8oo41DdXLnERYxrjU26Byuh3kii6YQY6eqVZUae1Tndk",
-        deployPath: getProgram("mpl_8004_identity_program.so"),
+        label: "Mpl Agent Identity",
+        programId: "1DREGFgysWYxLnRnKQnwrxnJQeSMk2HmGaC6whw2B2p",
+        deployPath: getProgram("mpl_agent_identity_program.so"),
+      },
+      {
+        label: "Mpl Agent Reputation",
+        programId: "REPREG5c1gPHuHukEyANpksLdHFaJCiTrm6zJgNhRZR",
+        deployPath: getProgram("mpl_agent_reputation_program.so"),
+      },
+      {
+        label: "Mpl Agent Validation",
+        programId: "VALREGY66A9ieJfFUNs5GrxFTy498KUoSU7TbmSePQi",
+        deployPath: getProgram("mpl_agent_validation_program.so"),
       },
       // Below are external programs that should be included in the local validator.
       // You may configure which ones to fetch from the cluster when building
