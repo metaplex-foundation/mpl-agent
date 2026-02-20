@@ -21,10 +21,7 @@ import {
   struct,
   u8,
 } from '@metaplex-foundation/umi/serializers';
-import {
-  findAgentIdentityV1Pda,
-  findCollectionIdentityConfigV1Pda,
-} from '../accounts';
+import { findAgentIdentityV1Pda } from '../accounts';
 import {
   ResolvedAccount,
   ResolvedAccountsWithIndices,
@@ -36,12 +33,10 @@ import {
 export type RegisterIdentityV1InstructionAccounts = {
   /** The agent identity PDA */
   agentIdentity?: PublicKey | Pda;
-  /** The collection identity config */
-  collectionIdentityConfig?: PublicKey | Pda;
   /** The address of the Core asset */
   asset: PublicKey | Pda;
   /** The address of the collection */
-  collection: PublicKey | Pda;
+  collection?: PublicKey | Pda;
   /** The payer for additional rent */
   payer?: Signer;
   /** Authority for the collection. If not provided, the payer will be used. */
@@ -104,38 +99,33 @@ export function registerIdentityV1(
       isWritable: true as boolean,
       value: input.agentIdentity ?? null,
     },
-    collectionIdentityConfig: {
-      index: 1,
-      isWritable: true as boolean,
-      value: input.collectionIdentityConfig ?? null,
-    },
     asset: {
-      index: 2,
+      index: 1,
       isWritable: true as boolean,
       value: input.asset ?? null,
     },
     collection: {
-      index: 3,
+      index: 2,
       isWritable: true as boolean,
       value: input.collection ?? null,
     },
     payer: {
-      index: 4,
+      index: 3,
       isWritable: true as boolean,
       value: input.payer ?? null,
     },
     authority: {
-      index: 5,
+      index: 4,
       isWritable: false as boolean,
       value: input.authority ?? null,
     },
     mplCoreProgram: {
-      index: 6,
+      index: 5,
       isWritable: false as boolean,
       value: input.mplCoreProgram ?? null,
     },
     systemProgram: {
-      index: 7,
+      index: 6,
       isWritable: false as boolean,
       value: input.systemProgram ?? null,
     },
@@ -146,12 +136,6 @@ export function registerIdentityV1(
     resolvedAccounts.agentIdentity.value = findAgentIdentityV1Pda(context, {
       asset: expectPublicKey(resolvedAccounts.asset.value),
     });
-  }
-  if (!resolvedAccounts.collectionIdentityConfig.value) {
-    resolvedAccounts.collectionIdentityConfig.value =
-      findCollectionIdentityConfigV1Pda(context, {
-        collection: expectPublicKey(resolvedAccounts.collection.value),
-      });
   }
   if (!resolvedAccounts.payer.value) {
     resolvedAccounts.payer.value = context.payer;

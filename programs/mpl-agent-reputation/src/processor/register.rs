@@ -1,20 +1,19 @@
 use bytemuck::{Pod, Zeroable};
-use mpl_core::accounts::BaseCollectionV1;
+use mpl_core::accounts::BaseAssetV1;
 use mpl_core::fetch_wrapped_external_plugin_adapter;
 use mpl_core::instructions::{
-    AddCollectionExternalPluginAdapterV1Cpi, AddCollectionExternalPluginAdapterV1InstructionArgs,
+    AddExternalPluginAdapterV1Cpi, AddExternalPluginAdapterV1InstructionArgs,
 };
 use mpl_core::types::{
-    ExternalPluginAdapterInitInfo, ExternalPluginAdapterKey, ExternalPluginAdapterSchema,
-    Key as MplCoreKey, LinkedAppDataInitInfo, PluginAuthority,
+    AppDataInitInfo, ExternalPluginAdapterInitInfo, ExternalPluginAdapterKey,
+    ExternalPluginAdapterSchema, Key as MplCoreKey, PluginAuthority,
 };
 use shank::ShankType;
 use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, system_program};
 
 use crate::{
-    error::MplAgentReputationError,
-    instruction::accounts::RegisterReputationV1Accounts,
-    state::{AgentReputationV1, CollectionReputationConfigV1},
+    error::MplAgentReputationError, instruction::accounts::RegisterReputationV1Accounts,
+    state::AgentReputationV1,
 };
 
 /// Arguments for the RegisterReputationV1 instruction.
@@ -70,11 +69,6 @@ pub fn register_reputation_v1<'a>(
         ctx.accounts.asset.key,
     )?;
 
-    let collection_reputation_config_bump = CollectionReputationConfigV1::check_pda_derivation(
-        ctx.accounts.collection_reputation_config,
-        ctx.accounts.collection.key,
-    )?;
-
     // Assert that the asset exists and is a Core asset.
     if ctx.accounts.asset.owner != &mpl_core::ID
         || ctx.accounts.asset.try_borrow_data()?[0] != MplCoreKey::AssetV1 as u8
@@ -113,45 +107,29 @@ pub fn register_reputation_v1<'a>(
 
     agent_reputation.initialize(agent_reputation_bump, ctx.accounts.asset.key);
 
-    // Create the collection reputation config account.
-    CollectionReputationConfigV1::create_account(&ctx.accounts, collection_reputation_config_bump)?;
-
-    // Initialize the account using zero-copy.
-    // Borrow the account data mutably and cast to our struct.
-    let mut data = ctx
-        .accounts
-        .collection_reputation_config
-        .try_borrow_mut_data()?;
-    let collection_reputation_config: &mut CollectionReputationConfigV1 =
-        bytemuck::from_bytes_mut(&mut data[..core::mem::size_of::<CollectionReputationConfigV1>()]);
-
-    collection_reputation_config.initialize(
-        collection_reputation_config_bump,
-        ctx.accounts.collection.key,
-    );
-
-    // Check if the collection already has a LinkedAppData plugin.
-    let result = fetch_wrapped_external_plugin_adapter::<BaseCollectionV1>(
-        ctx.accounts.collection,
+    // Check if the asset already has a AppData plugin.
+    let result = fetch_wrapped_external_plugin_adapter::<BaseAssetV1>(
+        ctx.accounts.asset,
         None,
-        &ExternalPluginAdapterKey::LinkedAppData(PluginAuthority::Address {
-            address: *ctx.accounts.collection_reputation_config.key,
+        &ExternalPluginAdapterKey::AppData(PluginAuthority::Address {
+            address: *ctx.accounts.agent_reputation.key,
         }),
     );
 
-    // If the collection already has a LinkedAppData plugin, move on, otherwise create it.
+    // If the asset already has a AppData plugin, move on, otherwise create it.
     if result.is_err() {
-        AddCollectionExternalPluginAdapterV1Cpi {
+        AddExternalPluginAdapterV1Cpi {
             __program: ctx.accounts.mpl_core_program,
+            asset: ctx.accounts.asset,
             collection: ctx.accounts.collection,
             payer: ctx.accounts.payer,
             authority: ctx.accounts.authority,
             system_program: ctx.accounts.system_program,
             log_wrapper: None,
-            __args: AddCollectionExternalPluginAdapterV1InstructionArgs {
-                init_info: ExternalPluginAdapterInitInfo::LinkedAppData(LinkedAppDataInitInfo {
+            __args: AddExternalPluginAdapterV1InstructionArgs {
+                init_info: ExternalPluginAdapterInitInfo::AppData(AppDataInitInfo {
                     data_authority: PluginAuthority::Address {
-                        address: *ctx.accounts.collection_reputation_config.key,
+                        address: *ctx.accounts.agent_reputation.key,
                     },
                     init_plugin_authority: None,
                     schema: Some(ExternalPluginAdapterSchema::Binary),

@@ -1,8 +1,6 @@
 mod agent_identity;
-mod collection_identity_config;
 
 pub use agent_identity::*;
-pub use collection_identity_config::*;
 
 use shank::ShankType;
 
@@ -13,7 +11,6 @@ use shank::ShankType;
 pub enum Key {
     Uninitialized,
     AgentIdentityV1,
-    CollectionIdentityConfigV1,
 }
 
 impl From<u8> for Key {
@@ -21,7 +18,6 @@ impl From<u8> for Key {
         match value {
             0 => Key::Uninitialized,
             1 => Key::AgentIdentityV1,
-            2 => Key::CollectionIdentityConfigV1,
             _ => Key::Uninitialized,
         }
     }

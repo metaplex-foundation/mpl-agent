@@ -1,8 +1,6 @@
 mod agent_reputation;
-mod collection_reputation_config;
 
 pub use agent_reputation::*;
-pub use collection_reputation_config::*;
 
 use shank::ShankType;
 
@@ -13,7 +11,6 @@ use shank::ShankType;
 pub enum Key {
     Uninitialized,
     AgentReputationV1,
-    CollectionReputationConfigV1,
 }
 
 impl From<u8> for Key {
@@ -21,7 +18,6 @@ impl From<u8> for Key {
         match value {
             0 => Key::Uninitialized,
             1 => Key::AgentReputationV1,
-            2 => Key::CollectionReputationConfigV1,
             _ => Key::Uninitialized,
         }
     }

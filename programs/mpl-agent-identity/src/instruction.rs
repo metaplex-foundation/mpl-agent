@@ -29,12 +29,11 @@ impl TryFrom<u8> for MplAgentIdentityInstructionDiscriminant {
 pub enum MplAgentIdentityInstruction {
     /// Register an Agent Identity.
     #[account(0, writable, name="agent_identity", desc = "The agent identity PDA")]
-    #[account(1, writable, name="collection_identity_config", desc = "The collection identity config")]
-    #[account(2, writable, name="asset", desc = "The address of the Core asset")]
-    #[account(3, writable, name="collection", desc = "The address of the collection")]
-    #[account(4, writable, signer, name="payer", desc = "The payer for additional rent")]
-    #[account(5, optional, signer, name="authority", desc = "Authority for the collection. If not provided, the payer will be used.")]
-    #[account(6, name="mpl_core_program", desc = "The MPL Core program")]
-    #[account(7, name="system_program", desc = "The system program")]
+    #[account(1, writable, name="asset", desc = "The address of the Core asset")]
+    #[account(2, writable, optional, name="collection", desc = "The address of the collection")]
+    #[account(3, writable, signer, name="payer", desc = "The payer for additional rent")]
+    #[account(4, optional, signer, name="authority", desc = "Authority for the collection. If not provided, the payer will be used.")]
+    #[account(5, name="mpl_core_program", desc = "The MPL Core program")]
+    #[account(6, name="system_program", desc = "The system program")]
     RegisterIdentityV1(RegisterIdentityV1Args),
 }

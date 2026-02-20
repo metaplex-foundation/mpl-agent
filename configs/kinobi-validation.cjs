@@ -26,12 +26,6 @@ kinobi.update(
         k.variablePdaSeedNode("asset", k.publicKeyTypeNode(), "The address of the asset"),
       ],
     },
-    collectionValidationConfigV1: {
-      seeds: [
-        k.constantPdaSeedNodeFromString("collection_validation_config"),
-        k.variablePdaSeedNode("collection", k.publicKeyTypeNode(), "The address of the collection"),
-      ],
-    },
   })
 );
 
@@ -41,7 +35,6 @@ kinobi.update(
     registerValidationV1: {
       accounts: {
         agentValidation: {defaultValue: k.pdaValueNode("agentValidationV1")},
-        collectionValidationConfig: {defaultValue: k.pdaValueNode("collectionValidationConfigV1")},
       },
     },
   })

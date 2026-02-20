@@ -7,4 +7,3 @@
  */
 
 export * from './agentReputationV1';
-export * from './collectionReputationConfigV1';

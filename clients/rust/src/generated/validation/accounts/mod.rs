@@ -6,7 +6,5 @@
 //!
 
 pub(crate) mod r#agent_validation_v1;
-pub(crate) mod r#collection_validation_config_v1;
 
 pub use self::r#agent_validation_v1::*;
-pub use self::r#collection_validation_config_v1::*;

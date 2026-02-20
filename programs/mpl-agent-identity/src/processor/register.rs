@@ -1,20 +1,19 @@
 use bytemuck::{Pod, Zeroable};
-use mpl_core::accounts::BaseCollectionV1;
+use mpl_core::accounts::BaseAssetV1;
 use mpl_core::fetch_wrapped_external_plugin_adapter;
 use mpl_core::instructions::{
-    AddCollectionExternalPluginAdapterV1Cpi, AddCollectionExternalPluginAdapterV1InstructionArgs,
+    AddExternalPluginAdapterV1Cpi, AddExternalPluginAdapterV1InstructionArgs,
 };
 use mpl_core::types::{
-    ExternalPluginAdapterInitInfo, ExternalPluginAdapterKey, ExternalPluginAdapterSchema,
-    Key as MplCoreKey, LinkedAppDataInitInfo, PluginAuthority,
+    AppDataInitInfo, ExternalPluginAdapterInitInfo, ExternalPluginAdapterKey,
+    ExternalPluginAdapterSchema, Key as MplCoreKey, PluginAuthority,
 };
 use shank::ShankType;
 use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, system_program};
 
 use crate::{
-    error::MplAgentIdentityError,
-    instruction::accounts::RegisterIdentityV1Accounts,
-    state::{AgentIdentityV1, CollectionIdentityConfigV1},
+    error::MplAgentIdentityError, instruction::accounts::RegisterIdentityV1Accounts,
+    state::AgentIdentityV1,
 };
 
 /// Arguments for the RegisterIdentityV1 instruction.
@@ -68,11 +67,6 @@ pub fn register_identity_v1<'a>(
     let agent_identity_bump =
         AgentIdentityV1::check_pda_derivation(ctx.accounts.agent_identity, ctx.accounts.asset.key)?;
 
-    let collection_identity_config_bump = CollectionIdentityConfigV1::check_pda_derivation(
-        ctx.accounts.collection_identity_config,
-        ctx.accounts.collection.key,
-    )?;
-
     // Assert that the asset exists and is a Core asset.
     if ctx.accounts.asset.owner != &mpl_core::ID
         || ctx.accounts.asset.try_borrow_data()?[0] != MplCoreKey::AssetV1 as u8
@@ -111,43 +105,29 @@ pub fn register_identity_v1<'a>(
 
     agent_identity.initialize(agent_identity_bump, ctx.accounts.asset.key);
 
-    // Create the collection identity config account.
-    CollectionIdentityConfigV1::create_account(&ctx.accounts, collection_identity_config_bump)?;
-
-    // Initialize the account using zero-copy.
-    // Borrow the account data mutably and cast to our struct.
-    let mut data = ctx
-        .accounts
-        .collection_identity_config
-        .try_borrow_mut_data()?;
-    let collection_identity_config: &mut CollectionIdentityConfigV1 =
-        bytemuck::from_bytes_mut(&mut data[..core::mem::size_of::<CollectionIdentityConfigV1>()]);
-
-    collection_identity_config
-        .initialize(collection_identity_config_bump, ctx.accounts.collection.key);
-
-    // Check if the collection already has a LinkedAppData plugin.
-    let result = fetch_wrapped_external_plugin_adapter::<BaseCollectionV1>(
-        ctx.accounts.collection,
+    // Check if the asset already has a AppData plugin.
+    let result = fetch_wrapped_external_plugin_adapter::<BaseAssetV1>(
+        ctx.accounts.asset,
         None,
-        &ExternalPluginAdapterKey::LinkedAppData(PluginAuthority::Address {
-            address: *ctx.accounts.collection_identity_config.key,
+        &ExternalPluginAdapterKey::AppData(PluginAuthority::Address {
+            address: *ctx.accounts.agent_identity.key,
         }),
     );
 
-    // If the collection already has a LinkedAppData plugin, move on, otherwise create it.
+    // If the asset already has a AppData plugin, move on, otherwise create it.
     if result.is_err() {
-        AddCollectionExternalPluginAdapterV1Cpi {
+        AddExternalPluginAdapterV1Cpi {
             __program: ctx.accounts.mpl_core_program,
+            asset: ctx.accounts.asset,
             collection: ctx.accounts.collection,
             payer: ctx.accounts.payer,
             authority: ctx.accounts.authority,
             system_program: ctx.accounts.system_program,
             log_wrapper: None,
-            __args: AddCollectionExternalPluginAdapterV1InstructionArgs {
-                init_info: ExternalPluginAdapterInitInfo::LinkedAppData(LinkedAppDataInitInfo {
+            __args: AddExternalPluginAdapterV1InstructionArgs {
+                init_info: ExternalPluginAdapterInitInfo::AppData(AppDataInitInfo {
                     data_authority: PluginAuthority::Address {
-                        address: *ctx.accounts.collection_identity_config.key,
+                        address: *ctx.accounts.agent_identity.key,
                     },
                     init_plugin_authority: None,
                     schema: Some(ExternalPluginAdapterSchema::Binary),

@@ -26,12 +26,6 @@ kinobi.update(
         k.variablePdaSeedNode("asset", k.publicKeyTypeNode(), "The address of the asset"),
       ],
     },
-    collectionReputationConfigV1: {
-      seeds: [
-        k.constantPdaSeedNodeFromString("collection_reputation_config"),
-        k.variablePdaSeedNode("collection", k.publicKeyTypeNode(), "The address of the collection"),
-      ],
-    },
   })
 );
 
@@ -41,7 +35,6 @@ kinobi.update(
     registerReputationV1: {
       accounts: {
         agentReputation: {defaultValue: k.pdaValueNode("agentReputationV1")},
-        collectionReputationConfig: {defaultValue: k.pdaValueNode("collectionReputationConfigV1")},
       },
     },
   })

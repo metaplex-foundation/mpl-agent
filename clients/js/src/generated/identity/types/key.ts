@@ -11,7 +11,6 @@ import { Serializer, scalarEnum } from '@metaplex-foundation/umi/serializers';
 export enum Key {
   Uninitialized,
   AgentIdentityV1,
-  CollectionIdentityConfigV1,
 }
 
 export type KeyArgs = Key;

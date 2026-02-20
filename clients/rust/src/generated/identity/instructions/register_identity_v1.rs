@@ -14,12 +14,10 @@ use borsh::{BorshDeserialize, BorshSerialize};
 pub struct RegisterIdentityV1 {
     /// The agent identity PDA
     pub agent_identity: solana_program::pubkey::Pubkey,
-    /// The collection identity config
-    pub collection_identity_config: solana_program::pubkey::Pubkey,
     /// The address of the Core asset
     pub asset: solana_program::pubkey::Pubkey,
     /// The address of the collection
-    pub collection: solana_program::pubkey::Pubkey,
+    pub collection: Option<solana_program::pubkey::Pubkey>,
     /// The payer for additional rent
     pub payer: solana_program::pubkey::Pubkey,
     /// Authority for the collection. If not provided, the payer will be used.
@@ -39,22 +37,24 @@ impl RegisterIdentityV1 {
         &self,
         remaining_accounts: &[solana_program::instruction::AccountMeta],
     ) -> solana_program::instruction::Instruction {
-        let mut accounts = Vec::with_capacity(8 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(7 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new(
             self.agent_identity,
             false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
-            self.collection_identity_config,
-            false,
-        ));
-        accounts.push(solana_program::instruction::AccountMeta::new(
             self.asset, false,
         ));
-        accounts.push(solana_program::instruction::AccountMeta::new(
-            self.collection,
-            false,
-        ));
+        if let Some(collection) = self.collection {
+            accounts.push(solana_program::instruction::AccountMeta::new(
+                collection, false,
+            ));
+        } else {
+            accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+                crate::MPL_AGENT_IDENTITY_ID,
+                false,
+            ));
+        }
         accounts.push(solana_program::instruction::AccountMeta::new(
             self.payer, true,
         ));
@@ -108,17 +108,15 @@ impl RegisterIdentityV1InstructionData {
 /// ### Accounts:
 ///
 ///   0. `[writable]` agent_identity
-///   1. `[writable]` collection_identity_config
-///   2. `[writable]` asset
-///   3. `[writable]` collection
-///   4. `[writable, signer]` payer
-///   5. `[signer, optional]` authority
-///   6. `[optional]` mpl_core_program (default to `CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d`)
-///   7. `[optional]` system_program (default to `11111111111111111111111111111111`)
+///   1. `[writable]` asset
+///   2. `[writable, optional]` collection
+///   3. `[writable, signer]` payer
+///   4. `[signer, optional]` authority
+///   5. `[optional]` mpl_core_program (default to `CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d`)
+///   6. `[optional]` system_program (default to `11111111111111111111111111111111`)
 #[derive(Default)]
 pub struct RegisterIdentityV1Builder {
     agent_identity: Option<solana_program::pubkey::Pubkey>,
-    collection_identity_config: Option<solana_program::pubkey::Pubkey>,
     asset: Option<solana_program::pubkey::Pubkey>,
     collection: Option<solana_program::pubkey::Pubkey>,
     payer: Option<solana_program::pubkey::Pubkey>,
@@ -138,25 +136,17 @@ impl RegisterIdentityV1Builder {
         self.agent_identity = Some(agent_identity);
         self
     }
-    /// The collection identity config
-    #[inline(always)]
-    pub fn collection_identity_config(
-        &mut self,
-        collection_identity_config: solana_program::pubkey::Pubkey,
-    ) -> &mut Self {
-        self.collection_identity_config = Some(collection_identity_config);
-        self
-    }
     /// The address of the Core asset
     #[inline(always)]
     pub fn asset(&mut self, asset: solana_program::pubkey::Pubkey) -> &mut Self {
         self.asset = Some(asset);
         self
     }
+    /// `[optional account]`
     /// The address of the collection
     #[inline(always)]
-    pub fn collection(&mut self, collection: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.collection = Some(collection);
+    pub fn collection(&mut self, collection: Option<solana_program::pubkey::Pubkey>) -> &mut Self {
+        self.collection = collection;
         self
     }
     /// The payer for additional rent
@@ -211,11 +201,8 @@ impl RegisterIdentityV1Builder {
     pub fn instruction(&self) -> solana_program::instruction::Instruction {
         let accounts = RegisterIdentityV1 {
             agent_identity: self.agent_identity.expect("agent_identity is not set"),
-            collection_identity_config: self
-                .collection_identity_config
-                .expect("collection_identity_config is not set"),
             asset: self.asset.expect("asset is not set"),
-            collection: self.collection.expect("collection is not set"),
+            collection: self.collection,
             payer: self.payer.expect("payer is not set"),
             authority: self.authority,
             mpl_core_program: self.mpl_core_program.unwrap_or(solana_program::pubkey!(
@@ -234,12 +221,10 @@ impl RegisterIdentityV1Builder {
 pub struct RegisterIdentityV1CpiAccounts<'a, 'b> {
     /// The agent identity PDA
     pub agent_identity: &'b solana_program::account_info::AccountInfo<'a>,
-    /// The collection identity config
-    pub collection_identity_config: &'b solana_program::account_info::AccountInfo<'a>,
     /// The address of the Core asset
     pub asset: &'b solana_program::account_info::AccountInfo<'a>,
     /// The address of the collection
-    pub collection: &'b solana_program::account_info::AccountInfo<'a>,
+    pub collection: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     /// The payer for additional rent
     pub payer: &'b solana_program::account_info::AccountInfo<'a>,
     /// Authority for the collection. If not provided, the payer will be used.
@@ -256,12 +241,10 @@ pub struct RegisterIdentityV1Cpi<'a, 'b> {
     pub __program: &'b solana_program::account_info::AccountInfo<'a>,
     /// The agent identity PDA
     pub agent_identity: &'b solana_program::account_info::AccountInfo<'a>,
-    /// The collection identity config
-    pub collection_identity_config: &'b solana_program::account_info::AccountInfo<'a>,
     /// The address of the Core asset
     pub asset: &'b solana_program::account_info::AccountInfo<'a>,
     /// The address of the collection
-    pub collection: &'b solana_program::account_info::AccountInfo<'a>,
+    pub collection: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     /// The payer for additional rent
     pub payer: &'b solana_program::account_info::AccountInfo<'a>,
     /// Authority for the collection. If not provided, the payer will be used.
@@ -280,7 +263,6 @@ impl<'a, 'b> RegisterIdentityV1Cpi<'a, 'b> {
         Self {
             __program: program,
             agent_identity: accounts.agent_identity,
-            collection_identity_config: accounts.collection_identity_config,
             asset: accounts.asset,
             collection: accounts.collection,
             payer: accounts.payer,
@@ -322,23 +304,26 @@ impl<'a, 'b> RegisterIdentityV1Cpi<'a, 'b> {
             bool,
         )],
     ) -> solana_program::entrypoint::ProgramResult {
-        let mut accounts = Vec::with_capacity(8 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(7 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new(
             *self.agent_identity.key,
-            false,
-        ));
-        accounts.push(solana_program::instruction::AccountMeta::new(
-            *self.collection_identity_config.key,
             false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
             *self.asset.key,
             false,
         ));
-        accounts.push(solana_program::instruction::AccountMeta::new(
-            *self.collection.key,
-            false,
-        ));
+        if let Some(collection) = self.collection {
+            accounts.push(solana_program::instruction::AccountMeta::new(
+                *collection.key,
+                false,
+            ));
+        } else {
+            accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+                crate::MPL_AGENT_IDENTITY_ID,
+                false,
+            ));
+        }
         accounts.push(solana_program::instruction::AccountMeta::new(
             *self.payer.key,
             true,
@@ -376,12 +361,13 @@ impl<'a, 'b> RegisterIdentityV1Cpi<'a, 'b> {
             accounts,
             data,
         };
-        let mut account_infos = Vec::with_capacity(8 + 1 + remaining_accounts.len());
+        let mut account_infos = Vec::with_capacity(7 + 1 + remaining_accounts.len());
         account_infos.push(self.__program.clone());
         account_infos.push(self.agent_identity.clone());
-        account_infos.push(self.collection_identity_config.clone());
         account_infos.push(self.asset.clone());
-        account_infos.push(self.collection.clone());
+        if let Some(collection) = self.collection {
+            account_infos.push(collection.clone());
+        }
         account_infos.push(self.payer.clone());
         if let Some(authority) = self.authority {
             account_infos.push(authority.clone());
@@ -405,13 +391,12 @@ impl<'a, 'b> RegisterIdentityV1Cpi<'a, 'b> {
 /// ### Accounts:
 ///
 ///   0. `[writable]` agent_identity
-///   1. `[writable]` collection_identity_config
-///   2. `[writable]` asset
-///   3. `[writable]` collection
-///   4. `[writable, signer]` payer
-///   5. `[signer, optional]` authority
-///   6. `[]` mpl_core_program
-///   7. `[]` system_program
+///   1. `[writable]` asset
+///   2. `[writable, optional]` collection
+///   3. `[writable, signer]` payer
+///   4. `[signer, optional]` authority
+///   5. `[]` mpl_core_program
+///   6. `[]` system_program
 pub struct RegisterIdentityV1CpiBuilder<'a, 'b> {
     instruction: Box<RegisterIdentityV1CpiBuilderInstruction<'a, 'b>>,
 }
@@ -421,7 +406,6 @@ impl<'a, 'b> RegisterIdentityV1CpiBuilder<'a, 'b> {
         let instruction = Box::new(RegisterIdentityV1CpiBuilderInstruction {
             __program: program,
             agent_identity: None,
-            collection_identity_config: None,
             asset: None,
             collection: None,
             payer: None,
@@ -441,28 +425,20 @@ impl<'a, 'b> RegisterIdentityV1CpiBuilder<'a, 'b> {
         self.instruction.agent_identity = Some(agent_identity);
         self
     }
-    /// The collection identity config
-    #[inline(always)]
-    pub fn collection_identity_config(
-        &mut self,
-        collection_identity_config: &'b solana_program::account_info::AccountInfo<'a>,
-    ) -> &mut Self {
-        self.instruction.collection_identity_config = Some(collection_identity_config);
-        self
-    }
     /// The address of the Core asset
     #[inline(always)]
     pub fn asset(&mut self, asset: &'b solana_program::account_info::AccountInfo<'a>) -> &mut Self {
         self.instruction.asset = Some(asset);
         self
     }
+    /// `[optional account]`
     /// The address of the collection
     #[inline(always)]
     pub fn collection(
         &mut self,
-        collection: &'b solana_program::account_info::AccountInfo<'a>,
+        collection: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     ) -> &mut Self {
-        self.instruction.collection = Some(collection);
+        self.instruction.collection = collection;
         self
     }
     /// The payer for additional rent
@@ -548,14 +524,9 @@ impl<'a, 'b> RegisterIdentityV1CpiBuilder<'a, 'b> {
                 .agent_identity
                 .expect("agent_identity is not set"),
 
-            collection_identity_config: self
-                .instruction
-                .collection_identity_config
-                .expect("collection_identity_config is not set"),
-
             asset: self.instruction.asset.expect("asset is not set"),
 
-            collection: self.instruction.collection.expect("collection is not set"),
+            collection: self.instruction.collection,
 
             payer: self.instruction.payer.expect("payer is not set"),
 
@@ -581,7 +552,6 @@ impl<'a, 'b> RegisterIdentityV1CpiBuilder<'a, 'b> {
 struct RegisterIdentityV1CpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
     agent_identity: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    collection_identity_config: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     asset: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     collection: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     payer: Option<&'b solana_program::account_info::AccountInfo<'a>>,

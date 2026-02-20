@@ -7,4 +7,3 @@
  */
 
 export * from './agentValidationV1';
-export * from './collectionValidationConfigV1';

@@ -21,10 +21,7 @@ import {
   struct,
   u8,
 } from '@metaplex-foundation/umi/serializers';
-import {
-  findAgentReputationV1Pda,
-  findCollectionReputationConfigV1Pda,
-} from '../accounts';
+import { findAgentReputationV1Pda } from '../accounts';
 import {
   ResolvedAccount,
   ResolvedAccountsWithIndices,
@@ -36,12 +33,10 @@ import {
 export type RegisterReputationV1InstructionAccounts = {
   /** The agent reputation PDA */
   agentReputation?: PublicKey | Pda;
-  /** The collection reputation config */
-  collectionReputationConfig?: PublicKey | Pda;
   /** The address of the Core asset */
   asset: PublicKey | Pda;
   /** The address of the collection */
-  collection: PublicKey | Pda;
+  collection?: PublicKey | Pda;
   /** The payer for additional rent */
   payer?: Signer;
   /** Authority for the collection. If not provided, the payer will be used. */
@@ -104,38 +99,33 @@ export function registerReputationV1(
       isWritable: true as boolean,
       value: input.agentReputation ?? null,
     },
-    collectionReputationConfig: {
-      index: 1,
-      isWritable: true as boolean,
-      value: input.collectionReputationConfig ?? null,
-    },
     asset: {
-      index: 2,
+      index: 1,
       isWritable: true as boolean,
       value: input.asset ?? null,
     },
     collection: {
-      index: 3,
+      index: 2,
       isWritable: true as boolean,
       value: input.collection ?? null,
     },
     payer: {
-      index: 4,
+      index: 3,
       isWritable: true as boolean,
       value: input.payer ?? null,
     },
     authority: {
-      index: 5,
+      index: 4,
       isWritable: false as boolean,
       value: input.authority ?? null,
     },
     mplCoreProgram: {
-      index: 6,
+      index: 5,
       isWritable: false as boolean,
       value: input.mplCoreProgram ?? null,
     },
     systemProgram: {
-      index: 7,
+      index: 6,
       isWritable: false as boolean,
       value: input.systemProgram ?? null,
     },
@@ -146,12 +136,6 @@ export function registerReputationV1(
     resolvedAccounts.agentReputation.value = findAgentReputationV1Pda(context, {
       asset: expectPublicKey(resolvedAccounts.asset.value),
     });
-  }
-  if (!resolvedAccounts.collectionReputationConfig.value) {
-    resolvedAccounts.collectionReputationConfig.value =
-      findCollectionReputationConfigV1Pda(context, {
-        collection: expectPublicKey(resolvedAccounts.collection.value),
-      });
   }
   if (!resolvedAccounts.payer.value) {
     resolvedAccounts.payer.value = context.payer;

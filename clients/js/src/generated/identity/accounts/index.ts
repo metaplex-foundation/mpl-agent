@@ -7,4 +7,3 @@
  */
 
 export * from './agentIdentityV1';
-export * from './collectionIdentityConfigV1';

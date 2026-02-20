@@ -6,7 +6,5 @@
 //!
 
 pub(crate) mod r#agent_identity_v1;
-pub(crate) mod r#collection_identity_config_v1;
 
 pub use self::r#agent_identity_v1::*;
-pub use self::r#collection_identity_config_v1::*;

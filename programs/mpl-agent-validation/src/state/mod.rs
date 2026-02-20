@@ -1,8 +1,6 @@
 mod agent_validation;
-mod collection_validation_config;
 
 pub use agent_validation::*;
-pub use collection_validation_config::*;
 
 use shank::ShankType;
 
@@ -13,7 +11,6 @@ use shank::ShankType;
 pub enum Key {
     Uninitialized,
     AgentValidationV1,
-    CollectionValidationConfigV1,
 }
 
 impl From<u8> for Key {
@@ -21,7 +18,6 @@ impl From<u8> for Key {
         match value {
             0 => Key::Uninitialized,
             1 => Key::AgentValidationV1,
-            2 => Key::CollectionValidationConfigV1,
             _ => Key::Uninitialized,
         }
     }

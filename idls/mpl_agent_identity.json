@@ -14,14 +14,6 @@
           ]
         },
         {
-          "name": "collectionIdentityConfig",
-          "isMut": true,
-          "isSigner": false,
-          "docs": [
-            "The collection identity config"
-          ]
-        },
-        {
           "name": "asset",
           "isMut": true,
           "isSigner": false,
@@ -33,6 +25,7 @@
           "name": "collection",
           "isMut": true,
           "isSigner": false,
+          "isOptional": true,
           "docs": [
             "The address of the collection"
           ]
@@ -122,43 +115,6 @@
           }
         ]
       }
-    },
-    {
-      "name": "CollectionIdentityConfigV1",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "key",
-            "type": {
-              "defined": "Key"
-            },
-            "attrs": [
-              "idl-type"
-            ]
-          },
-          {
-            "name": "bump",
-            "type": "u8"
-          },
-          {
-            "name": "padding",
-            "type": {
-              "array": [
-                "u8",
-                6
-              ]
-            },
-            "attrs": [
-              "padding"
-            ]
-          },
-          {
-            "name": "collection",
-            "type": "publicKey"
-          }
-        ]
-      }
     }
   ],
   "types": [
@@ -192,9 +148,6 @@
           },
           {
             "name": "AgentIdentityV1"
-          },
-          {
-            "name": "CollectionIdentityConfigV1"
           }
         ]
       }

@@ -18,5 +18,4 @@ use num_derive::FromPrimitive;
 pub enum Key {
     Uninitialized,
     AgentValidationV1,
-    CollectionValidationConfigV1,
 }
