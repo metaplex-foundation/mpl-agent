@@ -1,5 +1,5 @@
 {
-  "name": "@metaplex-foundation/mpl-agent-identity",
+  "name": "@metaplex-foundation/mpl-agent-registry",
   "version": "0.1.0",
   "description": "Identity Registry for MPL Agent",
   "main": "dist/src/index.js",
