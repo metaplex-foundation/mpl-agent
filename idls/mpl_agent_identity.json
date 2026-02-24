@@ -134,6 +134,13 @@
             "attrs": [
               "padding"
             ]
+          },
+          {
+            "name": "agentRegistrationUri",
+            "type": "string",
+            "attrs": [
+              "idl-type"
+            ]
           }
         ]
       }

@@ -18,6 +18,7 @@ import {
   Serializer,
   array,
   mapSerializer,
+  string,
   struct,
   u8,
 } from '@metaplex-foundation/umi/serializers';
@@ -51,9 +52,12 @@ export type RegisterIdentityV1InstructionAccounts = {
 export type RegisterIdentityV1InstructionData = {
   discriminator: number;
   padding: Array<number>;
+  agentRegistrationUri: string;
 };
 
-export type RegisterIdentityV1InstructionDataArgs = {};
+export type RegisterIdentityV1InstructionDataArgs = {
+  agentRegistrationUri: string;
+};
 
 export function getRegisterIdentityV1InstructionDataSerializer(): Serializer<
   RegisterIdentityV1InstructionDataArgs,
@@ -68,6 +72,7 @@ export function getRegisterIdentityV1InstructionDataSerializer(): Serializer<
       [
         ['discriminator', u8()],
         ['padding', array(u8(), { size: 7 })],
+        ['agentRegistrationUri', string()],
       ],
       { description: 'RegisterIdentityV1InstructionData' }
     ),
@@ -78,13 +83,18 @@ export function getRegisterIdentityV1InstructionDataSerializer(): Serializer<
   >;
 }
 
+// Args.
+export type RegisterIdentityV1InstructionArgs =
+  RegisterIdentityV1InstructionDataArgs;
+
 // Instruction discriminator.
 export const registerIdentityV1InstructionDiscriminator = 0;
 
 // Instruction.
 export function registerIdentityV1(
   context: Pick<Context, 'eddsa' | 'payer' | 'programs'>,
-  input: RegisterIdentityV1InstructionAccounts
+  input: RegisterIdentityV1InstructionAccounts &
+    RegisterIdentityV1InstructionArgs
 ): TransactionBuilder {
   // Program ID.
   const programId = context.programs.getPublicKey(
@@ -131,6 +141,9 @@ export function registerIdentityV1(
     },
   } satisfies ResolvedAccountsWithIndices;
 
+  // Arguments.
+  const resolvedArgs: RegisterIdentityV1InstructionArgs = { ...input };
+
   // Default values.
   if (!resolvedAccounts.agentIdentity.value) {
     resolvedAccounts.agentIdentity.value = findAgentIdentityV1Pda(context, {
@@ -168,7 +181,9 @@ export function registerIdentityV1(
   );
 
   // Data.
-  const data = getRegisterIdentityV1InstructionDataSerializer().serialize({});
+  const data = getRegisterIdentityV1InstructionDataSerializer().serialize(
+    resolvedArgs as RegisterIdentityV1InstructionDataArgs
+  );
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

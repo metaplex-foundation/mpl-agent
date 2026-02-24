@@ -46,8 +46,8 @@ const prettier = require(path.join(clientDir, "js", ".prettierrc.json"));
 kinobi.accept(new k.renderJavaScriptVisitor(jsDir, { prettier }));
 
 // Render Rust.
-const crateDir = path.join(clientDir, "rust");
-const rustDir = path.join(clientDir, "rust", "src", "generated", "validation");
+const crateDir = path.join(clientDir, "rust-validation");
+const rustDir = path.join(clientDir, "rust-validation", "src", "generated");
 kinobi.accept(
   new k.renderRustVisitor(rustDir, {
     formatCode: true,

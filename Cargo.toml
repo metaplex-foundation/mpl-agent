@@ -1,7 +1,9 @@
 [workspace]
 resolver = "2"
 members = [
-    "clients/rust",
+    "clients/rust-identity",
+    "clients/rust-reputation",
+    "clients/rust-validation",
     "programs/mpl-agent-identity",
     "programs/mpl-agent-reputation",
     "programs/mpl-agent-validation",

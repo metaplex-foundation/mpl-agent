@@ -2572,6 +2572,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "mpl-agent-reputation"
+version = "0.1.0"
+dependencies = [
+ "assert_matches",
+ "borsh 0.10.3",
+ "num-derive 0.4.1",
+ "num-traits",
+ "serde",
+ "serde_with",
+ "solana-program",
+ "solana-program-error 3.0.0",
+ "solana-program-test",
+ "solana-sdk",
+ "thiserror 1.0.69",
+]
+
+[[package]]
 name = "mpl-agent-reputation-program"
 version = "0.1.0"
 dependencies = [
@@ -2586,6 +2603,23 @@ dependencies = [
  "shank",
  "solana-program",
  "thiserror 2.0.16",
+]
+
+[[package]]
+name = "mpl-agent-validation"
+version = "0.1.0"
+dependencies = [
+ "assert_matches",
+ "borsh 0.10.3",
+ "num-derive 0.4.1",
+ "num-traits",
+ "serde",
+ "serde_with",
+ "solana-program",
+ "solana-program-error 3.0.0",
+ "solana-program-test",
+ "solana-sdk",
+ "thiserror 1.0.69",
 ]
 
 [[package]]

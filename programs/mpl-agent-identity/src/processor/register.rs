@@ -34,6 +34,10 @@ pub struct RegisterIdentityV1Args {
     /// Padding for alignment.
     #[padding]
     pub _padding: [u8; 7],
+    /// The URI of the Agent Registration JSON file.
+    /// We parse this manually from a string representation in the IDL.
+    #[idl_type("String")]
+    agent_registration_uri: [u8; 0],
 }
 
 // Compile-time assertion to ensure struct is properly sized.
@@ -52,8 +56,13 @@ const _: () = assert!(core::mem::size_of::<RegisterIdentityV1Args>() == 8);
 /// * `args` - The instruction arguments (zero-copy reference)
 pub fn register_identity_v1<'a>(
     accounts: &'a [AccountInfo<'a>],
-    _args: &RegisterIdentityV1Args,
+    instruction_data: &[u8],
 ) -> ProgramResult {
+    let (_, string_data) =
+        instruction_data.split_at(core::mem::size_of::<RegisterIdentityV1Args>());
+
+    let uri_length: u32 = u32::from_le_bytes(string_data[..4].try_into().unwrap());
+    let _uri = String::from_utf8(string_data[4..4 + uri_length as usize].to_vec()).unwrap();
     /****************************************************/
     /****************** Account Setup *******************/
     /****************************************************/

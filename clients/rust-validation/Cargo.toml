@@ -1,0 +1,30 @@
+[package]
+name = "mpl-agent-validation"
+description = "A new Solana program using the Metaplex Project Template"
+version = "0.1.0"
+edition = "2021"
+readme = "README.md"
+license-file = "../../LICENSE"
+repository = "https://github.com/metaplex-foundation/mpl-agent-identity"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[features]
+test-sbf = []
+serde = ["dep:serde", "dep:serde_with"]
+
+[dependencies]
+borsh = "^0.10"
+num-derive = "^0.4"
+num-traits = "^0.2"
+serde = { version = "^1.0", features = ["derive"], optional = true }
+serde_with = { version = "^3.14", optional = true }
+solana-program = "^2.3"
+solana-program-error = "3.0"
+thiserror = "^1.0"
+
+[dev-dependencies]
+assert_matches = "1.5.0"
+solana-program-test = "^2.3"
+solana-sdk = "^2.3"

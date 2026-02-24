@@ -1,6 +1,5 @@
 mod register;
 
-use bytemuck::try_from_bytes;
 use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, msg, pubkey::Pubkey};
 
 use crate::error::MplAgentIdentityError;
@@ -29,11 +28,7 @@ pub fn process_instruction<'a>(
     match MplAgentIdentityInstructionDiscriminant::try_from(instruction_data[0]) {
         Ok(MplAgentIdentityInstructionDiscriminant::RegisterIdentityV1) => {
             msg!("Instruction: RegisterIdentityV1");
-            register_identity_v1(
-                accounts,
-                try_from_bytes(instruction_data)
-                    .map_err(|_| MplAgentIdentityError::InvalidInstructionData)?,
-            )
+            register_identity_v1(accounts, instruction_data)
         }
         Err(_) => Err(MplAgentIdentityError::InvalidInstructionData.into()),
     }
