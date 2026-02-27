@@ -41,7 +41,7 @@ module.exports = {
       {
         label: "Mpl Core",
         programId: "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d",
-        deployPath: getProgram("mpl_core.so"),
+        deployPath: path.join(__dirname, "..", "..", "..", "security", "core", "programs", ".bin", "mpl_core_program.so"),
       }
     ],
   },

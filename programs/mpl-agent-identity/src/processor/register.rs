@@ -1,13 +1,14 @@
 use bytemuck::{Pod, Zeroable};
 use mpl_core::accounts::BaseAssetV1;
-use mpl_core::fetch_wrapped_external_plugin_adapter;
 use mpl_core::instructions::{
     AddExternalPluginAdapterV1Cpi, AddExternalPluginAdapterV1InstructionArgs,
 };
 use mpl_core::types::{
-    AppDataInitInfo, ExternalPluginAdapterInitInfo, ExternalPluginAdapterKey,
-    ExternalPluginAdapterSchema, Key as MplCoreKey, PluginAuthority,
+    AgentIdentityInitInfo, AppDataInitInfo, ExternalPluginAdapterInitInfo,
+    ExternalPluginAdapterKey, ExternalPluginAdapterSchema, HookableLifecycleEvent,
+    Key as MplCoreKey, PluginAuthority,
 };
+use mpl_core::{fetch_wrapped_external_plugin_adapter, ExternalCheckResultBits};
 use shank::ShankType;
 use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, system_program};
 
@@ -62,7 +63,7 @@ pub fn register_identity_v1<'a>(
         instruction_data.split_at(core::mem::size_of::<RegisterIdentityV1Args>());
 
     let uri_length: u32 = u32::from_le_bytes(string_data[..4].try_into().unwrap());
-    let _uri = String::from_utf8(string_data[4..4 + uri_length as usize].to_vec()).unwrap();
+    let uri = String::from_utf8(string_data[4..4 + uri_length as usize].to_vec()).unwrap();
     /****************************************************/
     /****************** Account Setup *******************/
     /****************************************************/
@@ -145,6 +146,50 @@ pub fn register_identity_v1<'a>(
         }
         .invoke()?;
     }
+
+    // Add the Agent Identity External Plugin Adapter to the asset.
+    AddExternalPluginAdapterV1Cpi {
+        __program: ctx.accounts.mpl_core_program,
+        asset: ctx.accounts.asset,
+        collection: ctx.accounts.collection,
+        payer: ctx.accounts.payer,
+        authority: ctx.accounts.authority,
+        system_program: ctx.accounts.system_program,
+        log_wrapper: None,
+        __args: AddExternalPluginAdapterV1InstructionArgs {
+            init_info: ExternalPluginAdapterInitInfo::AgentIdentity(AgentIdentityInitInfo {
+                uri,
+                init_plugin_authority: None,
+                lifecycle_checks: vec![
+                    (
+                        HookableLifecycleEvent::Transfer,
+                        ExternalCheckResultBits::new()
+                            .with_can_approve(true)
+                            .with_can_listen(true)
+                            .with_can_reject(true)
+                            .into(),
+                    ),
+                    (
+                        HookableLifecycleEvent::Burn,
+                        ExternalCheckResultBits::new()
+                            .with_can_approve(true)
+                            .with_can_listen(true)
+                            .with_can_reject(true)
+                            .into(),
+                    ),
+                    (
+                        HookableLifecycleEvent::Execute,
+                        ExternalCheckResultBits::new()
+                            .with_can_approve(true)
+                            .with_can_listen(true)
+                            .with_can_reject(true)
+                            .into(),
+                    ),
+                ],
+            }),
+        },
+    }
+    .invoke()?;
 
     Ok(())
 }

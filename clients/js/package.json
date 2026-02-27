@@ -27,7 +27,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@metaplex-foundation/mpl-toolbox": "^0.10.0",
-    "@metaplex-foundation/mpl-core": "^1.7.0"
+    "@metaplex-foundation/mpl-core": "link:/Users/kelliott/Metaplex/security/core/clients/js"
   },
   "peerDependencies": {
     "@metaplex-foundation/umi": "^1.0"

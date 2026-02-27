@@ -9,8 +9,8 @@ onlyBuiltDependencies:
 
 dependencies:
   '@metaplex-foundation/mpl-core':
-    specifier: ^1.7.0
-    version: 1.7.0(@metaplex-foundation/umi@1.5.1)(@noble/hashes@1.3.1)
+    specifier: link:/Users/kelliott/Metaplex/security/core/clients/js
+    version: link:../../../../security/core/clients/js
   '@metaplex-foundation/mpl-toolbox':
     specifier: ^0.10.0
     version: 0.10.0(@metaplex-foundation/umi@1.5.1)
@@ -1630,17 +1630,6 @@ packages:
       - supports-color
     dev: true
 
-  /@metaplex-foundation/mpl-core@1.7.0(@metaplex-foundation/umi@1.5.1)(@noble/hashes@1.3.1):
-    resolution: {integrity: sha512-lK80ppQ5/6ziD7vibpevKUnB9V3WzOoIo+pFo1SDviwaH5OlZzoGO1cYoP+9cX/B9V8db7ZlmCyxeNrnWiWP6w==}
-    peerDependencies:
-      '@metaplex-foundation/umi': '>=0.8.2 <2.0.0'
-      '@noble/hashes': ^1.3.1
-    dependencies:
-      '@metaplex-foundation/umi': 1.5.1
-      '@msgpack/msgpack': 3.1.3
-      '@noble/hashes': 1.3.1
-    dev: false
-
   /@metaplex-foundation/mpl-toolbox@0.10.0(@metaplex-foundation/umi@1.5.1):
     resolution: {integrity: sha512-84KD1L5cFyw5xnntHwL4uPwfcrkKSiwuDeypiVr92qCUFuF3ZENa2zlFVPu+pQcjTlod2LmEX3MhBmNjRMpdKg==}
     peerDependencies:
@@ -1787,11 +1776,6 @@ packages:
       '@metaplex-foundation/umi-public-keys': 1.5.1
       '@metaplex-foundation/umi-serializers': 1.5.1
 
-  /@msgpack/msgpack@3.1.3:
-    resolution: {integrity: sha512-47XIizs9XZXvuJgoaJUIE2lFoID8ugvc0jzSHP+Ptfk8nTbnR8g788wv48N03Kx0UkAv559HWRQ3yzOgzlRNUA==}
-    engines: {node: '>= 18'}
-    dev: false
-
   /@noble/curves@1.1.0:
     resolution: {integrity: sha512-091oBExgENk/kGj3AZmtBDMpxQPDtxQABR2B9lb1JbVTs6ytdzZNwvhxQ4MWasRNEzlbEH8jCWFCwhF/Obj5AA==}
     dependencies:
@@ -1809,6 +1793,7 @@ packages:
   /@noble/hashes@1.3.1:
     resolution: {integrity: sha512-EbqwksQwz9xDRGfDST86whPBgM65E0OH/pCgqW0GBVzO22bNE+NuIbeTb714+IfSjU3aRk47EUvXIb5bTsenKA==}
     engines: {node: '>= 16'}
+    dev: true
 
   /@noble/secp256k1@1.7.0:
     resolution: {integrity: sha512-kbacwGSsH/CTout0ZnZWxnW1B+jH/7r/WAAKLBtrRJ/+CUH7lgmQzl3GTrQua3SGKWNSDsS6lmjnDpIJ5Dxyaw==}

@@ -18,7 +18,7 @@ num-traits = "^0.2"
 solana-program = "^2.3"
 thiserror = "^2.0"
 mpl-utils = "0.4.1"
-mpl-core = "0.11.1"
+mpl-core = {path = "/Users/kelliott/Metaplex/security/core/clients/rust/"}
 
 # Pin crates below versions that require edition2024 (unsupported by cargo build-sbf's bundled Cargo 1.84)
 rmp = ">=0.8,<0.8.15"

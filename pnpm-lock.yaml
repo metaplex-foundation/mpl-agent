@@ -7,6 +7,10 @@ settings:
 onlyBuiltDependencies:
   - ''
 
+overrides:
+  '@metaplex-foundation/umi': ^1.5.1
+  '@metaplex-foundation/umi-public-keys': ^1.5.1
+
 devDependencies:
   '@metaplex-foundation/amman':
     specifier: ^0.12.1

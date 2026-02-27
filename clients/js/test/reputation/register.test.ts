@@ -28,7 +28,7 @@ test('it can register an asset', async (t) => {
   t.is(agentReputation.bump, agentReputationPda[1]);
 
   // Then the asset has a AppData plugin.
-  const assetData = await fetchAsset(umi, asset);
+  const assetData = await fetchAsset(umi as any, asset);
   t.is(assetData?.appDatas?.length, 1);
   t.like(assetData?.appDatas?.[0], {
     dataAuthority: { type: 'Address', address: publicKey(agentReputationPda) },

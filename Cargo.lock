@@ -2559,7 +2559,7 @@ name = "mpl-agent-identity-program"
 version = "0.1.0"
 dependencies = [
  "bytemuck",
- "mpl-core",
+ "mpl-core 0.11.0",
  "mpl-utils",
  "num-derive 0.4.1",
  "num-traits",
@@ -2593,7 +2593,7 @@ name = "mpl-agent-reputation-program"
 version = "0.1.0"
 dependencies = [
  "bytemuck",
- "mpl-core",
+ "mpl-core 0.11.1",
  "mpl-utils",
  "num-derive 0.4.1",
  "num-traits",
@@ -2627,7 +2627,7 @@ name = "mpl-agent-validation-program"
 version = "0.1.0"
 dependencies = [
  "bytemuck",
- "mpl-core",
+ "mpl-core 0.11.1",
  "mpl-utils",
  "num-derive 0.4.1",
  "num-traits",
@@ -2637,6 +2637,22 @@ dependencies = [
  "shank",
  "solana-program",
  "thiserror 2.0.16",
+]
+
+[[package]]
+name = "mpl-core"
+version = "0.11.0"
+dependencies = [
+ "base64 0.22.1",
+ "borsh 0.10.3",
+ "kaigan 0.3.0",
+ "modular-bitfield",
+ "num-derive 0.3.3",
+ "num-traits",
+ "rmp-serde",
+ "serde_json",
+ "solana-program",
+ "thiserror 1.0.69",
 ]
 
 [[package]]
