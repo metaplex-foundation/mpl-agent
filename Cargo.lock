@@ -2606,6 +2606,41 @@ dependencies = [
 ]
 
 [[package]]
+name = "mpl-agent-tools"
+version = "0.1.0"
+dependencies = [
+ "assert_matches",
+ "borsh 0.10.3",
+ "num-derive 0.4.1",
+ "num-traits",
+ "serde",
+ "serde_with",
+ "solana-program",
+ "solana-program-error 3.0.0",
+ "solana-program-test",
+ "solana-sdk",
+ "thiserror 1.0.69",
+]
+
+[[package]]
+name = "mpl-agent-tools-program"
+version = "0.1.0"
+dependencies = [
+ "bytemuck",
+ "mpl-agent-identity",
+ "mpl-core 0.11.1",
+ "mpl-utils",
+ "num-derive 0.4.1",
+ "num-traits",
+ "podded",
+ "rmp",
+ "rmp-serde",
+ "shank",
+ "solana-program",
+ "thiserror 2.0.16",
+]
+
+[[package]]
 name = "mpl-agent-validation"
 version = "0.1.0"
 dependencies = [
@@ -2645,7 +2680,7 @@ version = "0.11.0"
 dependencies = [
  "base64 0.22.1",
  "borsh 0.10.3",
- "kaigan 0.3.0",
+ "kaigan 0.2.6",
  "modular-bitfield",
  "num-derive 0.3.3",
  "num-traits",

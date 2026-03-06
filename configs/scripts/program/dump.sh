@@ -1,7 +1,7 @@
 #!/bin/bash
 
-EXTERNAL_ID=("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s" "noopb9bkMVfRPU8AsbpTUg8AQkHtKwMYZiFUjNRtMmV" "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d")
-EXTERNAL_SO=("mpl_token_metadata.so" "spl_noop.so" "mpl_core.so")
+EXTERNAL_ID=("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s" "noopb9bkMVfRPU8AsbpTUg8AQkHtKwMYZiFUjNRtMmV" "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d" "L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95")
+EXTERNAL_SO=("mpl_token_metadata.so" "spl_noop.so" "mpl_core.so" "lighthouse_program.so")
 
 # output colours
 RED() { echo $'\e[1;31m'$1$'\e[0m'; }

@@ -6,13 +6,15 @@ import {
   mplAgentIdentity,
   mplAgentReputation,
   mplAgentValidation,
+  mplAgentTools,
 } from '../src';
 
 export const createUmi = async () =>
   (await basecreateUmi())
     .use(mplAgentIdentity())
     .use(mplAgentReputation())
-    .use(mplAgentValidation());
+    .use(mplAgentValidation())
+    .use(mplAgentTools());
 
 export async function createCollectionAndAsset(
   umi: Umi

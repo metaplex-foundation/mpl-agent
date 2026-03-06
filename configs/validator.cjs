@@ -25,6 +25,11 @@ module.exports = {
         programId: "VALREGY66A9ieJfFUNs5GrxFTy498KUoSU7TbmSePQi",
         deployPath: getProgram("mpl_agent_validation_program.so"),
       },
+      {
+        label: "Mpl Agent Tools",
+        programId: "TLREGni9ZEyGC3vnPZtqUh95xQ8oPqJSvNjvB7FGK8S",
+        deployPath: getProgram("mpl_agent_tools_program.so"),
+      },
       // Below are external programs that should be included in the local validator.
       // You may configure which ones to fetch from the cluster when building
       // programs within the `configs/program-scripts/dump.sh` script.
@@ -42,7 +47,12 @@ module.exports = {
         label: "Mpl Core",
         programId: "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d",
         deployPath: path.join(__dirname, "..", "..", "..", "security", "core", "programs", ".bin", "mpl_core_program.so"),
-      }
+      },
+      {
+        label: "Lighthouse",
+        programId: "L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95",
+        deployPath: getProgram("lighthouse_program.so"),
+      },
     ],
   },
 };

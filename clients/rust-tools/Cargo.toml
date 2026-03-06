@@ -1,5 +1,5 @@
 [package]
-name = "mpl-agent-identity"
+name = "mpl-agent-tools"
 description = "A new Solana program using the Metaplex Project Template"
 version = "0.1.0"
 edition = "2021"

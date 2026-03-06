@@ -4,7 +4,9 @@ members = [
     "clients/rust-identity",
     "clients/rust-reputation",
     "clients/rust-validation",
+    "clients/rust-tools",
     "programs/mpl-agent-identity",
     "programs/mpl-agent-reputation",
     "programs/mpl-agent-validation",
+    "programs/mpl-agent-tools",
 ]

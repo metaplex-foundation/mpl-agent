@@ -2,6 +2,7 @@ import { UmiPlugin } from '@metaplex-foundation/umi';
 import { createMplAgentIdentityProgram } from './generated/identity';
 import { createMplAgentReputationProgram } from './generated/reputation';
 import { createMplAgentValidationProgram } from './generated/validation';
+import { createMplAgentToolsProgram } from './generated/tools';
 
 export const mplAgentIdentity = (): UmiPlugin => ({
   install(umi) {
@@ -18,5 +19,11 @@ export const mplAgentReputation = (): UmiPlugin => ({
 export const mplAgentValidation = (): UmiPlugin => ({
   install(umi) {
     umi.programs.add(createMplAgentValidationProgram(), false);
+  },
+});
+
+export const mplAgentTools = (): UmiPlugin => ({
+  install(umi) {
+    umi.programs.add(createMplAgentToolsProgram(), false);
   },
 });

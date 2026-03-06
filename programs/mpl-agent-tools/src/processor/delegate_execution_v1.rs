@@ -1,0 +1,122 @@
+use bytemuck::{Pod, Zeroable};
+use mpl_agent_identity::{accounts::AgentIdentityV1, types::Key as MplAgentIdentityKey};
+use mpl_core::types::Key as MplCoreKey;
+use shank::ShankType;
+use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, system_program};
+
+use crate::{
+    error::MplAgentToolsError,
+    instruction::accounts::DelegateExecutionV1Accounts,
+    state::{ExecutionDelegateRecordV1, Key},
+};
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Pod, Zeroable, ShankType)]
+pub struct DelegateExecutionV1Args {
+    /// Instruction discriminator (not included in IDL).
+    #[skip]
+    pub discriminator: u8,
+    /// Padding for alignment.
+    #[padding]
+    pub _padding: [u8; 7],
+}
+
+// Compile-time assertion to ensure struct is properly sized.
+const _: () = assert!(core::mem::size_of::<DelegateExecutionV1Args>() == 8);
+
+pub fn delegate_execution_v1<'a>(
+    accounts: &'a [AccountInfo<'a>],
+    _args: &DelegateExecutionV1Args,
+) -> ProgramResult {
+    /****************************************************/
+    /****************** Account Setup *******************/
+    /****************************************************/
+
+    let ctx = DelegateExecutionV1Accounts::context(accounts)?;
+
+    /****************************************************/
+    /****************** Account Guards ******************/
+    /****************************************************/
+    // Assert that the executor profile is initialized a valid executor profile.
+    if ctx.accounts.executor_profile.owner != &crate::ID
+        || ctx.accounts.executor_profile.data_len() == 0
+        || ctx.accounts.executor_profile.try_borrow_data()?[0] != Key::ExecutorProfileV1 as u8
+    {
+        return Err(MplAgentToolsError::ExecutorProfileMustBeUninitialized.into());
+    }
+
+    // Assert that the agent asset is initialized a valid agent asset.
+    if ctx.accounts.agent_asset.owner != &mpl_core::ID
+        || ctx.accounts.agent_asset.data_len() == 0
+        || ctx.accounts.agent_asset.try_borrow_data()?[0] != MplCoreKey::AssetV1 as u8
+    {
+        return Err(MplAgentToolsError::InvalidCoreAsset.into());
+    }
+
+    // Assert that the agent identity is correct and initialized.
+    if ctx.accounts.agent_identity.owner != &mpl_agent_identity::ID
+        || ctx.accounts.agent_identity.data_len() == 0
+        || ctx.accounts.agent_identity.try_borrow_data()?[0]
+            != MplAgentIdentityKey::AgentIdentityV1 as u8
+    {
+        return Err(MplAgentToolsError::AgentIdentityNotRegistered.into());
+    }
+
+    let agent_identity = AgentIdentityV1::try_from(ctx.accounts.agent_identity)?;
+
+    let (agent_identity_pda, agent_identity_bump) =
+        AgentIdentityV1::find_pda(ctx.accounts.agent_asset.key);
+
+    if ctx.accounts.agent_identity.key != &agent_identity_pda
+        || agent_identity.bump != agent_identity_bump
+    {
+        return Err(MplAgentToolsError::InvalidAgentIdentity.into());
+    }
+
+    // Check the delegation account is not initialized and is the correct derivation.
+    let bump = ExecutionDelegateRecordV1::check_pda_derivation(
+        ctx.accounts.execution_delegate_record,
+        ctx.accounts.executor_profile.key,
+        ctx.accounts.agent_asset.key,
+    )?;
+
+    if ctx.accounts.execution_delegate_record.owner != &system_program::ID
+        || ctx.accounts.execution_delegate_record.data_len() > 0
+    {
+        return Err(MplAgentToolsError::ExecutionDelegateRecordMustBeUninitialized.into());
+    }
+
+    // Validate system program.
+    if *ctx.accounts.system_program.key != system_program::id() {
+        return Err(MplAgentToolsError::InvalidSystemProgram.into());
+    }
+
+    /****************************************************/
+    /***************** Argument Guards ******************/
+    /****************************************************/
+
+    // Add any argument validation here.
+
+    /****************************************************/
+    /********************* Actions **********************/
+    /****************************************************/
+    // Create the agent executor account.
+    ExecutionDelegateRecordV1::create_account(&ctx.accounts, bump)?;
+
+    // Initialize the account using zero-copy.
+    // Borrow the account data mutably and cast to our struct.
+    let mut data = ctx
+        .accounts
+        .execution_delegate_record
+        .try_borrow_mut_data()?;
+    let execution_delegate_record: &mut ExecutionDelegateRecordV1 =
+        bytemuck::from_bytes_mut(&mut data[..core::mem::size_of::<ExecutionDelegateRecordV1>()]);
+
+    execution_delegate_record.initialize(
+        bump,
+        ctx.accounts.executor_profile.key,
+        ctx.accounts.agent_asset.key,
+    );
+
+    Ok(())
+}

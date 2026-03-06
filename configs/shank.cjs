@@ -34,3 +34,13 @@ generateIdl({
   binaryInstallDir,
   programDir: path.join(programDir, "mpl-agent-validation"),
 });
+
+generateIdl({
+  generator: "shank",
+  programName: "mpl_agent_tools_program",
+  programId: "TLREGni9ZEyGC3vnPZtqUh95xQ8oPqJSvNjvB7FGK8S",
+  idlDir,
+  idlName: "mpl_agent_tools",
+  binaryInstallDir,
+  programDir: path.join(programDir, "mpl-agent-tools"),
+});

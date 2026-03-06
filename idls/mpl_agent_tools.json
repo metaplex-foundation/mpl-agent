@@ -1,0 +1,323 @@
+{
+  "version": "0.1.0",
+  "name": "mpl_agent_tools_program",
+  "instructions": [
+    {
+      "name": "RegisterExecutorV1",
+      "accounts": [
+        {
+          "name": "executorProfile",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "The executor profile"
+          ]
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "The payer for additional rent"
+          ]
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true,
+          "isOptional": true,
+          "docs": [
+            "Authority the executor signs with when executing agent actions"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The system program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "registerExecutorV1Args",
+          "type": {
+            "defined": "RegisterExecutorV1Args"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 0
+      }
+    },
+    {
+      "name": "DelegateExecutionV1",
+      "accounts": [
+        {
+          "name": "executorProfile",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The executor profile"
+          ]
+        },
+        {
+          "name": "agentAsset",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The agent asset"
+          ]
+        },
+        {
+          "name": "agentIdentity",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The agent identity"
+          ]
+        },
+        {
+          "name": "executionDelegateRecord",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The execution delegate record"
+          ]
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "The payer for additional rent"
+          ]
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true,
+          "isOptional": true,
+          "docs": [
+            "Authority the executor signs with when executing agent actions"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The system program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "delegateExecutionV1Args",
+          "type": {
+            "defined": "DelegateExecutionV1Args"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 1
+      }
+    }
+  ],
+  "accounts": [
+    {
+      "name": "ExecutionDelegateRecordV1",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "key",
+            "type": {
+              "defined": "Key"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                6
+              ]
+            },
+            "attrs": [
+              "padding"
+            ]
+          },
+          {
+            "name": "executorProfile",
+            "type": "publicKey"
+          },
+          {
+            "name": "agentAsset",
+            "type": "publicKey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ExecutorProfileV1",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "key",
+            "type": {
+              "defined": "Key"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                7
+              ]
+            },
+            "attrs": [
+              "padding"
+            ]
+          },
+          {
+            "name": "authority",
+            "type": "publicKey"
+          }
+        ]
+      }
+    }
+  ],
+  "types": [
+    {
+      "name": "DelegateExecutionV1Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                7
+              ]
+            },
+            "attrs": [
+              "padding"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "RegisterExecutorV1Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                7
+              ]
+            },
+            "attrs": [
+              "padding"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "Key",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Uninitialized"
+          },
+          {
+            "name": "ExecutorProfileV1"
+          },
+          {
+            "name": "ExecutionDelegateRecordV1"
+          }
+        ]
+      }
+    }
+  ],
+  "errors": [
+    {
+      "code": 0,
+      "name": "InvalidSystemProgram",
+      "msg": "Invalid System Program"
+    },
+    {
+      "code": 1,
+      "name": "InvalidInstructionData",
+      "msg": "Invalid instruction data"
+    },
+    {
+      "code": 2,
+      "name": "InvalidAccountData",
+      "msg": "Invalid account data"
+    },
+    {
+      "code": 3,
+      "name": "InvalidMplCoreProgram",
+      "msg": "Invalid MPL Core Program"
+    },
+    {
+      "code": 4,
+      "name": "InvalidCoreAsset",
+      "msg": "Invalid Core Asset"
+    },
+    {
+      "code": 5,
+      "name": "ExecutorProfileMustBeUninitialized",
+      "msg": "Executor Profile must be uninitialized"
+    },
+    {
+      "code": 6,
+      "name": "InvalidExecutionDelegateRecordDerivation",
+      "msg": "Invalid Execution Delegate Record Derivation"
+    },
+    {
+      "code": 7,
+      "name": "ExecutionDelegateRecordMustBeUninitialized",
+      "msg": "Execution Delegate Record must be uninitialized"
+    },
+    {
+      "code": 8,
+      "name": "InvalidAgentIdentity",
+      "msg": "Invalid Agent Identity"
+    },
+    {
+      "code": 9,
+      "name": "AgentIdentityNotRegistered",
+      "msg": "Agent Identity not registered"
+    }
+  ],
+  "metadata": {
+    "origin": "shank",
+    "address": "TLREGni9ZEyGC3vnPZtqUh95xQ8oPqJSvNjvB7FGK8S",
+    "binaryVersion": "0.4.8",
+    "libVersion": "0.4.8"
+  }
+}
