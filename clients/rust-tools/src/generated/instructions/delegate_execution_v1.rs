@@ -12,8 +12,8 @@ use borsh::{BorshDeserialize, BorshSerialize};
 
 /// Accounts.
 pub struct DelegateExecutionV1 {
-    /// The executor profile
-    pub executor_profile: solana_program::pubkey::Pubkey,
+    /// The executive profile
+    pub executive_profile: solana_program::pubkey::Pubkey,
     /// The agent asset
     pub agent_asset: solana_program::pubkey::Pubkey,
     /// The agent identity
@@ -22,7 +22,7 @@ pub struct DelegateExecutionV1 {
     pub execution_delegate_record: solana_program::pubkey::Pubkey,
     /// The payer for additional rent
     pub payer: solana_program::pubkey::Pubkey,
-    /// Authority the executor signs with when executing agent actions
+    /// Authority the executive signs with when executing agent actions
     pub authority: Option<solana_program::pubkey::Pubkey>,
     /// The system program
     pub system_program: solana_program::pubkey::Pubkey,
@@ -39,7 +39,7 @@ impl DelegateExecutionV1 {
     ) -> solana_program::instruction::Instruction {
         let mut accounts = Vec::with_capacity(7 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            self.executor_profile,
+            self.executive_profile,
             false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
@@ -102,7 +102,7 @@ impl DelegateExecutionV1InstructionData {
 ///
 /// ### Accounts:
 ///
-///   0. `[]` executor_profile
+///   0. `[]` executive_profile
 ///   1. `[]` agent_asset
 ///   2. `[]` agent_identity
 ///   3. `[writable]` execution_delegate_record
@@ -111,7 +111,7 @@ impl DelegateExecutionV1InstructionData {
 ///   6. `[optional]` system_program (default to `11111111111111111111111111111111`)
 #[derive(Default)]
 pub struct DelegateExecutionV1Builder {
-    executor_profile: Option<solana_program::pubkey::Pubkey>,
+    executive_profile: Option<solana_program::pubkey::Pubkey>,
     agent_asset: Option<solana_program::pubkey::Pubkey>,
     agent_identity: Option<solana_program::pubkey::Pubkey>,
     execution_delegate_record: Option<solana_program::pubkey::Pubkey>,
@@ -125,13 +125,13 @@ impl DelegateExecutionV1Builder {
     pub fn new() -> Self {
         Self::default()
     }
-    /// The executor profile
+    /// The executive profile
     #[inline(always)]
-    pub fn executor_profile(
+    pub fn executive_profile(
         &mut self,
-        executor_profile: solana_program::pubkey::Pubkey,
+        executive_profile: solana_program::pubkey::Pubkey,
     ) -> &mut Self {
-        self.executor_profile = Some(executor_profile);
+        self.executive_profile = Some(executive_profile);
         self
     }
     /// The agent asset
@@ -162,7 +162,7 @@ impl DelegateExecutionV1Builder {
         self
     }
     /// `[optional account]`
-    /// Authority the executor signs with when executing agent actions
+    /// Authority the executive signs with when executing agent actions
     #[inline(always)]
     pub fn authority(&mut self, authority: Option<solana_program::pubkey::Pubkey>) -> &mut Self {
         self.authority = authority;
@@ -196,7 +196,9 @@ impl DelegateExecutionV1Builder {
     #[allow(clippy::clone_on_copy)]
     pub fn instruction(&self) -> solana_program::instruction::Instruction {
         let accounts = DelegateExecutionV1 {
-            executor_profile: self.executor_profile.expect("executor_profile is not set"),
+            executive_profile: self
+                .executive_profile
+                .expect("executive_profile is not set"),
             agent_asset: self.agent_asset.expect("agent_asset is not set"),
             agent_identity: self.agent_identity.expect("agent_identity is not set"),
             execution_delegate_record: self
@@ -215,8 +217,8 @@ impl DelegateExecutionV1Builder {
 
 /// `delegate_execution_v1` CPI accounts.
 pub struct DelegateExecutionV1CpiAccounts<'a, 'b> {
-    /// The executor profile
-    pub executor_profile: &'b solana_program::account_info::AccountInfo<'a>,
+    /// The executive profile
+    pub executive_profile: &'b solana_program::account_info::AccountInfo<'a>,
     /// The agent asset
     pub agent_asset: &'b solana_program::account_info::AccountInfo<'a>,
     /// The agent identity
@@ -225,7 +227,7 @@ pub struct DelegateExecutionV1CpiAccounts<'a, 'b> {
     pub execution_delegate_record: &'b solana_program::account_info::AccountInfo<'a>,
     /// The payer for additional rent
     pub payer: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Authority the executor signs with when executing agent actions
+    /// Authority the executive signs with when executing agent actions
     pub authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     /// The system program
     pub system_program: &'b solana_program::account_info::AccountInfo<'a>,
@@ -235,8 +237,8 @@ pub struct DelegateExecutionV1CpiAccounts<'a, 'b> {
 pub struct DelegateExecutionV1Cpi<'a, 'b> {
     /// The program to invoke.
     pub __program: &'b solana_program::account_info::AccountInfo<'a>,
-    /// The executor profile
-    pub executor_profile: &'b solana_program::account_info::AccountInfo<'a>,
+    /// The executive profile
+    pub executive_profile: &'b solana_program::account_info::AccountInfo<'a>,
     /// The agent asset
     pub agent_asset: &'b solana_program::account_info::AccountInfo<'a>,
     /// The agent identity
@@ -245,7 +247,7 @@ pub struct DelegateExecutionV1Cpi<'a, 'b> {
     pub execution_delegate_record: &'b solana_program::account_info::AccountInfo<'a>,
     /// The payer for additional rent
     pub payer: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Authority the executor signs with when executing agent actions
+    /// Authority the executive signs with when executing agent actions
     pub authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     /// The system program
     pub system_program: &'b solana_program::account_info::AccountInfo<'a>,
@@ -258,7 +260,7 @@ impl<'a, 'b> DelegateExecutionV1Cpi<'a, 'b> {
     ) -> Self {
         Self {
             __program: program,
-            executor_profile: accounts.executor_profile,
+            executive_profile: accounts.executive_profile,
             agent_asset: accounts.agent_asset,
             agent_identity: accounts.agent_identity,
             execution_delegate_record: accounts.execution_delegate_record,
@@ -302,7 +304,7 @@ impl<'a, 'b> DelegateExecutionV1Cpi<'a, 'b> {
     ) -> solana_program::entrypoint::ProgramResult {
         let mut accounts = Vec::with_capacity(7 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            *self.executor_profile.key,
+            *self.executive_profile.key,
             false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
@@ -352,7 +354,7 @@ impl<'a, 'b> DelegateExecutionV1Cpi<'a, 'b> {
         };
         let mut account_infos = Vec::with_capacity(7 + 1 + remaining_accounts.len());
         account_infos.push(self.__program.clone());
-        account_infos.push(self.executor_profile.clone());
+        account_infos.push(self.executive_profile.clone());
         account_infos.push(self.agent_asset.clone());
         account_infos.push(self.agent_identity.clone());
         account_infos.push(self.execution_delegate_record.clone());
@@ -377,7 +379,7 @@ impl<'a, 'b> DelegateExecutionV1Cpi<'a, 'b> {
 ///
 /// ### Accounts:
 ///
-///   0. `[]` executor_profile
+///   0. `[]` executive_profile
 ///   1. `[]` agent_asset
 ///   2. `[]` agent_identity
 ///   3. `[writable]` execution_delegate_record
@@ -392,7 +394,7 @@ impl<'a, 'b> DelegateExecutionV1CpiBuilder<'a, 'b> {
     pub fn new(program: &'b solana_program::account_info::AccountInfo<'a>) -> Self {
         let instruction = Box::new(DelegateExecutionV1CpiBuilderInstruction {
             __program: program,
-            executor_profile: None,
+            executive_profile: None,
             agent_asset: None,
             agent_identity: None,
             execution_delegate_record: None,
@@ -403,13 +405,13 @@ impl<'a, 'b> DelegateExecutionV1CpiBuilder<'a, 'b> {
         });
         Self { instruction }
     }
-    /// The executor profile
+    /// The executive profile
     #[inline(always)]
-    pub fn executor_profile(
+    pub fn executive_profile(
         &mut self,
-        executor_profile: &'b solana_program::account_info::AccountInfo<'a>,
+        executive_profile: &'b solana_program::account_info::AccountInfo<'a>,
     ) -> &mut Self {
-        self.instruction.executor_profile = Some(executor_profile);
+        self.instruction.executive_profile = Some(executive_profile);
         self
     }
     /// The agent asset
@@ -446,7 +448,7 @@ impl<'a, 'b> DelegateExecutionV1CpiBuilder<'a, 'b> {
         self
     }
     /// `[optional account]`
-    /// Authority the executor signs with when executing agent actions
+    /// Authority the executive signs with when executing agent actions
     #[inline(always)]
     pub fn authority(
         &mut self,
@@ -508,10 +510,10 @@ impl<'a, 'b> DelegateExecutionV1CpiBuilder<'a, 'b> {
         let instruction = DelegateExecutionV1Cpi {
             __program: self.instruction.__program,
 
-            executor_profile: self
+            executive_profile: self
                 .instruction
-                .executor_profile
-                .expect("executor_profile is not set"),
+                .executive_profile
+                .expect("executive_profile is not set"),
 
             agent_asset: self
                 .instruction
@@ -546,7 +548,7 @@ impl<'a, 'b> DelegateExecutionV1CpiBuilder<'a, 'b> {
 
 struct DelegateExecutionV1CpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
-    executor_profile: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    executive_profile: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     agent_asset: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     agent_identity: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     execution_delegate_record: Option<&'b solana_program::account_info::AccountInfo<'a>>,

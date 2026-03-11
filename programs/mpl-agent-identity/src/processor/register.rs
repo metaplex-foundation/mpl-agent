@@ -115,37 +115,8 @@ pub fn register_identity_v1<'a>(
 
     agent_identity.initialize(agent_identity_bump, ctx.accounts.asset.key);
 
-    // Check if the asset already has a AppData plugin.
-    let result = fetch_wrapped_external_plugin_adapter::<BaseAssetV1>(
-        ctx.accounts.asset,
-        None,
-        &ExternalPluginAdapterKey::AppData(PluginAuthority::Address {
-            address: *ctx.accounts.agent_identity.key,
-        }),
-    );
-
-    // If the asset already has a AppData plugin, move on, otherwise create it.
-    if result.is_err() {
-        AddExternalPluginAdapterV1Cpi {
-            __program: ctx.accounts.mpl_core_program,
-            asset: ctx.accounts.asset,
-            collection: ctx.accounts.collection,
-            payer: ctx.accounts.payer,
-            authority: ctx.accounts.authority,
-            system_program: ctx.accounts.system_program,
-            log_wrapper: None,
-            __args: AddExternalPluginAdapterV1InstructionArgs {
-                init_info: ExternalPluginAdapterInitInfo::AppData(AppDataInitInfo {
-                    data_authority: PluginAuthority::Address {
-                        address: *ctx.accounts.agent_identity.key,
-                    },
-                    init_plugin_authority: None,
-                    schema: Some(ExternalPluginAdapterSchema::Binary),
-                }),
-            },
-        }
-        .invoke()?;
-    }
+    // Drop the agent identity account data.
+    drop(data);
 
     // Add the Agent Identity External Plugin Adapter to the asset.
     AddExternalPluginAdapterV1Cpi {
@@ -170,7 +141,7 @@ pub fn register_identity_v1<'a>(
                             .into(),
                     ),
                     (
-                        HookableLifecycleEvent::Burn,
+                        HookableLifecycleEvent::Update,
                         ExternalCheckResultBits::new()
                             .with_can_approve(true)
                             .with_can_listen(true)
@@ -189,7 +160,14 @@ pub fn register_identity_v1<'a>(
             }),
         },
     }
-    .invoke()?;
+    .invoke_signed_with_remaining_accounts(
+        &[&[
+            AgentIdentityV1::PREFIX,
+            ctx.accounts.asset.key.as_ref(),
+            &[agent_identity_bump],
+        ]],
+        &[(ctx.accounts.agent_identity, true, false)],
+    )?;
 
     Ok(())
 }

@@ -1,5 +1,5 @@
 mod delegate_execution_v1;
-mod register_executor_v1;
+mod register_executive_v1;
 
 use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, msg, pubkey::Pubkey};
 
@@ -7,7 +7,7 @@ use crate::error::MplAgentToolsError;
 use crate::instruction::MplAgentToolsInstructionDiscriminant;
 
 pub use delegate_execution_v1::{delegate_execution_v1, DelegateExecutionV1Args};
-pub use register_executor_v1::{register_executor_v1, RegisterExecutorV1Args};
+pub use register_executive_v1::{register_executive_v1, RegisterExecutiveV1Args};
 
 /// Process incoming instructions.
 ///
@@ -29,12 +29,12 @@ pub fn process_instruction<'a>(
     // Route by discriminant (first byte).
     match MplAgentToolsInstructionDiscriminant::try_from(instruction_data[0]) {
         Ok(MplAgentToolsInstructionDiscriminant::RegisterExecutorV1) => {
-            msg!("Instruction: RegisterExecutorV1");
+            msg!("Instruction: RegisterExecutiveV1");
             // Zero-copy: cast instruction data to args struct.
-            let args: &RegisterExecutorV1Args = bytemuck::from_bytes(
-                &instruction_data[..core::mem::size_of::<RegisterExecutorV1Args>()],
+            let args: &RegisterExecutiveV1Args = bytemuck::from_bytes(
+                &instruction_data[..core::mem::size_of::<RegisterExecutiveV1Args>()],
             );
-            register_executor_v1(accounts, args)
+            register_executive_v1(accounts, args)
         }
         Ok(MplAgentToolsInstructionDiscriminant::DelegateExecutionV1) => {
             msg!("Instruction: DelegateExecutionV1");

@@ -80,20 +80,20 @@ export class InvalidCoreAssetError extends ProgramError {
 codeToErrorMap.set(0x4, InvalidCoreAssetError);
 nameToErrorMap.set('InvalidCoreAsset', InvalidCoreAssetError);
 
-/** ExecutorProfileMustBeUninitialized: Executor Profile must be uninitialized */
-export class ExecutorProfileMustBeUninitializedError extends ProgramError {
-  override readonly name: string = 'ExecutorProfileMustBeUninitialized';
+/** ExecutiveProfileMustBeUninitialized: Executive Profile must be uninitialized */
+export class ExecutiveProfileMustBeUninitializedError extends ProgramError {
+  override readonly name: string = 'ExecutiveProfileMustBeUninitialized';
 
   readonly code: number = 0x5; // 5
 
   constructor(program: Program, cause?: Error) {
-    super('Executor Profile must be uninitialized', program, cause);
+    super('Executive Profile must be uninitialized', program, cause);
   }
 }
-codeToErrorMap.set(0x5, ExecutorProfileMustBeUninitializedError);
+codeToErrorMap.set(0x5, ExecutiveProfileMustBeUninitializedError);
 nameToErrorMap.set(
-  'ExecutorProfileMustBeUninitialized',
-  ExecutorProfileMustBeUninitializedError
+  'ExecutiveProfileMustBeUninitialized',
+  ExecutiveProfileMustBeUninitializedError
 );
 
 /** InvalidExecutionDelegateRecordDerivation: Invalid Execution Delegate Record Derivation */
@@ -155,6 +155,38 @@ codeToErrorMap.set(0x9, AgentIdentityNotRegisteredError);
 nameToErrorMap.set(
   'AgentIdentityNotRegistered',
   AgentIdentityNotRegisteredError
+);
+
+/** AssetOwnerMustBeTheOneToDelegateExecution: Asset owner must be the one to delegate execution */
+export class AssetOwnerMustBeTheOneToDelegateExecutionError extends ProgramError {
+  override readonly name: string = 'AssetOwnerMustBeTheOneToDelegateExecution';
+
+  readonly code: number = 0xa; // 10
+
+  constructor(program: Program, cause?: Error) {
+    super('Asset owner must be the one to delegate execution', program, cause);
+  }
+}
+codeToErrorMap.set(0xa, AssetOwnerMustBeTheOneToDelegateExecutionError);
+nameToErrorMap.set(
+  'AssetOwnerMustBeTheOneToDelegateExecution',
+  AssetOwnerMustBeTheOneToDelegateExecutionError
+);
+
+/** InvalidExecutiveProfileDerivation: Invalid Executive Profile Derivation */
+export class InvalidExecutiveProfileDerivationError extends ProgramError {
+  override readonly name: string = 'InvalidExecutiveProfileDerivation';
+
+  readonly code: number = 0xb; // 11
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid Executive Profile Derivation', program, cause);
+  }
+}
+codeToErrorMap.set(0xb, InvalidExecutiveProfileDerivationError);
+nameToErrorMap.set(
+  'InvalidExecutiveProfileDerivation',
+  InvalidExecutiveProfileDerivationError
 );
 
 /**

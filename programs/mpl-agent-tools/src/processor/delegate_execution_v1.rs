@@ -1,13 +1,13 @@
-use bytemuck::{Pod, Zeroable};
+use bytemuck::{from_bytes, Pod, Zeroable};
 use mpl_agent_identity::{accounts::AgentIdentityV1, types::Key as MplAgentIdentityKey};
-use mpl_core::types::Key as MplCoreKey;
+use mpl_core::{accounts::BaseAssetV1, types::Key as MplCoreKey};
 use shank::ShankType;
 use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, system_program};
 
 use crate::{
     error::MplAgentToolsError,
     instruction::accounts::DelegateExecutionV1Accounts,
-    state::{ExecutionDelegateRecordV1, Key},
+    state::{ExecutionDelegateRecordV1, ExecutiveProfileV1, Key},
 };
 
 #[repr(C)]
@@ -37,13 +37,17 @@ pub fn delegate_execution_v1<'a>(
     /****************************************************/
     /****************** Account Guards ******************/
     /****************************************************/
-    // Assert that the executor profile is initialized a valid executor profile.
-    if ctx.accounts.executor_profile.owner != &crate::ID
-        || ctx.accounts.executor_profile.data_len() == 0
-        || ctx.accounts.executor_profile.try_borrow_data()?[0] != Key::ExecutorProfileV1 as u8
+    // Assert that the executive profile is initialized and a valid executive profile.
+    if ctx.accounts.executive_profile.owner != &crate::ID
+        || ctx.accounts.executive_profile.data_len() == 0
+        || ctx.accounts.executive_profile.try_borrow_data()?[0] != Key::ExecutiveProfileV1 as u8
     {
-        return Err(MplAgentToolsError::ExecutorProfileMustBeUninitialized.into());
+        return Err(MplAgentToolsError::ExecutiveProfileMustBeUninitialized.into());
     }
+
+    let executive_profile_data = ctx.accounts.executive_profile.try_borrow_data()?;
+    let executive_profile: &ExecutiveProfileV1 =
+        from_bytes(&executive_profile_data[..core::mem::size_of::<ExecutiveProfileV1>()]);
 
     // Assert that the agent asset is initialized a valid agent asset.
     if ctx.accounts.agent_asset.owner != &mpl_core::ID
@@ -51,6 +55,12 @@ pub fn delegate_execution_v1<'a>(
         || ctx.accounts.agent_asset.try_borrow_data()?[0] != MplCoreKey::AssetV1 as u8
     {
         return Err(MplAgentToolsError::InvalidCoreAsset.into());
+    }
+
+    // Also assert that the owner is the one signing.
+    let asset = BaseAssetV1::try_from(ctx.accounts.agent_asset)?;
+    if asset.owner != *ctx.accounts.authority.unwrap_or(ctx.accounts.payer).key {
+        return Err(MplAgentToolsError::AssetOwnerMustBeTheOneToDelegateExecution.into());
     }
 
     // Assert that the agent identity is correct and initialized.
@@ -76,7 +86,7 @@ pub fn delegate_execution_v1<'a>(
     // Check the delegation account is not initialized and is the correct derivation.
     let bump = ExecutionDelegateRecordV1::check_pda_derivation(
         ctx.accounts.execution_delegate_record,
-        ctx.accounts.executor_profile.key,
+        ctx.accounts.executive_profile.key,
         ctx.accounts.agent_asset.key,
     )?;
 
@@ -114,8 +124,9 @@ pub fn delegate_execution_v1<'a>(
 
     execution_delegate_record.initialize(
         bump,
-        ctx.accounts.executor_profile.key,
+        ctx.accounts.executive_profile.key,
         ctx.accounts.agent_asset.key,
+        &executive_profile.authority,
     );
 
     Ok(())

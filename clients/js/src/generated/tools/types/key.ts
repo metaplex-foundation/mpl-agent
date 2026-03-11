@@ -10,7 +10,7 @@ import { Serializer, scalarEnum } from '@metaplex-foundation/umi/serializers';
 
 export enum Key {
   Uninitialized,
-  ExecutorProfileV1,
+  ExecutiveProfileV1,
   ExecutionDelegateRecordV1,
 }
 

@@ -1,6 +1,6 @@
 use shank::{ShankContext, ShankInstruction};
 
-use crate::processor::{DelegateExecutionV1Args, RegisterExecutorV1Args};
+use crate::processor::{DelegateExecutionV1Args, RegisterExecutiveV1Args};
 
 /// Instruction discriminants for routing.
 /// The first byte of instruction data determines which instruction to execute.
@@ -29,20 +29,20 @@ impl TryFrom<u8> for MplAgentToolsInstructionDiscriminant {
 #[derive(Clone, Debug, ShankContext, ShankInstruction)]
 #[rustfmt::skip]
 pub enum MplAgentToolsInstruction {
-    /// Register an Agent Executor.
-    #[account(0, writable, signer, name="executor_profile", desc = "The executor profile")]
+    /// Register an Agent Executive.
+    #[account(0, writable, name="executive_profile", desc = "The executive profile")]
     #[account(1, writable, signer, name="payer", desc = "The payer for additional rent")]
-    #[account(2, optional, signer, name="authority", desc = "Authority the executor signs with when executing agent actions")]
+    #[account(2, optional, signer, name="authority", desc = "Authority the executive signs with when executing agent actions")]
     #[account(3, name="system_program", desc = "The system program")]
-    RegisterExecutorV1(RegisterExecutorV1Args),
+    RegisterExecutiveV1(RegisterExecutiveV1Args),
 
-    /// Delegate Executor Permission for an Agent Asset.
-    #[account(0, name="executor_profile", desc = "The executor profile")]
+    /// Delegate Executive Permission for an Agent Asset.
+    #[account(0, name="executive_profile", desc = "The executive profile")]
     #[account(1, name="agent_asset", desc = "The agent asset")]
     #[account(2, name="agent_identity", desc = "The agent identity")]
     #[account(3, writable, name="execution_delegate_record", desc = "The execution delegate record")]
     #[account(4, writable, signer, name="payer", desc = "The payer for additional rent")]
-    #[account(5, optional, signer, name="authority", desc = "Authority the executor signs with when executing agent actions")]
+    #[account(5, optional, signer, name="authority", desc = "Authority the executive signs with when executing agent actions")]
     #[account(6, name="system_program", desc = "The system program")]
     DelegateExecutionV1(DelegateExecutionV1Args),
 }

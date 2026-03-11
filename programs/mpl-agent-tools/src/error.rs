@@ -28,9 +28,9 @@ pub enum MplAgentToolsError {
     #[error("Invalid Core Asset")]
     InvalidCoreAsset,
 
-    /// 5 - Executor Profile must be uninitialized
-    #[error("Executor Profile must be uninitialized")]
-    ExecutorProfileMustBeUninitialized,
+    /// 5 - Executive Profile must be uninitialized
+    #[error("Executive Profile must be uninitialized")]
+    ExecutiveProfileMustBeUninitialized,
 
     /// 6 - Invalid Execution Delegate Record Derivation
     #[error("Invalid Execution Delegate Record Derivation")]
@@ -47,6 +47,14 @@ pub enum MplAgentToolsError {
     /// 9 - Agent Identity not registered
     #[error("Agent Identity not registered")]
     AgentIdentityNotRegistered,
+
+    /// 10 - Asset owner must be the one to delegate execution
+    #[error("Asset owner must be the one to delegate execution")]
+    AssetOwnerMustBeTheOneToDelegateExecution,
+
+    /// 11 - Invalid Executive Profile Derivation
+    #[error("Invalid Executive Profile Derivation")]
+    InvalidExecutiveProfileDerivation,
 }
 
 impl PrintProgramError for MplAgentToolsError {

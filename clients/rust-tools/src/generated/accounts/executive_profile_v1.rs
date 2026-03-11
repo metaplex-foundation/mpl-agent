@@ -16,7 +16,7 @@ use solana_program::pubkey::Pubkey;
 #[cfg_attr(not(feature = "anchor"), derive(BorshSerialize, BorshDeserialize))]
 #[cfg_attr(feature = "anchor", derive(AnchorSerialize, AnchorDeserialize))]
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct ExecutorProfileV1 {
+pub struct ExecutiveProfileV1 {
     pub key: Key,
     pub padding: [u8; 7],
     #[cfg_attr(
@@ -26,8 +26,33 @@ pub struct ExecutorProfileV1 {
     pub authority: Pubkey,
 }
 
-impl ExecutorProfileV1 {
+impl ExecutiveProfileV1 {
     pub const LEN: usize = 40;
+
+    /// Prefix values used to generate a PDA for this account.
+    ///
+    /// Values are positional and appear in the following order:
+    ///
+    ///   0. `ExecutiveProfileV1::PREFIX`
+    ///   1. authority (`Pubkey`)
+    pub const PREFIX: &'static [u8] = "executive_profile".as_bytes();
+
+    pub fn create_pda(
+        authority: Pubkey,
+        bump: u8,
+    ) -> Result<solana_program::pubkey::Pubkey, solana_program::pubkey::PubkeyError> {
+        solana_program::pubkey::Pubkey::create_program_address(
+            &["executive_profile".as_bytes(), authority.as_ref(), &[bump]],
+            &crate::MPL_AGENT_TOOLS_ID,
+        )
+    }
+
+    pub fn find_pda(authority: &Pubkey) -> (solana_program::pubkey::Pubkey, u8) {
+        solana_program::pubkey::Pubkey::find_program_address(
+            &["executive_profile".as_bytes(), authority.as_ref()],
+            &crate::MPL_AGENT_TOOLS_ID,
+        )
+    }
 
     #[inline(always)]
     pub fn from_bytes(data: &[u8]) -> Result<Self, std::io::Error> {
@@ -36,7 +61,7 @@ impl ExecutorProfileV1 {
     }
 }
 
-impl<'a> TryFrom<&solana_program::account_info::AccountInfo<'a>> for ExecutorProfileV1 {
+impl<'a> TryFrom<&solana_program::account_info::AccountInfo<'a>> for ExecutiveProfileV1 {
     type Error = std::io::Error;
 
     fn try_from(

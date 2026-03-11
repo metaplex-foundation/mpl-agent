@@ -24,7 +24,12 @@ pub struct ExecutionDelegateRecordV1 {
         feature = "serde",
         serde(with = "serde_with::As::<serde_with::DisplayFromStr>")
     )]
-    pub executor_profile: Pubkey,
+    pub executive_profile: Pubkey,
+    #[cfg_attr(
+        feature = "serde",
+        serde(with = "serde_with::As::<serde_with::DisplayFromStr>")
+    )]
+    pub authority: Pubkey,
     #[cfg_attr(
         feature = "serde",
         serde(with = "serde_with::As::<serde_with::DisplayFromStr>")
@@ -33,26 +38,26 @@ pub struct ExecutionDelegateRecordV1 {
 }
 
 impl ExecutionDelegateRecordV1 {
-    pub const LEN: usize = 72;
+    pub const LEN: usize = 104;
 
     /// Prefix values used to generate a PDA for this account.
     ///
     /// Values are positional and appear in the following order:
     ///
     ///   0. `ExecutionDelegateRecordV1::PREFIX`
-    ///   1. executor_profile (`Pubkey`)
+    ///   1. executive_profile (`Pubkey`)
     ///   2. agent_asset (`Pubkey`)
     pub const PREFIX: &'static [u8] = "execution_delegate_record".as_bytes();
 
     pub fn create_pda(
-        executor_profile: Pubkey,
+        executive_profile: Pubkey,
         agent_asset: Pubkey,
         bump: u8,
     ) -> Result<solana_program::pubkey::Pubkey, solana_program::pubkey::PubkeyError> {
         solana_program::pubkey::Pubkey::create_program_address(
             &[
                 "execution_delegate_record".as_bytes(),
-                executor_profile.as_ref(),
+                executive_profile.as_ref(),
                 agent_asset.as_ref(),
                 &[bump],
             ],
@@ -61,13 +66,13 @@ impl ExecutionDelegateRecordV1 {
     }
 
     pub fn find_pda(
-        executor_profile: &Pubkey,
+        executive_profile: &Pubkey,
         agent_asset: &Pubkey,
     ) -> (solana_program::pubkey::Pubkey, u8) {
         solana_program::pubkey::Pubkey::find_program_address(
             &[
                 "execution_delegate_record".as_bytes(),
-                executor_profile.as_ref(),
+                executive_profile.as_ref(),
                 agent_asset.as_ref(),
             ],
             &crate::MPL_AGENT_TOOLS_ID,

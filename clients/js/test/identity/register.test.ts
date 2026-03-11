@@ -1,6 +1,5 @@
 import test from 'ava';
 import { fetchAsset } from '@metaplex-foundation/mpl-core';
-import { publicKey } from '@metaplex-foundation/umi';
 import {
   fetchAgentIdentityV1,
   findAgentIdentityV1Pda,
@@ -32,12 +31,6 @@ test('it can register an asset', async (t) => {
 
   // Then the asset has an AppData plugin.
   const assetData = await fetchAsset(umi as any, asset);
-  t.is(assetData?.appDatas?.length, 1);
-  t.like(assetData?.appDatas?.[0], {
-    dataAuthority: { type: 'Address', address: publicKey(agentIdentityPda) },
-    authority: { type: 'UpdateAuthority' },
-  });
-
   // And the asset has an AgentIdentity plugin.
   t.is(assetData?.agentIdentities?.length, 1);
   t.like(assetData?.agentIdentities?.[0], {
@@ -49,6 +42,6 @@ test('it can register an asset', async (t) => {
   // Verify lifecycle checks for Transfer, Burn, and Execute.
   const lifecycleChecks = assetData?.agentIdentities?.[0]?.lifecycleChecks;
   t.truthy(lifecycleChecks?.transfer);
-  t.truthy(lifecycleChecks?.burn);
+  t.truthy(lifecycleChecks?.update);
   t.truthy(lifecycleChecks?.execute);
 });

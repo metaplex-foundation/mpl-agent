@@ -26,9 +26,9 @@ pub enum MplAgentToolsError {
     /// 4 (0x4) - Invalid Core Asset
     #[error("Invalid Core Asset")]
     InvalidCoreAsset,
-    /// 5 (0x5) - Executor Profile must be uninitialized
-    #[error("Executor Profile must be uninitialized")]
-    ExecutorProfileMustBeUninitialized,
+    /// 5 (0x5) - Executive Profile must be uninitialized
+    #[error("Executive Profile must be uninitialized")]
+    ExecutiveProfileMustBeUninitialized,
     /// 6 (0x6) - Invalid Execution Delegate Record Derivation
     #[error("Invalid Execution Delegate Record Derivation")]
     InvalidExecutionDelegateRecordDerivation,
@@ -41,6 +41,12 @@ pub enum MplAgentToolsError {
     /// 9 (0x9) - Agent Identity not registered
     #[error("Agent Identity not registered")]
     AgentIdentityNotRegistered,
+    /// 10 (0xA) - Asset owner must be the one to delegate execution
+    #[error("Asset owner must be the one to delegate execution")]
+    AssetOwnerMustBeTheOneToDelegateExecution,
+    /// 11 (0xB) - Invalid Executive Profile Derivation
+    #[error("Invalid Executive Profile Derivation")]
+    InvalidExecutiveProfileDerivation,
 }
 
 impl From<MplAgentToolsError> for ProgramError {
@@ -58,11 +64,13 @@ impl TryFrom<u32> for MplAgentToolsError {
             2 => Ok(MplAgentToolsError::InvalidAccountData),
             3 => Ok(MplAgentToolsError::InvalidMplCoreProgram),
             4 => Ok(MplAgentToolsError::InvalidCoreAsset),
-            5 => Ok(MplAgentToolsError::ExecutorProfileMustBeUninitialized),
+            5 => Ok(MplAgentToolsError::ExecutiveProfileMustBeUninitialized),
             6 => Ok(MplAgentToolsError::InvalidExecutionDelegateRecordDerivation),
             7 => Ok(MplAgentToolsError::ExecutionDelegateRecordMustBeUninitialized),
             8 => Ok(MplAgentToolsError::InvalidAgentIdentity),
             9 => Ok(MplAgentToolsError::AgentIdentityNotRegistered),
+            10 => Ok(MplAgentToolsError::AssetOwnerMustBeTheOneToDelegateExecution),
+            11 => Ok(MplAgentToolsError::InvalidExecutiveProfileDerivation),
             _ => Err(ProgramError::InvalidArgument),
         }
     }
@@ -76,8 +84,8 @@ impl ToStr for MplAgentToolsError {
             MplAgentToolsError::InvalidAccountData => "Invalid account data",
             MplAgentToolsError::InvalidMplCoreProgram => "Invalid MPL Core Program",
             MplAgentToolsError::InvalidCoreAsset => "Invalid Core Asset",
-            MplAgentToolsError::ExecutorProfileMustBeUninitialized => {
-                "Executor Profile must be uninitialized"
+            MplAgentToolsError::ExecutiveProfileMustBeUninitialized => {
+                "Executive Profile must be uninitialized"
             }
             MplAgentToolsError::InvalidExecutionDelegateRecordDerivation => {
                 "Invalid Execution Delegate Record Derivation"
@@ -87,6 +95,12 @@ impl ToStr for MplAgentToolsError {
             }
             MplAgentToolsError::InvalidAgentIdentity => "Invalid Agent Identity",
             MplAgentToolsError::AgentIdentityNotRegistered => "Agent Identity not registered",
+            MplAgentToolsError::AssetOwnerMustBeTheOneToDelegateExecution => {
+                "Asset owner must be the one to delegate execution"
+            }
+            MplAgentToolsError::InvalidExecutiveProfileDerivation => {
+                "Invalid Executive Profile Derivation"
+            }
         }
     }
 }

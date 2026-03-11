@@ -21,62 +21,64 @@ import {
   struct,
   u8,
 } from '@metaplex-foundation/umi/serializers';
+import { findExecutiveProfileV1Pda } from '../accounts';
 import {
   ResolvedAccount,
   ResolvedAccountsWithIndices,
+  expectPublicKey,
   getAccountMetasAndSigners,
 } from '../shared';
 
 // Accounts.
-export type RegisterExecutorV1InstructionAccounts = {
-  /** The executor profile */
-  executorProfile: Signer;
+export type RegisterExecutiveV1InstructionAccounts = {
+  /** The executive profile */
+  executiveProfile?: PublicKey | Pda;
   /** The payer for additional rent */
   payer?: Signer;
-  /** Authority the executor signs with when executing agent actions */
+  /** Authority the executive signs with when executing agent actions */
   authority?: Signer;
   /** The system program */
   systemProgram?: PublicKey | Pda;
 };
 
 // Data.
-export type RegisterExecutorV1InstructionData = {
+export type RegisterExecutiveV1InstructionData = {
   discriminator: number;
   padding: Array<number>;
 };
 
-export type RegisterExecutorV1InstructionDataArgs = {};
+export type RegisterExecutiveV1InstructionDataArgs = {};
 
-export function getRegisterExecutorV1InstructionDataSerializer(): Serializer<
-  RegisterExecutorV1InstructionDataArgs,
-  RegisterExecutorV1InstructionData
+export function getRegisterExecutiveV1InstructionDataSerializer(): Serializer<
+  RegisterExecutiveV1InstructionDataArgs,
+  RegisterExecutiveV1InstructionData
 > {
   return mapSerializer<
-    RegisterExecutorV1InstructionDataArgs,
+    RegisterExecutiveV1InstructionDataArgs,
     any,
-    RegisterExecutorV1InstructionData
+    RegisterExecutiveV1InstructionData
   >(
-    struct<RegisterExecutorV1InstructionData>(
+    struct<RegisterExecutiveV1InstructionData>(
       [
         ['discriminator', u8()],
         ['padding', array(u8(), { size: 7 })],
       ],
-      { description: 'RegisterExecutorV1InstructionData' }
+      { description: 'RegisterExecutiveV1InstructionData' }
     ),
     (value) => ({ ...value, discriminator: 0, padding: [0, 0, 0, 0, 0, 0, 0] })
   ) as Serializer<
-    RegisterExecutorV1InstructionDataArgs,
-    RegisterExecutorV1InstructionData
+    RegisterExecutiveV1InstructionDataArgs,
+    RegisterExecutiveV1InstructionData
   >;
 }
 
 // Instruction discriminator.
-export const registerExecutorV1InstructionDiscriminator = 0;
+export const registerExecutiveV1InstructionDiscriminator = 0;
 
 // Instruction.
-export function registerExecutorV1(
-  context: Pick<Context, 'payer' | 'programs'>,
-  input: RegisterExecutorV1InstructionAccounts
+export function registerExecutiveV1(
+  context: Pick<Context, 'eddsa' | 'payer' | 'programs'>,
+  input: RegisterExecutiveV1InstructionAccounts
 ): TransactionBuilder {
   // Program ID.
   const programId = context.programs.getPublicKey(
@@ -86,10 +88,10 @@ export function registerExecutorV1(
 
   // Accounts.
   const resolvedAccounts = {
-    executorProfile: {
+    executiveProfile: {
       index: 0,
       isWritable: true as boolean,
-      value: input.executorProfile ?? null,
+      value: input.executiveProfile ?? null,
     },
     payer: {
       index: 1,
@@ -112,6 +114,19 @@ export function registerExecutorV1(
   if (!resolvedAccounts.payer.value) {
     resolvedAccounts.payer.value = context.payer;
   }
+  if (!resolvedAccounts.executiveProfile.value) {
+    if (resolvedAccounts.authority.value) {
+      resolvedAccounts.executiveProfile.value = findExecutiveProfileV1Pda(
+        context,
+        { authority: expectPublicKey(resolvedAccounts.authority.value) }
+      );
+    } else {
+      resolvedAccounts.executiveProfile.value = findExecutiveProfileV1Pda(
+        context,
+        { authority: expectPublicKey(resolvedAccounts.payer.value) }
+      );
+    }
+  }
   if (!resolvedAccounts.systemProgram.value) {
     resolvedAccounts.systemProgram.value = context.programs.getPublicKey(
       'splSystem',
@@ -133,7 +148,7 @@ export function registerExecutorV1(
   );
 
   // Data.
-  const data = getRegisterExecutorV1InstructionDataSerializer().serialize({});
+  const data = getRegisterExecutiveV1InstructionDataSerializer().serialize({});
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

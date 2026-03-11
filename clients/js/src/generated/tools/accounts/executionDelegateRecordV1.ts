@@ -37,14 +37,16 @@ export type ExecutionDelegateRecordV1AccountData = {
   key: Key;
   bump: number;
   padding: Array<number>;
-  executorProfile: PublicKey;
+  executiveProfile: PublicKey;
+  authority: PublicKey;
   agentAsset: PublicKey;
 };
 
 export type ExecutionDelegateRecordV1AccountDataArgs = {
   key: KeyArgs;
   bump: number;
-  executorProfile: PublicKey;
+  executiveProfile: PublicKey;
+  authority: PublicKey;
   agentAsset: PublicKey;
 };
 
@@ -62,7 +64,8 @@ export function getExecutionDelegateRecordV1AccountDataSerializer(): Serializer<
         ['key', getKeySerializer()],
         ['bump', u8()],
         ['padding', array(u8(), { size: 6 })],
-        ['executorProfile', publicKeySerializer()],
+        ['executiveProfile', publicKeySerializer()],
+        ['authority', publicKeySerializer()],
         ['agentAsset', publicKeySerializer()],
       ],
       { description: 'ExecutionDelegateRecordV1AccountData' }
@@ -153,14 +156,16 @@ export function getExecutionDelegateRecordV1GpaBuilder(
       key: KeyArgs;
       bump: number;
       padding: Array<number>;
-      executorProfile: PublicKey;
+      executiveProfile: PublicKey;
+      authority: PublicKey;
       agentAsset: PublicKey;
     }>({
       key: [0, getKeySerializer()],
       bump: [1, u8()],
       padding: [2, array(u8(), { size: 6 })],
-      executorProfile: [8, publicKeySerializer()],
-      agentAsset: [40, publicKeySerializer()],
+      executiveProfile: [8, publicKeySerializer()],
+      authority: [40, publicKeySerializer()],
+      agentAsset: [72, publicKeySerializer()],
     })
     .deserializeUsing<ExecutionDelegateRecordV1>((account) =>
       deserializeExecutionDelegateRecordV1(account)
@@ -168,14 +173,14 @@ export function getExecutionDelegateRecordV1GpaBuilder(
 }
 
 export function getExecutionDelegateRecordV1Size(): number {
-  return 72;
+  return 104;
 }
 
 export function findExecutionDelegateRecordV1Pda(
   context: Pick<Context, 'eddsa' | 'programs'>,
   seeds: {
-    /** The address of the executor profile */
-    executorProfile: PublicKey;
+    /** The address of the executive profile */
+    executiveProfile: PublicKey;
     /** The address of the agent asset */
     agentAsset: PublicKey;
   }
@@ -186,7 +191,7 @@ export function findExecutionDelegateRecordV1Pda(
   );
   return context.eddsa.findPda(programId, [
     string({ size: 'variable' }).serialize('execution_delegate_record'),
-    publicKeySerializer().serialize(seeds.executorProfile),
+    publicKeySerializer().serialize(seeds.executiveProfile),
     publicKeySerializer().serialize(seeds.agentAsset),
   ]);
 }

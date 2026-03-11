@@ -11,18 +11,18 @@ use anchor_lang::prelude::{AnchorDeserialize, AnchorSerialize};
 use borsh::{BorshDeserialize, BorshSerialize};
 
 /// Accounts.
-pub struct RegisterExecutorV1 {
-    /// The executor profile
-    pub executor_profile: solana_program::pubkey::Pubkey,
+pub struct RegisterExecutiveV1 {
+    /// The executive profile
+    pub executive_profile: solana_program::pubkey::Pubkey,
     /// The payer for additional rent
     pub payer: solana_program::pubkey::Pubkey,
-    /// Authority the executor signs with when executing agent actions
+    /// Authority the executive signs with when executing agent actions
     pub authority: Option<solana_program::pubkey::Pubkey>,
     /// The system program
     pub system_program: solana_program::pubkey::Pubkey,
 }
 
-impl RegisterExecutorV1 {
+impl RegisterExecutiveV1 {
     pub fn instruction(&self) -> solana_program::instruction::Instruction {
         self.instruction_with_remaining_accounts(&[])
     }
@@ -33,8 +33,8 @@ impl RegisterExecutorV1 {
     ) -> solana_program::instruction::Instruction {
         let mut accounts = Vec::with_capacity(4 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new(
-            self.executor_profile,
-            true,
+            self.executive_profile,
+            false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
             self.payer, true,
@@ -54,7 +54,7 @@ impl RegisterExecutorV1 {
             false,
         ));
         accounts.extend_from_slice(remaining_accounts);
-        let data = borsh::to_vec(&(RegisterExecutorV1InstructionData::new())).unwrap();
+        let data = borsh::to_vec(&(RegisterExecutiveV1InstructionData::new())).unwrap();
 
         solana_program::instruction::Instruction {
             program_id: crate::MPL_AGENT_TOOLS_ID,
@@ -66,12 +66,12 @@ impl RegisterExecutorV1 {
 
 #[cfg_attr(not(feature = "anchor"), derive(BorshSerialize, BorshDeserialize))]
 #[cfg_attr(feature = "anchor", derive(AnchorSerialize, AnchorDeserialize))]
-pub struct RegisterExecutorV1InstructionData {
+pub struct RegisterExecutiveV1InstructionData {
     discriminator: u8,
     padding: [u8; 7],
 }
 
-impl RegisterExecutorV1InstructionData {
+impl RegisterExecutiveV1InstructionData {
     pub fn new() -> Self {
         Self {
             discriminator: 0,
@@ -80,34 +80,34 @@ impl RegisterExecutorV1InstructionData {
     }
 }
 
-/// Instruction builder for `RegisterExecutorV1`.
+/// Instruction builder for `RegisterExecutiveV1`.
 ///
 /// ### Accounts:
 ///
-///   0. `[writable, signer]` executor_profile
+///   0. `[writable]` executive_profile
 ///   1. `[writable, signer]` payer
 ///   2. `[signer, optional]` authority
 ///   3. `[optional]` system_program (default to `11111111111111111111111111111111`)
 #[derive(Default)]
-pub struct RegisterExecutorV1Builder {
-    executor_profile: Option<solana_program::pubkey::Pubkey>,
+pub struct RegisterExecutiveV1Builder {
+    executive_profile: Option<solana_program::pubkey::Pubkey>,
     payer: Option<solana_program::pubkey::Pubkey>,
     authority: Option<solana_program::pubkey::Pubkey>,
     system_program: Option<solana_program::pubkey::Pubkey>,
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
 }
 
-impl RegisterExecutorV1Builder {
+impl RegisterExecutiveV1Builder {
     pub fn new() -> Self {
         Self::default()
     }
-    /// The executor profile
+    /// The executive profile
     #[inline(always)]
-    pub fn executor_profile(
+    pub fn executive_profile(
         &mut self,
-        executor_profile: solana_program::pubkey::Pubkey,
+        executive_profile: solana_program::pubkey::Pubkey,
     ) -> &mut Self {
-        self.executor_profile = Some(executor_profile);
+        self.executive_profile = Some(executive_profile);
         self
     }
     /// The payer for additional rent
@@ -117,7 +117,7 @@ impl RegisterExecutorV1Builder {
         self
     }
     /// `[optional account]`
-    /// Authority the executor signs with when executing agent actions
+    /// Authority the executive signs with when executing agent actions
     #[inline(always)]
     pub fn authority(&mut self, authority: Option<solana_program::pubkey::Pubkey>) -> &mut Self {
         self.authority = authority;
@@ -150,8 +150,10 @@ impl RegisterExecutorV1Builder {
     }
     #[allow(clippy::clone_on_copy)]
     pub fn instruction(&self) -> solana_program::instruction::Instruction {
-        let accounts = RegisterExecutorV1 {
-            executor_profile: self.executor_profile.expect("executor_profile is not set"),
+        let accounts = RegisterExecutiveV1 {
+            executive_profile: self
+                .executive_profile
+                .expect("executive_profile is not set"),
             payer: self.payer.expect("payer is not set"),
             authority: self.authority,
             system_program: self
@@ -163,40 +165,40 @@ impl RegisterExecutorV1Builder {
     }
 }
 
-/// `register_executor_v1` CPI accounts.
-pub struct RegisterExecutorV1CpiAccounts<'a, 'b> {
-    /// The executor profile
-    pub executor_profile: &'b solana_program::account_info::AccountInfo<'a>,
+/// `register_executive_v1` CPI accounts.
+pub struct RegisterExecutiveV1CpiAccounts<'a, 'b> {
+    /// The executive profile
+    pub executive_profile: &'b solana_program::account_info::AccountInfo<'a>,
     /// The payer for additional rent
     pub payer: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Authority the executor signs with when executing agent actions
+    /// Authority the executive signs with when executing agent actions
     pub authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     /// The system program
     pub system_program: &'b solana_program::account_info::AccountInfo<'a>,
 }
 
-/// `register_executor_v1` CPI instruction.
-pub struct RegisterExecutorV1Cpi<'a, 'b> {
+/// `register_executive_v1` CPI instruction.
+pub struct RegisterExecutiveV1Cpi<'a, 'b> {
     /// The program to invoke.
     pub __program: &'b solana_program::account_info::AccountInfo<'a>,
-    /// The executor profile
-    pub executor_profile: &'b solana_program::account_info::AccountInfo<'a>,
+    /// The executive profile
+    pub executive_profile: &'b solana_program::account_info::AccountInfo<'a>,
     /// The payer for additional rent
     pub payer: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Authority the executor signs with when executing agent actions
+    /// Authority the executive signs with when executing agent actions
     pub authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     /// The system program
     pub system_program: &'b solana_program::account_info::AccountInfo<'a>,
 }
 
-impl<'a, 'b> RegisterExecutorV1Cpi<'a, 'b> {
+impl<'a, 'b> RegisterExecutiveV1Cpi<'a, 'b> {
     pub fn new(
         program: &'b solana_program::account_info::AccountInfo<'a>,
-        accounts: RegisterExecutorV1CpiAccounts<'a, 'b>,
+        accounts: RegisterExecutiveV1CpiAccounts<'a, 'b>,
     ) -> Self {
         Self {
             __program: program,
-            executor_profile: accounts.executor_profile,
+            executive_profile: accounts.executive_profile,
             payer: accounts.payer,
             authority: accounts.authority,
             system_program: accounts.system_program,
@@ -237,8 +239,8 @@ impl<'a, 'b> RegisterExecutorV1Cpi<'a, 'b> {
     ) -> solana_program::entrypoint::ProgramResult {
         let mut accounts = Vec::with_capacity(4 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new(
-            *self.executor_profile.key,
-            true,
+            *self.executive_profile.key,
+            false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
             *self.payer.key,
@@ -266,7 +268,7 @@ impl<'a, 'b> RegisterExecutorV1Cpi<'a, 'b> {
                 is_signer: remaining_account.2,
             })
         });
-        let data = borsh::to_vec(&(RegisterExecutorV1InstructionData::new())).unwrap();
+        let data = borsh::to_vec(&(RegisterExecutiveV1InstructionData::new())).unwrap();
 
         let instruction = solana_program::instruction::Instruction {
             program_id: crate::MPL_AGENT_TOOLS_ID,
@@ -275,7 +277,7 @@ impl<'a, 'b> RegisterExecutorV1Cpi<'a, 'b> {
         };
         let mut account_infos = Vec::with_capacity(4 + 1 + remaining_accounts.len());
         account_infos.push(self.__program.clone());
-        account_infos.push(self.executor_profile.clone());
+        account_infos.push(self.executive_profile.clone());
         account_infos.push(self.payer.clone());
         if let Some(authority) = self.authority {
             account_infos.push(authority.clone());
@@ -293,23 +295,23 @@ impl<'a, 'b> RegisterExecutorV1Cpi<'a, 'b> {
     }
 }
 
-/// Instruction builder for `RegisterExecutorV1` via CPI.
+/// Instruction builder for `RegisterExecutiveV1` via CPI.
 ///
 /// ### Accounts:
 ///
-///   0. `[writable, signer]` executor_profile
+///   0. `[writable]` executive_profile
 ///   1. `[writable, signer]` payer
 ///   2. `[signer, optional]` authority
 ///   3. `[]` system_program
-pub struct RegisterExecutorV1CpiBuilder<'a, 'b> {
-    instruction: Box<RegisterExecutorV1CpiBuilderInstruction<'a, 'b>>,
+pub struct RegisterExecutiveV1CpiBuilder<'a, 'b> {
+    instruction: Box<RegisterExecutiveV1CpiBuilderInstruction<'a, 'b>>,
 }
 
-impl<'a, 'b> RegisterExecutorV1CpiBuilder<'a, 'b> {
+impl<'a, 'b> RegisterExecutiveV1CpiBuilder<'a, 'b> {
     pub fn new(program: &'b solana_program::account_info::AccountInfo<'a>) -> Self {
-        let instruction = Box::new(RegisterExecutorV1CpiBuilderInstruction {
+        let instruction = Box::new(RegisterExecutiveV1CpiBuilderInstruction {
             __program: program,
-            executor_profile: None,
+            executive_profile: None,
             payer: None,
             authority: None,
             system_program: None,
@@ -317,13 +319,13 @@ impl<'a, 'b> RegisterExecutorV1CpiBuilder<'a, 'b> {
         });
         Self { instruction }
     }
-    /// The executor profile
+    /// The executive profile
     #[inline(always)]
-    pub fn executor_profile(
+    pub fn executive_profile(
         &mut self,
-        executor_profile: &'b solana_program::account_info::AccountInfo<'a>,
+        executive_profile: &'b solana_program::account_info::AccountInfo<'a>,
     ) -> &mut Self {
-        self.instruction.executor_profile = Some(executor_profile);
+        self.instruction.executive_profile = Some(executive_profile);
         self
     }
     /// The payer for additional rent
@@ -333,7 +335,7 @@ impl<'a, 'b> RegisterExecutorV1CpiBuilder<'a, 'b> {
         self
     }
     /// `[optional account]`
-    /// Authority the executor signs with when executing agent actions
+    /// Authority the executive signs with when executing agent actions
     #[inline(always)]
     pub fn authority(
         &mut self,
@@ -392,13 +394,13 @@ impl<'a, 'b> RegisterExecutorV1CpiBuilder<'a, 'b> {
         &self,
         signers_seeds: &[&[&[u8]]],
     ) -> solana_program::entrypoint::ProgramResult {
-        let instruction = RegisterExecutorV1Cpi {
+        let instruction = RegisterExecutiveV1Cpi {
             __program: self.instruction.__program,
 
-            executor_profile: self
+            executive_profile: self
                 .instruction
-                .executor_profile
-                .expect("executor_profile is not set"),
+                .executive_profile
+                .expect("executive_profile is not set"),
 
             payer: self.instruction.payer.expect("payer is not set"),
 
@@ -416,9 +418,9 @@ impl<'a, 'b> RegisterExecutorV1CpiBuilder<'a, 'b> {
     }
 }
 
-struct RegisterExecutorV1CpiBuilderInstruction<'a, 'b> {
+struct RegisterExecutiveV1CpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
-    executor_profile: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    executive_profile: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     payer: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     system_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,

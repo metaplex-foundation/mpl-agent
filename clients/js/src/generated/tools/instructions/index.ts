@@ -7,4 +7,4 @@
  */
 
 export * from './delegateExecutionV1';
-export * from './registerExecutorV1';
+export * from './registerExecutiveV1';

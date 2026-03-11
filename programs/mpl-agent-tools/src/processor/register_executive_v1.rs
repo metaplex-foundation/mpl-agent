@@ -3,13 +3,13 @@ use shank::ShankType;
 use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, system_program};
 
 use crate::{
-    error::MplAgentToolsError, instruction::accounts::RegisterExecutorV1Accounts,
-    state::ExecutorProfileV1,
+    error::MplAgentToolsError, instruction::accounts::RegisterExecutiveV1Accounts,
+    state::ExecutiveProfileV1,
 };
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Pod, Zeroable, ShankType)]
-pub struct RegisterExecutorV1Args {
+pub struct RegisterExecutiveV1Args {
     /// Instruction discriminator (not included in IDL).
     #[skip]
     pub discriminator: u8,
@@ -19,27 +19,32 @@ pub struct RegisterExecutorV1Args {
 }
 
 // Compile-time assertion to ensure struct is properly sized.
-const _: () = assert!(core::mem::size_of::<RegisterExecutorV1Args>() == 8);
+const _: () = assert!(core::mem::size_of::<RegisterExecutiveV1Args>() == 8);
 
-pub fn register_executor_v1<'a>(
+pub fn register_executive_v1<'a>(
     accounts: &'a [AccountInfo<'a>],
-    _args: &RegisterExecutorV1Args,
+    _args: &RegisterExecutiveV1Args,
 ) -> ProgramResult {
     /****************************************************/
     /****************** Account Setup *******************/
     /****************************************************/
 
-    let ctx = RegisterExecutorV1Accounts::context(accounts)?;
+    let ctx = RegisterExecutiveV1Accounts::context(accounts)?;
 
     /****************************************************/
     /****************** Account Guards ******************/
     /****************************************************/
-    // Assert that the executor profile is not already initialized.
-    if ctx.accounts.executor_profile.owner != &system_program::ID
-        || ctx.accounts.executor_profile.data_len() != 0
+    // Assert that the executive profile is not already initialized.
+    if ctx.accounts.executive_profile.owner != &system_program::ID
+        || ctx.accounts.executive_profile.data_len() != 0
     {
-        return Err(MplAgentToolsError::ExecutorProfileMustBeUninitialized.into());
+        return Err(MplAgentToolsError::ExecutiveProfileMustBeUninitialized.into());
     }
+
+    let bump = ExecutiveProfileV1::check_pda_derivation(
+        ctx.accounts.executive_profile,
+        ctx.accounts.authority.unwrap_or(ctx.accounts.payer),
+    )?;
 
     // Validate system program.
     if *ctx.accounts.system_program.key != system_program::id() {
@@ -56,15 +61,15 @@ pub fn register_executor_v1<'a>(
     /********************* Actions **********************/
     /****************************************************/
     // Create the agent executor account.
-    ExecutorProfileV1::create_account(&ctx.accounts)?;
+    ExecutiveProfileV1::create_account(&ctx.accounts, bump)?;
 
     // Initialize the account using zero-copy.
     // Borrow the account data mutably and cast to our struct.
-    let mut data = ctx.accounts.executor_profile.try_borrow_mut_data()?;
-    let executor_profile: &mut ExecutorProfileV1 =
-        bytemuck::from_bytes_mut(&mut data[..core::mem::size_of::<ExecutorProfileV1>()]);
+    let mut data = ctx.accounts.executive_profile.try_borrow_mut_data()?;
+    let executive_profile: &mut ExecutiveProfileV1 =
+        bytemuck::from_bytes_mut(&mut data[..core::mem::size_of::<ExecutiveProfileV1>()]);
 
-    executor_profile.initialize(ctx.accounts.authority.unwrap_or(ctx.accounts.payer).key);
+    executive_profile.initialize(ctx.accounts.authority.unwrap_or(ctx.accounts.payer).key);
 
     Ok(())
 }

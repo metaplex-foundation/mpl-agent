@@ -17,6 +17,6 @@ use num_derive::FromPrimitive;
 #[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Hash, FromPrimitive)]
 pub enum Key {
     Uninitialized,
-    ExecutorProfileV1,
+    ExecutiveProfileV1,
     ExecutionDelegateRecordV1,
 }

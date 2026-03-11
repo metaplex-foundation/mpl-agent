@@ -9,8 +9,8 @@ onlyBuiltDependencies:
 
 dependencies:
   '@metaplex-foundation/mpl-core':
-    specifier: link:/Users/kelliott/Metaplex/security/core/clients/js
-    version: link:../../../../security/core/clients/js
+    specifier: link:/Users/kelliott/Metaplex/mpl/core/clients/js
+    version: link:../../../../mpl/core/clients/js
   '@metaplex-foundation/mpl-toolbox':
     specifier: ^0.10.0
     version: 0.10.0(@metaplex-foundation/umi@1.5.1)

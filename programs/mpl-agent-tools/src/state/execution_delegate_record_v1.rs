@@ -7,9 +7,7 @@ use solana_program::{
 };
 
 use crate::{
-    error::MplAgentToolsError,
-    instruction::accounts::{DelegateExecutionV1Accounts, RegisterExecutorV1Accounts},
-    state::Key,
+    error::MplAgentToolsError, instruction::accounts::DelegateExecutionV1Accounts, state::Key,
 };
 
 #[repr(C)]
@@ -23,15 +21,17 @@ pub struct ExecutionDelegateRecordV1 {
     /// Padding for 8-byte alignment.
     #[padding]
     pub _padding: [u8; 6],
-    /// The address of the executor profile.
-    pub executor_profile: Pubkey,
+    /// The address of the executive profile.
+    pub executive_profile: Pubkey,
+    /// The address of the authority signer for the executive.
+    pub authority: Pubkey,
     /// The address of the agent asset.
     pub agent_asset: Pubkey,
 }
 
 // Compile-time assertion to ensure struct is 8-byte aligned.
 const _: () = assert!(core::mem::size_of::<ExecutionDelegateRecordV1>() % 8 == 0);
-const _: () = assert!(core::mem::size_of::<ExecutionDelegateRecordV1>() == 72);
+const _: () = assert!(core::mem::size_of::<ExecutionDelegateRecordV1>() == 104);
 
 impl ExecutionDelegateRecordV1 {
     const PREFIX: &[u8] = b"execution_delegate_record";
@@ -64,7 +64,7 @@ impl ExecutionDelegateRecordV1 {
             core::mem::size_of::<ExecutionDelegateRecordV1>(),
             &[
                 Self::PREFIX,
-                accounts.executor_profile.key.as_ref(),
+                accounts.executive_profile.key.as_ref(),
                 accounts.agent_asset.key.as_ref(),
                 &[bump],
             ],
@@ -73,12 +73,19 @@ impl ExecutionDelegateRecordV1 {
 
     /// Initialize the account with the given bump seed.
     #[inline]
-    pub fn initialize(&mut self, bump: u8, executor_profile: &Pubkey, agent_asset: &Pubkey) {
+    pub fn initialize(
+        &mut self,
+        bump: u8,
+        executive_profile: &Pubkey,
+        agent_asset: &Pubkey,
+        authority: &Pubkey,
+    ) {
         solana_program::msg!("Initializing execution delegate record account");
         self.key = Key::ExecutionDelegateRecordV1 as u8;
         self.bump = bump;
         self._padding = [0u8; 6];
-        self.executor_profile = *executor_profile;
+        self.executive_profile = *executive_profile;
         self.agent_asset = *agent_asset;
+        self.authority = *authority;
     }
 }

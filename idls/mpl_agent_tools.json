@@ -3,14 +3,14 @@
   "name": "mpl_agent_tools_program",
   "instructions": [
     {
-      "name": "RegisterExecutorV1",
+      "name": "RegisterExecutiveV1",
       "accounts": [
         {
-          "name": "executorProfile",
+          "name": "executiveProfile",
           "isMut": true,
-          "isSigner": true,
+          "isSigner": false,
           "docs": [
-            "The executor profile"
+            "The executive profile"
           ]
         },
         {
@@ -27,7 +27,7 @@
           "isSigner": true,
           "isOptional": true,
           "docs": [
-            "Authority the executor signs with when executing agent actions"
+            "Authority the executive signs with when executing agent actions"
           ]
         },
         {
@@ -41,9 +41,9 @@
       ],
       "args": [
         {
-          "name": "registerExecutorV1Args",
+          "name": "registerExecutiveV1Args",
           "type": {
-            "defined": "RegisterExecutorV1Args"
+            "defined": "RegisterExecutiveV1Args"
           }
         }
       ],
@@ -56,11 +56,11 @@
       "name": "DelegateExecutionV1",
       "accounts": [
         {
-          "name": "executorProfile",
+          "name": "executiveProfile",
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "The executor profile"
+            "The executive profile"
           ]
         },
         {
@@ -101,7 +101,7 @@
           "isSigner": true,
           "isOptional": true,
           "docs": [
-            "Authority the executor signs with when executing agent actions"
+            "Authority the executive signs with when executing agent actions"
           ]
         },
         {
@@ -159,7 +159,11 @@
             ]
           },
           {
-            "name": "executorProfile",
+            "name": "executiveProfile",
+            "type": "publicKey"
+          },
+          {
+            "name": "authority",
             "type": "publicKey"
           },
           {
@@ -170,7 +174,7 @@
       }
     },
     {
-      "name": "ExecutorProfileV1",
+      "name": "ExecutiveProfileV1",
       "type": {
         "kind": "struct",
         "fields": [
@@ -225,7 +229,7 @@
       }
     },
     {
-      "name": "RegisterExecutorV1Args",
+      "name": "RegisterExecutiveV1Args",
       "type": {
         "kind": "struct",
         "fields": [
@@ -253,7 +257,7 @@
             "name": "Uninitialized"
           },
           {
-            "name": "ExecutorProfileV1"
+            "name": "ExecutiveProfileV1"
           },
           {
             "name": "ExecutionDelegateRecordV1"
@@ -290,8 +294,8 @@
     },
     {
       "code": 5,
-      "name": "ExecutorProfileMustBeUninitialized",
-      "msg": "Executor Profile must be uninitialized"
+      "name": "ExecutiveProfileMustBeUninitialized",
+      "msg": "Executive Profile must be uninitialized"
     },
     {
       "code": 6,
@@ -312,6 +316,16 @@
       "code": 9,
       "name": "AgentIdentityNotRegistered",
       "msg": "Agent Identity not registered"
+    },
+    {
+      "code": 10,
+      "name": "AssetOwnerMustBeTheOneToDelegateExecution",
+      "msg": "Asset owner must be the one to delegate execution"
+    },
+    {
+      "code": 11,
+      "name": "InvalidExecutiveProfileDerivation",
+      "msg": "Invalid Executive Profile Derivation"
     }
   ],
   "metadata": {

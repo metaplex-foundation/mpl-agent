@@ -20,10 +20,16 @@ kinobi.update(
 // Update accounts.
 kinobi.update(
   new k.updateAccountsVisitor({
+    executiveProfileV1: {
+      seeds: [
+        k.constantPdaSeedNodeFromString("executive_profile"),
+        k.variablePdaSeedNode("authority", k.publicKeyTypeNode(), "The address of the authority"),
+      ],
+    },
     executionDelegateRecordV1: {
       seeds: [
         k.constantPdaSeedNodeFromString("execution_delegate_record"),
-        k.variablePdaSeedNode("executorProfile", k.publicKeyTypeNode(), "The address of the executor profile"),
+        k.variablePdaSeedNode("executiveProfile", k.publicKeyTypeNode(), "The address of the executive profile"),
         k.variablePdaSeedNode("agentAsset", k.publicKeyTypeNode(), "The address of the agent asset"),
       ],
     },
@@ -33,6 +39,16 @@ kinobi.update(
 // Update instructions.
 kinobi.update(
   new k.updateInstructionsVisitor({
+    registerExecutiveV1: {
+      accounts: {
+        executiveProfile: {defaultValue: k.conditionalValueNode({
+          condition: k.accountValueNode("authority"),
+          ifTrue: k.pdaValueNode("executiveProfileV1", [k.pdaSeedValueNode("authority", k.accountValueNode("authority"))]),
+          ifFalse: k.pdaValueNode("executiveProfileV1", [k.pdaSeedValueNode("authority", k.accountValueNode("payer"))]),
+        }),
+      }
+      },
+    },
     delegateExecutionV1: {
       accounts: {
         executionDelegateRecord: {defaultValue: k.pdaValueNode("executionDelegateRecordV1")},

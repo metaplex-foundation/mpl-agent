@@ -31,8 +31,8 @@ import {
 
 // Accounts.
 export type DelegateExecutionV1InstructionAccounts = {
-  /** The executor profile */
-  executorProfile: PublicKey | Pda;
+  /** The executive profile */
+  executiveProfile: PublicKey | Pda;
   /** The agent asset */
   agentAsset: PublicKey | Pda;
   /** The agent identity */
@@ -41,7 +41,7 @@ export type DelegateExecutionV1InstructionAccounts = {
   executionDelegateRecord?: PublicKey | Pda;
   /** The payer for additional rent */
   payer?: Signer;
-  /** Authority the executor signs with when executing agent actions */
+  /** Authority the executive signs with when executing agent actions */
   authority?: Signer;
   /** The system program */
   systemProgram?: PublicKey | Pda;
@@ -94,10 +94,10 @@ export function delegateExecutionV1(
 
   // Accounts.
   const resolvedAccounts = {
-    executorProfile: {
+    executiveProfile: {
       index: 0,
       isWritable: false as boolean,
-      value: input.executorProfile ?? null,
+      value: input.executiveProfile ?? null,
     },
     agentAsset: {
       index: 1,
@@ -135,8 +135,8 @@ export function delegateExecutionV1(
   if (!resolvedAccounts.executionDelegateRecord.value) {
     resolvedAccounts.executionDelegateRecord.value =
       findExecutionDelegateRecordV1Pda(context, {
-        executorProfile: expectPublicKey(
-          resolvedAccounts.executorProfile.value
+        executiveProfile: expectPublicKey(
+          resolvedAccounts.executiveProfile.value
         ),
         agentAsset: expectPublicKey(resolvedAccounts.agentAsset.value),
       });

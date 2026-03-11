@@ -2680,7 +2680,7 @@ version = "0.11.0"
 dependencies = [
  "base64 0.22.1",
  "borsh 0.10.3",
- "kaigan 0.2.6",
+ "kaigan 0.3.0",
  "modular-bitfield",
  "num-derive 0.3.3",
  "num-traits",

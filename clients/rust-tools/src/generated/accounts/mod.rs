@@ -6,7 +6,7 @@
 //!
 
 pub(crate) mod r#execution_delegate_record_v1;
-pub(crate) mod r#executor_profile_v1;
+pub(crate) mod r#executive_profile_v1;
 
 pub use self::r#execution_delegate_record_v1::*;
-pub use self::r#executor_profile_v1::*;
+pub use self::r#executive_profile_v1::*;

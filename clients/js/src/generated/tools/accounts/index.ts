@@ -7,4 +7,4 @@
  */
 
 export * from './executionDelegateRecordV1';
-export * from './executorProfileV1';
+export * from './executiveProfileV1';
