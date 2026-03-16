@@ -1,6 +1,6 @@
 {
   "name": "@metaplex-foundation/mpl-agent-registry",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Identity Registry for MPL Agent",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
@@ -27,7 +27,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@metaplex-foundation/mpl-toolbox": "^0.10.0",
-    "@metaplex-foundation/mpl-core": "link:/Users/kelliott/Metaplex/mpl/core/clients/js"
+    "@metaplex-foundation/mpl-core": "1.8.0"
   },
   "peerDependencies": {
     "@metaplex-foundation/umi": "^1.0"
