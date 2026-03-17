@@ -1,0 +1,40 @@
+{
+  "name": "@metaplex-foundation/mpl-agent-migrator",
+  "version": "0.2.0",
+  "description": "CLI tool to migrate existing Agent collections to the MPL Agent Registry standard",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "mpl-agent-migrator": "dist/index.js"
+  },
+  "scripts": {
+    "build": "rimraf dist && tsc -p tsconfig.json",
+    "start": "ts-node src/index.ts",
+    "lint": "eslint --ext js,ts src",
+    "lint:fix": "eslint --fix --ext js,ts src"
+  },
+  "author": "Metaplex Maintainers <contact@metaplex.com>",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@metaplex-foundation/digital-asset-standard-api": "^1.0.4",
+    "@metaplex-foundation/mpl-agent-registry": "link:../js",
+    "@metaplex-foundation/mpl-bubblegum": "^4.3.1",
+    "@metaplex-foundation/mpl-core": "^1.2.0",
+    "@metaplex-foundation/mpl-token-metadata": "^3.2.1",
+    "@metaplex-foundation/mpl-toolbox": "^0.10.0",
+    "@metaplex-foundation/umi": "^1.5.1",
+    "@metaplex-foundation/umi-bundle-defaults": "^1.5.1",
+    "@metaplex-foundation/umi-uploader-irys": "^1.5.0",
+    "@solana/web3.js": "^1.73.0",
+    "bs58": "^5.0.0",
+    "commander": "^12.0.0",
+    "p-map": "^5.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.3",
+    "rimraf": "^3.0.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^4.9.4"
+  },
+  "packageManager": "pnpm@8.9.0"
+}

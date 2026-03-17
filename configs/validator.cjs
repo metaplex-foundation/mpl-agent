@@ -46,7 +46,7 @@ module.exports = {
       {
         label: "Mpl Core",
         programId: "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d",
-        deployPath: path.join(__dirname, "..", "..", "..", "mpl", "core", "programs", ".bin", "mpl_core_program.so"),
+        deployPath: getProgram("mpl_core.so"),
       },
       {
         label: "Lighthouse",
