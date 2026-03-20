@@ -104,7 +104,7 @@ test('it can execute as the execution delegate without the owner signing', async
   const noopProgramId = publicKey(
     'noopb9bkMVfRPU8AsbpTUg8AQkHtKwMYZiFUjNRtMmV'
   );
-  await (execute as any)(umi, {
+  await execute(umi, {
     asset: { publicKey: asset },
     collection: { publicKey: collection },
     authority: executiveAuthority,
@@ -159,7 +159,7 @@ test('it can transfer SOL via delegate execution', async (t) => {
   });
 
   // Fund the asset signer PDA so it has SOL to transfer.
-  const assetSignerPda = (findAssetSignerPda as any)(umi, { asset });
+  const assetSignerPda = findAssetSignerPda(umi, { asset });
   await umi.rpc.airdrop(publicKey(assetSignerPda), sol(1));
 
   // Execute a system transfer as the delegate.
@@ -175,7 +175,7 @@ test('it can transfer SOL via delegate execution', async (t) => {
   view.setUint32(0, 2, true); // Transfer = 2
   view.setBigUint64(4, BigInt(500_000_000), true); // 0.5 SOL
 
-  await (execute as any)(umi, {
+  await execute(umi, {
     asset: { publicKey: asset },
     collection: { publicKey: collection },
     authority: executiveAuthority,
@@ -224,7 +224,7 @@ test('the owner can still execute even with the AgentIdentity plugin', async (t)
   const noopProgramId = publicKey(
     'noopb9bkMVfRPU8AsbpTUg8AQkHtKwMYZiFUjNRtMmV'
   );
-  await (execute as any)(umi, {
+  await execute(umi, {
     asset: { publicKey: asset },
     collection: { publicKey: collection },
     instructions: [
@@ -259,7 +259,7 @@ test('it cannot execute without a valid execution delegate', async (t) => {
   const noopProgramId = publicKey(
     'noopb9bkMVfRPU8AsbpTUg8AQkHtKwMYZiFUjNRtMmV'
   );
-  const result = (execute as any)(umi, {
+  const result = execute(umi, {
     asset: { publicKey: asset },
     collection: { publicKey: collection },
     authority: attacker,

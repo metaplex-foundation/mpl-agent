@@ -30,7 +30,7 @@ test('it can register an asset', async (t) => {
   t.is(agentIdentity.bump, agentIdentityPda[1]);
 
   // Then the asset has an AppData plugin.
-  const assetData = await fetchAsset(umi as any, asset);
+  const assetData = await fetchAsset(umi, asset);
   // And the asset has an AgentIdentity plugin.
   t.is(assetData?.agentIdentities?.length, 1);
   t.like(assetData?.agentIdentities?.[0], {

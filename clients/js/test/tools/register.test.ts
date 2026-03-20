@@ -4,7 +4,6 @@ import {
   fetchExecutiveProfileV1,
   Key,
   registerExecutiveV1,
-  ExecutiveProfileV1,
   findExecutiveProfileV1Pda,
 } from '../../src/generated/tools';
 import { createUmi } from '../_setup';
@@ -22,7 +21,7 @@ test('it can register an executive profile', async (t) => {
       umi,
       findExecutiveProfileV1Pda(umi, { authority: umi.identity.publicKey })
     ),
-    <ExecutiveProfileV1>{
+    {
       key: Key.ExecutiveProfileV1,
       authority: umi.identity.publicKey,
     }
@@ -45,7 +44,7 @@ test('it can register an executive profile with a custom authority', async (t) =
       umi,
       findExecutiveProfileV1Pda(umi, { authority: authority.publicKey })
     ),
-    <ExecutiveProfileV1>{
+    {
       key: Key.ExecutiveProfileV1,
       authority: authority.publicKey,
     }

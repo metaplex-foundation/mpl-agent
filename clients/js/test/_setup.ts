@@ -22,7 +22,7 @@ export async function createCollectionAndAsset(
   const collection = generateSigner(umi);
   const asset = generateSigner(umi);
 
-  await (createCollection as any)(umi, {
+  await createCollection(umi, {
     collection,
     name: 'Test Collection',
     uri: 'https://example.com/collection.json',
@@ -34,7 +34,7 @@ export async function createCollectionAndAsset(
     ],
   }).sendAndConfirm(umi);
 
-  await (create as any)(umi, {
+  await create(umi, {
     asset,
     name: 'Test Asset',
     uri: 'https://example.com/asset.json',
