@@ -2543,6 +2543,7 @@ version = "0.2.0"
 dependencies = [
  "assert_matches",
  "borsh 0.10.3",
+ "mpl-core 0.11.1",
  "num-derive 0.4.1",
  "num-traits",
  "serde",
@@ -2559,7 +2560,7 @@ name = "mpl-agent-identity-program"
 version = "0.1.0"
 dependencies = [
  "bytemuck",
- "mpl-core 0.11.0",
+ "mpl-core 0.10.1-alpha.2",
  "mpl-utils",
  "num-derive 0.4.1",
  "num-traits",
@@ -2577,6 +2578,7 @@ version = "0.1.0"
 dependencies = [
  "assert_matches",
  "borsh 0.10.3",
+ "mpl-core 0.11.1",
  "num-derive 0.4.1",
  "num-traits",
  "serde",
@@ -2611,6 +2613,8 @@ version = "0.2.0"
 dependencies = [
  "assert_matches",
  "borsh 0.10.3",
+ "mpl-agent-identity",
+ "mpl-core 0.11.1",
  "num-derive 0.4.1",
  "num-traits",
  "serde",
@@ -2646,6 +2650,7 @@ version = "0.1.0"
 dependencies = [
  "assert_matches",
  "borsh 0.10.3",
+ "mpl-core 0.11.1",
  "num-derive 0.4.1",
  "num-traits",
  "serde",
@@ -2676,7 +2681,7 @@ dependencies = [
 
 [[package]]
 name = "mpl-core"
-version = "0.11.0"
+version = "0.10.1-alpha.2"
 dependencies = [
  "base64 0.22.1",
  "borsh 0.10.3",
