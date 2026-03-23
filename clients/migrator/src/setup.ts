@@ -35,13 +35,13 @@ export function setupSignerFromKeypair(umi: DasUmi, keypairPath: string): DasUmi
   return umi;
 }
 
-export function validateSource(source: string): "bubblegum" | "token22" {
-  const valid = ["bubblegum", "token22"];
+export function validateSource(source: string): "bubblegum" | "token22" | "core" {
+  const valid = ["bubblegum", "token22", "core"];
   if (!valid.includes(source)) {
     console.error(`Invalid source standard: "${source}". Must be one of: ${valid.join(", ")}`);
     process.exit(1);
   }
-  return source as "bubblegum" | "token22";
+  return source as "bubblegum" | "token22" | "core";
 }
 
 export function validatePublicKey(address: string, label: string): string {

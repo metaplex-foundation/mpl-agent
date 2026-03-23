@@ -1,6 +1,7 @@
 import { createDasUmi, validateSource, validatePublicKey } from "../setup";
 import { migrateBubblegum } from "../migrate/bubblegum";
 import { migrateToken22 } from "../migrate/token22";
+import { migrateCore } from "../migrate/core";
 import type { MigrateOptions } from "../types";
 
 export async function migrateCommand(opts: MigrateOptions): Promise<void> {
@@ -16,11 +17,15 @@ export async function migrateCommand(opts: MigrateOptions): Promise<void> {
   console.log(`\n=== MPL Agent Migrator ===\n`);
   console.log(`Source collection:  ${collection}`);
   console.log(`Source standard:    ${source}`);
-  console.log(`Destination:        ${opts.destination ?? "(new collection)"}`);
+  if (source !== "core") {
+    console.log(`Destination:        ${opts.destination ?? "(new collection)"}`);
+  }
   console.log(`Batch size:         ${batchSize}`);
   console.log(`TX delay:           ${delay}ms`);
   console.log(`Agent URI:          ${opts.agentUri ?? "(default)"}`);
-  console.log(`Burn originals:     ${opts.burn}`);
+  if (source !== "core") {
+    console.log(`Burn originals:     ${opts.burn}`);
+  }
   console.log(`Execute:            ${opts.execute}`);
   console.log(`RPC:                ${opts.rpc}`);
   console.log(`DAS:                ${dasUrl}\n`);
@@ -47,6 +52,16 @@ export async function migrateCommand(opts: MigrateOptions): Promise<void> {
         keypairPath: opts.keypair,
         agentUri: opts.agentUri,
         burn: opts.burn,
+        execute: opts.execute,
+        batchSize,
+        delay,
+      });
+      break;
+    case "core":
+      await migrateCore(umi, {
+        sourceCollection: collection,
+        keypairPath: opts.keypair,
+        agentUri: opts.agentUri,
         execute: opts.execute,
         batchSize,
         delay,

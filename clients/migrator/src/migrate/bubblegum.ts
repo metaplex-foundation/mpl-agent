@@ -141,7 +141,7 @@ export async function migrateBubblegum(
     const collectionUri = sourceCollectionData.content?.json_uri ?? "";
 
     const collectionSigner = generateSigner(umi);
-    await (createCollection as any)(umi, {
+    await createCollection(umi, {
       collection: collectionSigner,
       name: collectionName,
       uri: collectionUri,
@@ -204,7 +204,7 @@ export async function migrateBubblegum(
         assetAgentUri = await umi.uploader.uploadJson(registrationData);
       }
 
-      const createIx = (createV2 as any)(umi, {
+      const createIx = createV2(umi, {
         asset: assetSigner,
         name,
         uri,
@@ -254,8 +254,8 @@ export async function migrateBubblegum(
 
       await pMap(toBurn, async (manifestAsset) => {
         try {
-          const assetProof = await getAssetWithProof(umi as any, publicKey(manifestAsset.sourceAssetId));
-          await burn(umi as any, {
+          const assetProof = await getAssetWithProof(umi, publicKey(manifestAsset.sourceAssetId));
+          await burn(umi, {
             ...assetProof,
             leafOwner: umi.identity,
           }).sendAndConfirm(umi);

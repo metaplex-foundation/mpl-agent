@@ -19,7 +19,7 @@ program
   .command("fetch")
   .description("Fetch and display assets from a collection using DAS")
   .requiredOption("-c, --collection <address>", "Collection address")
-  .requiredOption("-s, --source <standard>", "Source standard: bubblegum | token22")
+  .requiredOption("-s, --source <standard>", "Source standard: bubblegum | token22 | core")
   .option("-l, --limit <number>", "Max assets to fetch", "100")
   .option("--rpc <url>", "Solana RPC URL", "https://api.mainnet-beta.solana.com")
   .option("--das <url>", "DAS API URL (defaults to RPC URL)")
@@ -27,9 +27,9 @@ program
 
 program
   .command("migrate")
-  .description("Migrate a collection to MPL Core with Agent Registry")
+  .description("Migrate a collection to MPL Core with Agent Registry (or register existing Core assets)")
   .requiredOption("-c, --collection <address>", "Source collection address")
-  .requiredOption("-s, --source <standard>", "Source standard: bubblegum | token22")
+  .requiredOption("-s, --source <standard>", "Source standard: bubblegum | token22 | core")
   .option("-d, --destination <address>", "Destination MPL Core collection (creates new if omitted)")
   .option("-k, --keypair <path>", "Payer keypair file", "~/.config/solana/id.json")
   .option("--batch-size <number>", "Assets per processing batch", "2")
@@ -51,7 +51,8 @@ program
 
 program
   .command("mint-test")
-  .description("Mint a test Bubblegum compressed NFT collection on devnet")
+  .description("Mint a test collection on devnet (Bubblegum or Core)")
+  .requiredOption("-s, --source <standard>", "Source standard: bubblegum | core")
   .option("-k, --keypair <path>", "Payer keypair file", "~/.config/solana/id.json")
   .option("--rpc <url>", "Solana RPC URL", "https://api.devnet.solana.com")
   .option("--count <number>", "Number of NFTs to mint", "10")

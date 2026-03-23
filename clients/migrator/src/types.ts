@@ -1,4 +1,4 @@
-export type SourceStandard = "bubblegum" | "token22";
+export type SourceStandard = "bubblegum" | "token22" | "core";
 
 export interface FetchOptions {
   collection: string;
@@ -29,6 +29,7 @@ export interface StatusOptions {
 }
 
 export interface MintTestOptions {
+  source: string;
   keypair: string;
   rpc: string;
   count: string;
