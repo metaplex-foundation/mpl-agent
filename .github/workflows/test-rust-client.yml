@@ -41,8 +41,8 @@ jobs:
       - name: Cache Rust client test dependencies
         uses: metaplex-foundation/actions/cache-crate@v1
         with:
-          folder: ./clients/rust
-          key: rust-client-test
+          folder: ./clients
+          key: rust-clients-test
 
       - name: Sanitize Ref
         id: sanitize

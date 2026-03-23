@@ -3,6 +3,15 @@ name: Publish Rust Client
 on:
   workflow_dispatch:
     inputs:
+      client:
+        description: Client to publish
+        required: true
+        type: choice
+        options:
+          - rust-identity
+          - rust-reputation
+          - rust-validation
+          - rust-tools
       level:
         description: Level
         required: true
@@ -71,7 +80,7 @@ jobs:
           cache: ${{ env.CACHE }}
 
       - name: Publish crate
-        working-directory: ./clients/rust
+        working-directory: ./clients/${{ inputs.client }}
         run: |
           if [ "${{ inputs.level }}" == "version" ]; then
             BUMP=${{ inputs.version }}

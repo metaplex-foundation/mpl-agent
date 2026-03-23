@@ -29,6 +29,9 @@ jobs:
   build_sdk:
     name: Build
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        client: [rust-identity, rust-reputation, rust-validation, rust-tools]
     steps:
       - name: Git checkout
         uses: actions/checkout@v4
@@ -54,24 +57,23 @@ jobs:
       - name: Cache Rust client test dependencies
         uses: metaplex-foundation/actions/cache-crate@v1
         with:
-          folder: ./clients/rust
-          key: rust-client-test
+          folder: ./clients/${{ matrix.client }}
+          key: ${{ matrix.client }}-test
 
       - name: Run cargo clippy
         uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: --all-targets --all-features --no-deps --manifest-path ./clients/rust/Cargo.toml
+          args: --all-targets --all-features --no-deps --manifest-path ./clients/${{ matrix.client }}/Cargo.toml
 
       - name: Build Rust client
         shell: bash
-        working-directory: clients/rust
+        working-directory: clients/${{ matrix.client }}
         run: cargo build --all-features --release
 
       - name: Upload Rust client builds
         uses: actions/upload-artifact@v4
         with:
-          name: rust-client-builds
-          # First wildcard ensures exported paths are consistently under the clients folder.
-          path: ./targe*/release/*mpl_agent_identity*
+          name: rust-client-builds-${{ matrix.client }}
+          path: ./targe*/release/*mpl_agent*
           if-no-files-found: error
