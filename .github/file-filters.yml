@@ -14,19 +14,29 @@ program_common: &program_common
 mpl_agent_identity_program: &mpl_agent_identity_program
   - *program_common
   - "programs/mpl-agent-identity/**"
+
+mpl_agent_reputation_program: &mpl_agent_reputation_program
+  - *program_common
   - "programs/mpl-agent-reputation/**"
+
+mpl_agent_tools_program: &mpl_agent_tools_program
+  - *program_common
+  - "programs/mpl-agent-tools/**"
+
+mpl_agent_validation_program: &mpl_agent_validation_program
+  - *program_common
+  - "programs/mpl-agent-validation/**"
 
 programs: &programs
   - *mpl_agent_identity_program
   - *mpl_agent_reputation_program
+  - *mpl_agent_tools_program
+  - *mpl_agent_validation_program
 
 # Clients.
 
 client_common: &client_common
   - *programs
-  - ".github/workflows/test-js.yml"
-  - ".github/workflows/test-rust-client.yml"
-  - ".github/workflows/build-rust-client.yml"
   - ".github/workflows/main.yml"
   - ".github/file-filters.yml"
   - ".github/.env"
@@ -35,15 +45,28 @@ client_common: &client_common
 
 js_client: &js_client
   - *client_common
+  - ".github/workflows/test-js-client.yml"
+  - ".github/workflows/publish-js-client.yml"
   - "clients/js/**"
 
 rust_client: &rust_client
   - *client_common
-  - "clients/rust/**"
+  - ".github/workflows/test-rust-client.yml"
+  - ".github/workflows/build-rust-client.yml"
+  - ".github/workflows/publish-rust-client.yml"
+  - "clients/rust-identity/**"
+  - "clients/rust-reputation/**"
+  - "clients/rust-tools/**"
+  - "clients/rust-validation/**"
+
+migrator_client: &migrator_client
+  - *client_common
+  - "clients/migrator/**"
 
 clients: &clients
   - *js_client
   - *rust_client
+  - *migrator_client
 
 # Any.
 
