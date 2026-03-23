@@ -2543,7 +2543,7 @@ version = "0.2.0"
 dependencies = [
  "assert_matches",
  "borsh 0.10.3",
- "mpl-core 0.11.1",
+ "mpl-core",
  "num-derive 0.4.1",
  "num-traits",
  "serde",
@@ -2560,7 +2560,7 @@ name = "mpl-agent-identity-program"
 version = "0.1.0"
 dependencies = [
  "bytemuck",
- "mpl-core 0.10.1-alpha.2",
+ "mpl-core",
  "mpl-utils",
  "num-derive 0.4.1",
  "num-traits",
@@ -2578,7 +2578,7 @@ version = "0.1.0"
 dependencies = [
  "assert_matches",
  "borsh 0.10.3",
- "mpl-core 0.11.1",
+ "mpl-core",
  "num-derive 0.4.1",
  "num-traits",
  "serde",
@@ -2595,7 +2595,7 @@ name = "mpl-agent-reputation-program"
 version = "0.1.0"
 dependencies = [
  "bytemuck",
- "mpl-core 0.11.1",
+ "mpl-core",
  "mpl-utils",
  "num-derive 0.4.1",
  "num-traits",
@@ -2614,7 +2614,7 @@ dependencies = [
  "assert_matches",
  "borsh 0.10.3",
  "mpl-agent-identity",
- "mpl-core 0.11.1",
+ "mpl-core",
  "num-derive 0.4.1",
  "num-traits",
  "serde",
@@ -2632,7 +2632,7 @@ version = "0.1.0"
 dependencies = [
  "bytemuck",
  "mpl-agent-identity",
- "mpl-core 0.11.1",
+ "mpl-core",
  "mpl-utils",
  "num-derive 0.4.1",
  "num-traits",
@@ -2650,7 +2650,7 @@ version = "0.1.0"
 dependencies = [
  "assert_matches",
  "borsh 0.10.3",
- "mpl-core 0.11.1",
+ "mpl-core",
  "num-derive 0.4.1",
  "num-traits",
  "serde",
@@ -2667,7 +2667,7 @@ name = "mpl-agent-validation-program"
 version = "0.1.0"
 dependencies = [
  "bytemuck",
- "mpl-core 0.11.1",
+ "mpl-core",
  "mpl-utils",
  "num-derive 0.4.1",
  "num-traits",
@@ -2677,22 +2677,6 @@ dependencies = [
  "shank",
  "solana-program",
  "thiserror 2.0.16",
-]
-
-[[package]]
-name = "mpl-core"
-version = "0.10.1-alpha.2"
-dependencies = [
- "base64 0.22.1",
- "borsh 0.10.3",
- "kaigan 0.3.0",
- "modular-bitfield",
- "num-derive 0.3.3",
- "num-traits",
- "rmp-serde",
- "serde_json",
- "solana-program",
- "thiserror 1.0.69",
 ]
 
 [[package]]
