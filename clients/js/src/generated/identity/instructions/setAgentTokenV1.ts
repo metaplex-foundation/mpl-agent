@@ -21,16 +21,18 @@ import {
   struct,
   u8,
 } from '@metaplex-foundation/umi/serializers';
+import { findAgentIdentityV2Pda } from '../accounts';
 import {
   ResolvedAccount,
   ResolvedAccountsWithIndices,
+  expectPublicKey,
   getAccountMetasAndSigners,
 } from '../shared';
 
 // Accounts.
 export type SetAgentTokenV1InstructionAccounts = {
   /** The agent identity PDA. Must be of type AgentIdentityV1 or AgentIdentityV2. */
-  agentIdentity: PublicKey | Pda;
+  agentIdentity?: PublicKey | Pda;
   /** The address of the Core asset */
   asset: PublicKey | Pda;
   /** The address of the agent token */
@@ -79,7 +81,7 @@ export const setAgentTokenV1InstructionDiscriminator = 1;
 
 // Instruction.
 export function setAgentTokenV1(
-  context: Pick<Context, 'payer' | 'programs'>,
+  context: Pick<Context, 'eddsa' | 'payer' | 'programs'>,
   input: SetAgentTokenV1InstructionAccounts
 ): TransactionBuilder {
   // Program ID.
@@ -123,6 +125,11 @@ export function setAgentTokenV1(
   } satisfies ResolvedAccountsWithIndices;
 
   // Default values.
+  if (!resolvedAccounts.agentIdentity.value) {
+    resolvedAccounts.agentIdentity.value = findAgentIdentityV2Pda(context, {
+      asset: expectPublicKey(resolvedAccounts.asset.value),
+    });
+  }
   if (!resolvedAccounts.payer.value) {
     resolvedAccounts.payer.value = context.payer;
   }

@@ -45,7 +45,6 @@ test('it can set an agent token', async (t) => {
     asset: { publicKey: asset },
     collection: { publicKey: collection },
     instructions: setAgentTokenV1(umi, {
-      agentIdentity: agentIdentityPda,
       asset,
       agentToken: agentTokenSigner.publicKey,
       authority: createNoopSigner(publicKey(assetSignerPda)),
@@ -72,11 +71,9 @@ test('it cannot set agent token without asset signer authority', async (t) => {
   await createMint(umi, {
     mint: agentTokenSigner,
   }).sendAndConfirm(umi);
-  const agentIdentityPda = findAgentIdentityV2Pda(umi, { asset });
 
   // Call SetAgentTokenV1 directly (not via Execute) - payer is authority, not asset signer.
   const result = setAgentTokenV1(umi, {
-    agentIdentity: agentIdentityPda,
     asset,
     agentToken: agentTokenSigner.publicKey,
   }).sendAndConfirm(umi);
@@ -104,7 +101,6 @@ test('it cannot set agent token twice', async (t) => {
     mint: agentTokenSigner2,
   }).sendAndConfirm(umi);
 
-  const agentIdentityPda = findAgentIdentityV2Pda(umi, { asset });
   const assetSignerPda = findAssetSignerPda(umi, { asset });
 
   // First set succeeds.
@@ -112,7 +108,6 @@ test('it cannot set agent token twice', async (t) => {
     asset: { publicKey: asset },
     collection: { publicKey: collection },
     instructions: setAgentTokenV1(umi, {
-      agentIdentity: agentIdentityPda,
       asset,
       agentToken: agentTokenSigner1.publicKey,
       authority: createNoopSigner(publicKey(assetSignerPda)),
@@ -124,7 +119,6 @@ test('it cannot set agent token twice', async (t) => {
     asset: { publicKey: asset },
     collection: { publicKey: collection },
     instructions: setAgentTokenV1(umi, {
-      agentIdentity: agentIdentityPda,
       asset,
       agentToken: agentTokenSigner2.publicKey,
       authority: createNoopSigner(publicKey(assetSignerPda)),
@@ -147,14 +141,12 @@ test('it cannot set agent token with invalid token account', async (t) => {
   // Use a random account (not owned by SPL Token program) as the token.
   const fakeToken = generateSigner(umi);
 
-  const agentIdentityPda = findAgentIdentityV2Pda(umi, { asset });
   const assetSignerPda = findAssetSignerPda(umi, { asset });
 
   const result = execute(umi, {
     asset: { publicKey: asset },
     collection: { publicKey: collection },
     instructions: setAgentTokenV1(umi, {
-      agentIdentity: agentIdentityPda,
       asset,
       agentToken: fakeToken.publicKey,
       authority: createNoopSigner(publicKey(assetSignerPda)),
@@ -177,14 +169,12 @@ test('it cannot set agent token on unregistered identity', async (t) => {
     programId: SPL_TOKEN_PROGRAM_ID,
   }).sendAndConfirm(umi);
   const agentToken = agentTokenSigner.publicKey;
-  const agentIdentityPda = findAgentIdentityV2Pda(umi, { asset });
   const assetSignerPda = findAssetSignerPda(umi, { asset });
 
   const result = execute(umi, {
     asset: { publicKey: asset },
     collection: { publicKey: collection },
     instructions: setAgentTokenV1(umi, {
-      agentIdentity: agentIdentityPda,
       asset,
       agentToken,
       authority: createNoopSigner(publicKey(assetSignerPda)),

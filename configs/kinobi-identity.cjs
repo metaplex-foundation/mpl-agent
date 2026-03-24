@@ -43,6 +43,11 @@ kinobi.update(
         agentIdentity: {defaultValue: k.pdaValueNode("agentIdentityV2")},
       },
     },
+    setAgentTokenV1: {
+      accounts: {
+        agentIdentity: {defaultValue: k.pdaValueNode("agentIdentityV2")},
+      },
+    },
   })
 );
 
