@@ -7,3 +7,4 @@
  */
 
 export * from './registerIdentityV1';
+export * from './setAgentTokenV1';

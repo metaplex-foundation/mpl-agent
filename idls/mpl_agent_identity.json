@@ -44,7 +44,7 @@
           "isSigner": true,
           "isOptional": true,
           "docs": [
-            "Authority for the collection. If not provided, the payer will be used."
+            "Authority for the asset. If not provided, the payer will be used."
           ]
         },
         {
@@ -75,6 +75,72 @@
       "discriminant": {
         "type": "u8",
         "value": 0
+      }
+    },
+    {
+      "name": "SetAgentTokenV1",
+      "accounts": [
+        {
+          "name": "agentIdentity",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The agent identity PDA. Must be of type AgentIdentityV1 or AgentIdentityV2."
+          ]
+        },
+        {
+          "name": "asset",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The address of the Core asset"
+          ]
+        },
+        {
+          "name": "agentToken",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The address of the agent token"
+          ]
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "The payer for additional rent"
+          ]
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true,
+          "isOptional": true,
+          "docs": [
+            "Authority must be the asset signer. If not provided, the payer will be used."
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The system program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "setAgentTokenV1Args",
+          "type": {
+            "defined": "SetAgentTokenV1Args"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 1
       }
     }
   ],
@@ -115,6 +181,97 @@
           }
         ]
       }
+    },
+    {
+      "name": "AgentIdentityV2",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "key",
+            "type": {
+              "defined": "Key"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                6
+              ]
+            },
+            "attrs": [
+              "padding"
+            ]
+          },
+          {
+            "name": "asset",
+            "type": "publicKey"
+          },
+          {
+            "name": "agentToken",
+            "type": {
+              "fixedSizeOption": {
+                "inner": "publicKey",
+                "sentinel": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            }
+          },
+          {
+            "name": "reserved",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            },
+            "attrs": [
+              "padding"
+            ]
+          }
+        ]
+      }
     }
   ],
   "types": [
@@ -146,6 +303,26 @@
       }
     },
     {
+      "name": "SetAgentTokenV1Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                7
+              ]
+            },
+            "attrs": [
+              "padding"
+            ]
+          }
+        ]
+      }
+    },
+    {
       "name": "Key",
       "type": {
         "kind": "enum",
@@ -155,6 +332,9 @@
           },
           {
             "name": "AgentIdentityV1"
+          },
+          {
+            "name": "AgentIdentityV2"
           }
         ]
       }
@@ -185,6 +365,31 @@
       "code": 4,
       "name": "InvalidCoreAsset",
       "msg": "Invalid Core Asset"
+    },
+    {
+      "code": 5,
+      "name": "InvalidAgentToken",
+      "msg": "Invalid Agent Token"
+    },
+    {
+      "code": 6,
+      "name": "OnlyAssetSignerCanSetAgentToken",
+      "msg": "Only the Asset Signer can set the agent token"
+    },
+    {
+      "code": 7,
+      "name": "AgentTokenAlreadySet",
+      "msg": "Agent Token already set"
+    },
+    {
+      "code": 8,
+      "name": "InvalidAgentIdentity",
+      "msg": "Invalid Agent Identity"
+    },
+    {
+      "code": 9,
+      "name": "AgentIdentityAlreadyRegistered",
+      "msg": "Agent Identity already registered"
     }
   ],
   "metadata": {

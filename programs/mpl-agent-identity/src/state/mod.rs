@@ -1,6 +1,8 @@
-mod agent_identity;
+mod agent_identity_v1;
+mod agent_identity_v2;
 
-pub use agent_identity::*;
+pub use agent_identity_v1::*;
+pub use agent_identity_v2::*;
 
 use shank::ShankType;
 
@@ -11,6 +13,7 @@ use shank::ShankType;
 pub enum Key {
     Uninitialized,
     AgentIdentityV1,
+    AgentIdentityV2,
 }
 
 impl From<u8> for Key {
@@ -18,6 +21,7 @@ impl From<u8> for Key {
         match value {
             0 => Key::Uninitialized,
             1 => Key::AgentIdentityV1,
+            2 => Key::AgentIdentityV2,
             _ => Key::Uninitialized,
         }
     }

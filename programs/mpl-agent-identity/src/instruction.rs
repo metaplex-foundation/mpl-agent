@@ -1,6 +1,6 @@
 use shank::{ShankContext, ShankInstruction};
 
-use crate::processor::RegisterIdentityV1Args;
+use crate::processor::{RegisterIdentityV1Args, SetAgentTokenV1Args};
 
 /// Instruction discriminants for routing.
 /// The first byte of instruction data determines which instruction to execute.
@@ -8,6 +8,7 @@ use crate::processor::RegisterIdentityV1Args;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum MplAgentIdentityInstructionDiscriminant {
     RegisterIdentityV1 = 0,
+    SetAgentTokenV1 = 1,
 }
 
 impl TryFrom<u8> for MplAgentIdentityInstructionDiscriminant {
@@ -16,6 +17,7 @@ impl TryFrom<u8> for MplAgentIdentityInstructionDiscriminant {
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
             0 => Ok(MplAgentIdentityInstructionDiscriminant::RegisterIdentityV1),
+            1 => Ok(MplAgentIdentityInstructionDiscriminant::SetAgentTokenV1),
             _ => Err(()),
         }
     }
@@ -32,8 +34,17 @@ pub enum MplAgentIdentityInstruction {
     #[account(1, writable, name="asset", desc = "The address of the Core asset")]
     #[account(2, writable, optional, name="collection", desc = "The address of the collection")]
     #[account(3, writable, signer, name="payer", desc = "The payer for additional rent")]
-    #[account(4, optional, signer, name="authority", desc = "Authority for the collection. If not provided, the payer will be used.")]
+    #[account(4, optional, signer, name="authority", desc = "Authority for the asset. If not provided, the payer will be used.")]
     #[account(5, name="mpl_core_program", desc = "The MPL Core program")]
     #[account(6, name="system_program", desc = "The system program")]
     RegisterIdentityV1(RegisterIdentityV1Args),
+
+    /// Set an agent token if it is not already set. If the account also happens to be an AgentIdentityV1, it will be upgraded to an AgentIdentityV2.
+    #[account(0, writable, name="agent_identity", desc = "The agent identity PDA. Must be of type AgentIdentityV1 or AgentIdentityV2.")]
+    #[account(1, name="asset", desc = "The address of the Core asset")]
+    #[account(2, name="agent_token", desc = "The address of the agent token")]
+    #[account(3, writable, signer, name="payer", desc = "The payer for additional rent")]
+    #[account(4, optional, signer, name="authority", desc = "Authority must be the asset signer. If not provided, the payer will be used.")]
+    #[account(5, name="system_program", desc = "The system program")]
+    SetAgentTokenV1(SetAgentTokenV1Args),
 }

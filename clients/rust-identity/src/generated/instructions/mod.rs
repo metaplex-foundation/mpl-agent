@@ -6,5 +6,7 @@
 //!
 
 pub(crate) mod r#register_identity_v1;
+pub(crate) mod r#set_agent_token_v1;
 
 pub use self::r#register_identity_v1::*;
+pub use self::r#set_agent_token_v1::*;

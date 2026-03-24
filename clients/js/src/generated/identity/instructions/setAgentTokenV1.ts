@@ -18,83 +18,69 @@ import {
   Serializer,
   array,
   mapSerializer,
-  string,
   struct,
   u8,
 } from '@metaplex-foundation/umi/serializers';
-import { findAgentIdentityV2Pda } from '../accounts';
 import {
   ResolvedAccount,
   ResolvedAccountsWithIndices,
-  expectPublicKey,
   getAccountMetasAndSigners,
 } from '../shared';
 
 // Accounts.
-export type RegisterIdentityV1InstructionAccounts = {
-  /** The agent identity PDA */
-  agentIdentity?: PublicKey | Pda;
+export type SetAgentTokenV1InstructionAccounts = {
+  /** The agent identity PDA. Must be of type AgentIdentityV1 or AgentIdentityV2. */
+  agentIdentity: PublicKey | Pda;
   /** The address of the Core asset */
   asset: PublicKey | Pda;
-  /** The address of the collection */
-  collection?: PublicKey | Pda;
+  /** The address of the agent token */
+  agentToken: PublicKey | Pda;
   /** The payer for additional rent */
   payer?: Signer;
-  /** Authority for the asset. If not provided, the payer will be used. */
+  /** Authority must be the asset signer. If not provided, the payer will be used. */
   authority?: Signer;
-  /** The MPL Core program */
-  mplCoreProgram?: PublicKey | Pda;
   /** The system program */
   systemProgram?: PublicKey | Pda;
 };
 
 // Data.
-export type RegisterIdentityV1InstructionData = {
+export type SetAgentTokenV1InstructionData = {
   discriminator: number;
   padding: Array<number>;
-  agentRegistrationUri: string;
 };
 
-export type RegisterIdentityV1InstructionDataArgs = {
-  agentRegistrationUri: string;
-};
+export type SetAgentTokenV1InstructionDataArgs = {};
 
-export function getRegisterIdentityV1InstructionDataSerializer(): Serializer<
-  RegisterIdentityV1InstructionDataArgs,
-  RegisterIdentityV1InstructionData
+export function getSetAgentTokenV1InstructionDataSerializer(): Serializer<
+  SetAgentTokenV1InstructionDataArgs,
+  SetAgentTokenV1InstructionData
 > {
   return mapSerializer<
-    RegisterIdentityV1InstructionDataArgs,
+    SetAgentTokenV1InstructionDataArgs,
     any,
-    RegisterIdentityV1InstructionData
+    SetAgentTokenV1InstructionData
   >(
-    struct<RegisterIdentityV1InstructionData>(
+    struct<SetAgentTokenV1InstructionData>(
       [
         ['discriminator', u8()],
         ['padding', array(u8(), { size: 7 })],
-        ['agentRegistrationUri', string()],
       ],
-      { description: 'RegisterIdentityV1InstructionData' }
+      { description: 'SetAgentTokenV1InstructionData' }
     ),
-    (value) => ({ ...value, discriminator: 0, padding: [0, 0, 0, 0, 0, 0, 0] })
+    (value) => ({ ...value, discriminator: 1, padding: [0, 0, 0, 0, 0, 0, 0] })
   ) as Serializer<
-    RegisterIdentityV1InstructionDataArgs,
-    RegisterIdentityV1InstructionData
+    SetAgentTokenV1InstructionDataArgs,
+    SetAgentTokenV1InstructionData
   >;
 }
 
-// Args.
-export type RegisterIdentityV1InstructionArgs =
-  RegisterIdentityV1InstructionDataArgs;
-
 // Instruction discriminator.
-export const registerIdentityV1InstructionDiscriminator = 0;
+export const setAgentTokenV1InstructionDiscriminator = 1;
 
 // Instruction.
-export function registerIdentityV1(
-  context: Pick<Context, 'eddsa' | 'payer' | 'programs'>,
-  input: RegisterIdentityV1InstructionAccounts &
-    RegisterIdentityV1InstructionArgs
+export function setAgentTokenV1(
+  context: Pick<Context, 'payer' | 'programs'>,
+  input: SetAgentTokenV1InstructionAccounts
 ): TransactionBuilder {
   // Program ID.
   const programId = context.programs.getPublicKey(
@@ -111,13 +97,13 @@ export function registerIdentityV1(
     },
     asset: {
       index: 1,
-      isWritable: true as boolean,
+      isWritable: false as boolean,
       value: input.asset ?? null,
     },
-    collection: {
+    agentToken: {
       index: 2,
-      isWritable: true as boolean,
-      value: input.collection ?? null,
+      isWritable: false as boolean,
+      value: input.agentToken ?? null,
     },
     payer: {
       index: 3,
@@ -129,36 +115,16 @@ export function registerIdentityV1(
       isWritable: false as boolean,
       value: input.authority ?? null,
     },
-    mplCoreProgram: {
-      index: 5,
-      isWritable: false as boolean,
-      value: input.mplCoreProgram ?? null,
-    },
     systemProgram: {
-      index: 6,
+      index: 5,
       isWritable: false as boolean,
       value: input.systemProgram ?? null,
     },
   } satisfies ResolvedAccountsWithIndices;
 
-  // Arguments.
-  const resolvedArgs: RegisterIdentityV1InstructionArgs = { ...input };
-
   // Default values.
-  if (!resolvedAccounts.agentIdentity.value) {
-    resolvedAccounts.agentIdentity.value = findAgentIdentityV2Pda(context, {
-      asset: expectPublicKey(resolvedAccounts.asset.value),
-    });
-  }
   if (!resolvedAccounts.payer.value) {
     resolvedAccounts.payer.value = context.payer;
-  }
-  if (!resolvedAccounts.mplCoreProgram.value) {
-    resolvedAccounts.mplCoreProgram.value = context.programs.getPublicKey(
-      'mplCore',
-      'CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d'
-    );
-    resolvedAccounts.mplCoreProgram.isWritable = false;
   }
   if (!resolvedAccounts.systemProgram.value) {
     resolvedAccounts.systemProgram.value = context.programs.getPublicKey(
@@ -181,9 +147,7 @@ export function registerIdentityV1(
   );
 
   // Data.
-  const data = getRegisterIdentityV1InstructionDataSerializer().serialize(
-    resolvedArgs as RegisterIdentityV1InstructionDataArgs
-  );
+  const data = getSetAgentTokenV1InstructionDataSerializer().serialize({});
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

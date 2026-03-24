@@ -26,6 +26,21 @@ pub enum MplAgentIdentityError {
     /// 4 (0x4) - Invalid Core Asset
     #[error("Invalid Core Asset")]
     InvalidCoreAsset,
+    /// 5 (0x5) - Invalid Agent Token
+    #[error("Invalid Agent Token")]
+    InvalidAgentToken,
+    /// 6 (0x6) - Only the Asset Signer can set the agent token
+    #[error("Only the Asset Signer can set the agent token")]
+    OnlyAssetSignerCanSetAgentToken,
+    /// 7 (0x7) - Agent Token already set
+    #[error("Agent Token already set")]
+    AgentTokenAlreadySet,
+    /// 8 (0x8) - Invalid Agent Identity
+    #[error("Invalid Agent Identity")]
+    InvalidAgentIdentity,
+    /// 9 (0x9) - Agent Identity already registered
+    #[error("Agent Identity already registered")]
+    AgentIdentityAlreadyRegistered,
 }
 
 impl From<MplAgentIdentityError> for ProgramError {
@@ -43,6 +58,11 @@ impl TryFrom<u32> for MplAgentIdentityError {
             2 => Ok(MplAgentIdentityError::InvalidAccountData),
             3 => Ok(MplAgentIdentityError::InvalidMplCoreProgram),
             4 => Ok(MplAgentIdentityError::InvalidCoreAsset),
+            5 => Ok(MplAgentIdentityError::InvalidAgentToken),
+            6 => Ok(MplAgentIdentityError::OnlyAssetSignerCanSetAgentToken),
+            7 => Ok(MplAgentIdentityError::AgentTokenAlreadySet),
+            8 => Ok(MplAgentIdentityError::InvalidAgentIdentity),
+            9 => Ok(MplAgentIdentityError::AgentIdentityAlreadyRegistered),
             _ => Err(ProgramError::InvalidArgument),
         }
     }
@@ -56,6 +76,15 @@ impl ToStr for MplAgentIdentityError {
             MplAgentIdentityError::InvalidAccountData => "Invalid account data",
             MplAgentIdentityError::InvalidMplCoreProgram => "Invalid MPL Core Program",
             MplAgentIdentityError::InvalidCoreAsset => "Invalid Core Asset",
+            MplAgentIdentityError::InvalidAgentToken => "Invalid Agent Token",
+            MplAgentIdentityError::OnlyAssetSignerCanSetAgentToken => {
+                "Only the Asset Signer can set the agent token"
+            }
+            MplAgentIdentityError::AgentTokenAlreadySet => "Agent Token already set",
+            MplAgentIdentityError::InvalidAgentIdentity => "Invalid Agent Identity",
+            MplAgentIdentityError::AgentIdentityAlreadyRegistered => {
+                "Agent Identity already registered"
+            }
         }
     }
 }

@@ -1,20 +1,31 @@
 #![cfg(feature = "test-sbf")]
 
-use mpl_agent_identity::{accounts::AgentIdentityV1, instructions::RegisterIdentityV1Builder};
+use mpl_agent_identity::{accounts::AgentIdentityV2, instructions::RegisterIdentityV1Builder};
 use mpl_agent_tools::{
     accounts::{ExecutionDelegateRecordV1, ExecutiveProfileV1},
+    errors::MplAgentToolsError,
     instructions::{DelegateExecutionV1Builder, RegisterExecutiveV1Builder},
     types::Key,
 };
 use mpl_core::instructions::{CreateCollectionV1Builder, CreateV1Builder, ExecuteV1Builder};
-use solana_program_test::{tokio, ProgramTest};
+use solana_program::instruction::InstructionError;
+use solana_program_test::{tokio, BanksClientError, ProgramTest};
 use solana_sdk::{
     instruction::AccountMeta,
     pubkey::Pubkey,
     signature::{Keypair, Signer},
     system_instruction, system_program,
-    transaction::Transaction,
+    transaction::{Transaction, TransactionError},
 };
+
+fn assert_custom_error(error: BanksClientError, expected_code: u32) {
+    match error.unwrap() {
+        TransactionError::InstructionError(_, InstructionError::Custom(code)) => {
+            assert_eq!(code, expected_code);
+        }
+        err => panic!("Expected InstructionError::Custom({expected_code}), got: {err:?}"),
+    }
+}
 
 const MPL_CORE_ID: Pubkey = solana_program::pubkey!("CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d");
 const SPL_NOOP_ID: Pubkey = solana_program::pubkey!("noopb9bkMVfRPU8AsbpTUg8AQkHtKwMYZiFUjNRtMmV");
@@ -74,7 +85,7 @@ async fn register_identity(
     asset: Pubkey,
     collection: Pubkey,
 ) -> Pubkey {
-    let (agent_identity_pda, _) = AgentIdentityV1::find_pda(&asset);
+    let (agent_identity_pda, _) = AgentIdentityV2::find_pda(&asset);
 
     let ix = RegisterIdentityV1Builder::new()
         .agent_identity(agent_identity_pda)
@@ -195,7 +206,7 @@ async fn execute_as_delegate_without_owner() {
     let executive_profile_pda = register_executive(&mut context, Some(&executive_authority)).await;
 
     // Owner delegates execution to the executive for the agent asset.
-    let agent_identity_pda = AgentIdentityV1::find_pda(&asset).0;
+    let agent_identity_pda = AgentIdentityV2::find_pda(&asset).0;
     let (delegate_record_pda, _) =
         ExecutionDelegateRecordV1::find_pda(&executive_profile_pda, &asset);
 
@@ -256,7 +267,7 @@ async fn transfer_sol_via_delegate_execution() {
     let executive_authority = Keypair::new();
     let executive_profile_pda = register_executive(&mut context, Some(&executive_authority)).await;
 
-    let agent_identity_pda = AgentIdentityV1::find_pda(&asset).0;
+    let agent_identity_pda = AgentIdentityV2::find_pda(&asset).0;
     let (delegate_record_pda, _) =
         ExecutionDelegateRecordV1::find_pda(&executive_profile_pda, &asset);
 
@@ -437,7 +448,7 @@ async fn cannot_delegate_if_not_owner() {
 
     // A non-owner tries to delegate execution.
     let non_owner = Keypair::new();
-    let agent_identity_pda = AgentIdentityV1::find_pda(&asset).0;
+    let agent_identity_pda = AgentIdentityV2::find_pda(&asset).0;
     let (delegate_record_pda, _) =
         ExecutionDelegateRecordV1::find_pda(&executive_profile_pda, &asset);
 
@@ -456,10 +467,16 @@ async fn cannot_delegate_if_not_owner() {
         &[&context.payer, &non_owner],
         context.last_blockhash,
     );
-    let result = context.banks_client.process_transaction(tx).await;
+    let err = context
+        .banks_client
+        .process_transaction(tx)
+        .await
+        .unwrap_err();
 
-    // Should fail with AssetOwnerMustBeTheOneToDelegateExecution error.
-    assert!(result.is_err(), "Expected delegation to fail for non-owner");
+    assert_custom_error(
+        err,
+        MplAgentToolsError::AssetOwnerMustBeTheOneToDelegateExecution as u32,
+    );
 }
 
 /// Equivalent of JS test: tools/delegateExecution.test.ts -
@@ -475,7 +492,7 @@ async fn cannot_delegate_without_identity() {
     let executive_profile_pda = register_executive(&mut context, None).await;
 
     // Use the agent identity PDA (it won't be initialized).
-    let agent_identity_pda = AgentIdentityV1::find_pda(&asset).0;
+    let agent_identity_pda = AgentIdentityV2::find_pda(&asset).0;
     let (delegate_record_pda, _) =
         ExecutionDelegateRecordV1::find_pda(&executive_profile_pda, &asset);
 
@@ -493,13 +510,13 @@ async fn cannot_delegate_without_identity() {
         &[&context.payer],
         context.last_blockhash,
     );
-    let result = context.banks_client.process_transaction(tx).await;
+    let err = context
+        .banks_client
+        .process_transaction(tx)
+        .await
+        .unwrap_err();
 
-    // Should fail with AgentIdentityNotRegistered error.
-    assert!(
-        result.is_err(),
-        "Expected delegation to fail without registered identity"
-    );
+    assert_custom_error(err, MplAgentToolsError::AgentIdentityNotRegistered as u32);
 }
 
 /// Equivalent of JS test: tools/delegateExecution.test.ts -
@@ -513,7 +530,7 @@ async fn cannot_delegate_twice() {
 
     let executive_profile_pda = register_executive(&mut context, None).await;
 
-    let agent_identity_pda = AgentIdentityV1::find_pda(&asset).0;
+    let agent_identity_pda = AgentIdentityV2::find_pda(&asset).0;
     let (delegate_record_pda, _) =
         ExecutionDelegateRecordV1::find_pda(&executive_profile_pda, &asset);
 
@@ -552,10 +569,16 @@ async fn cannot_delegate_twice() {
         &[&context.payer],
         recent_blockhash,
     );
-    let result = context.banks_client.process_transaction(tx).await;
+    let err = context
+        .banks_client
+        .process_transaction(tx)
+        .await
+        .unwrap_err();
 
-    // Should fail with ExecutionDelegateRecordMustBeUninitialized error.
-    assert!(result.is_err(), "Expected second delegation to fail");
+    assert_custom_error(
+        err,
+        MplAgentToolsError::ExecutionDelegateRecordMustBeUninitialized as u32,
+    );
 }
 
 /// Equivalent of JS test: tools/delegateExecution.test.ts -
@@ -571,7 +594,7 @@ async fn cannot_delegate_with_uninitialized_profile() {
     let fake_authority = Keypair::new();
     let (uninitialized_profile, _) = ExecutiveProfileV1::find_pda(&fake_authority.pubkey());
 
-    let agent_identity_pda = AgentIdentityV1::find_pda(&asset).0;
+    let agent_identity_pda = AgentIdentityV2::find_pda(&asset).0;
     let (delegate_record_pda, _) =
         ExecutionDelegateRecordV1::find_pda(&uninitialized_profile, &asset);
 
@@ -589,11 +612,14 @@ async fn cannot_delegate_with_uninitialized_profile() {
         &[&context.payer],
         context.last_blockhash,
     );
-    let result = context.banks_client.process_transaction(tx).await;
+    let err = context
+        .banks_client
+        .process_transaction(tx)
+        .await
+        .unwrap_err();
 
-    // Should fail with ExecutiveProfileMustBeUninitialized error.
-    assert!(
-        result.is_err(),
-        "Expected delegation to fail with uninitialized profile"
+    assert_custom_error(
+        err,
+        MplAgentToolsError::ExecutiveProfileMustBeUninitialized as u32,
     );
 }

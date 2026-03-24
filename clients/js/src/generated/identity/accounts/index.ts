@@ -7,3 +7,4 @@
  */
 
 export * from './agentIdentityV1';
+export * from './agentIdentityV2';

@@ -1,31 +1,73 @@
 use bytemuck::{Pod, Zeroable};
-use mpl_core::accounts::BaseAssetV1;
 use mpl_core::instructions::{
     AddExternalPluginAdapterV1Cpi, AddExternalPluginAdapterV1InstructionArgs,
 };
 use mpl_core::types::{
-    AgentIdentityInitInfo, AppDataInitInfo, ExternalPluginAdapterInitInfo,
-    ExternalPluginAdapterKey, ExternalPluginAdapterSchema, HookableLifecycleEvent,
-    Key as MplCoreKey, PluginAuthority,
+    AgentIdentityInitInfo, ExternalPluginAdapterInitInfo, HookableLifecycleEvent, Key as MplCoreKey,
 };
-use mpl_core::{fetch_wrapped_external_plugin_adapter, ExternalCheckResultBits};
+use mpl_core::ExternalCheckResultBits;
+use mpl_utils::assert_signer;
 use shank::ShankType;
+use solana_program::program_error::ProgramError;
 use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, system_program};
 
 use crate::{
     error::MplAgentIdentityError, instruction::accounts::RegisterIdentityV1Accounts,
-    state::AgentIdentityV1,
+    state::AgentIdentityV2,
 };
 
-/// Arguments for the RegisterIdentityV1 instruction.
-///
-/// # Layout
-/// - discriminator: 1 byte (instruction discriminant, excluded from IDL)
-/// - _padding: 1 byte (alignment)
-/// - arg1: 2 bytes
-/// - arg2: 4 bytes
-///
-/// Total: 8 bytes (8-byte aligned)
+impl<'a> RegisterIdentityV1Accounts<'a> {
+    pub fn validate(&self) -> Result<u8, ProgramError> {
+        let Self {
+            agent_identity,
+            asset,
+            collection: _,
+            payer,
+            authority,
+            mpl_core_program,
+            system_program,
+        } = self;
+
+        // Agent Identity
+        let agent_identity_bump =
+            AgentIdentityV2::check_pda_derivation(agent_identity, self.asset.key)?;
+
+        if agent_identity.data_len() != 0 || *agent_identity.owner != system_program::id() {
+            return Err(MplAgentIdentityError::AgentIdentityAlreadyRegistered.into());
+        }
+
+        // Asset
+        // Assert that the asset exists and is a Core asset.
+        if asset.owner != &mpl_core::ID || asset.try_borrow_data()?[0] != MplCoreKey::AssetV1 as u8
+        {
+            return Err(MplAgentIdentityError::InvalidCoreAsset.into());
+        }
+
+        // Collection
+        // SAFE: Checked by the Core program.
+
+        // Payer
+        assert_signer(payer)?;
+
+        // Authority
+        if authority.is_some() {
+            assert_signer(authority.unwrap())?;
+        }
+
+        // MPL Core Program
+        if *mpl_core_program.key != mpl_core::ID {
+            return Err(MplAgentIdentityError::InvalidMplCoreProgram.into());
+        }
+
+        // System Program
+        if *system_program.key != system_program::id() {
+            return Err(MplAgentIdentityError::InvalidSystemProgram.into());
+        }
+
+        Ok(agent_identity_bump)
+    }
+}
+
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Pod, Zeroable, ShankType)]
 pub struct RegisterIdentityV1Args {
@@ -44,17 +86,6 @@ pub struct RegisterIdentityV1Args {
 // Compile-time assertion to ensure struct is properly sized.
 const _: () = assert!(core::mem::size_of::<RegisterIdentityV1Args>() == 8);
 
-/// RegisterIdentityV1 a new Agent Identity.
-///
-/// # Accounts
-/// 0. `[writable, signer]` agent_identity - The address of the new agent identity
-/// 1. `[]` authority - The authority of the agent identity
-/// 2. `[writable, signer]` payer - The account paying for the storage fees
-/// 3. `[]` system_program - The system program
-///
-/// # Arguments
-/// * `accounts` - The accounts required for the instruction
-/// * `args` - The instruction arguments (zero-copy reference)
 pub fn register_identity_v1<'a>(
     accounts: &'a [AccountInfo<'a>],
     instruction_data: &[u8],
@@ -69,49 +100,23 @@ pub fn register_identity_v1<'a>(
     /****************************************************/
 
     let ctx = RegisterIdentityV1Accounts::context(accounts)?;
-
-    /****************************************************/
-    /****************** Account Guards ******************/
-    /****************************************************/
-
-    let agent_identity_bump =
-        AgentIdentityV1::check_pda_derivation(ctx.accounts.agent_identity, ctx.accounts.asset.key)?;
-
-    // Assert that the asset exists and is a Core asset.
-    if ctx.accounts.asset.owner != &mpl_core::ID
-        || ctx.accounts.asset.try_borrow_data()?[0] != MplCoreKey::AssetV1 as u8
-    {
-        return Err(MplAgentIdentityError::InvalidCoreAsset.into());
-    }
-
-    // Validate the MPL Core program.
-    if *ctx.accounts.mpl_core_program.key != mpl_core::ID {
-        return Err(MplAgentIdentityError::InvalidMplCoreProgram.into());
-    }
-
-    // Validate system program.
-    if *ctx.accounts.system_program.key != system_program::id() {
-        return Err(MplAgentIdentityError::InvalidSystemProgram.into());
-    }
+    let agent_identity_bump = ctx.accounts.validate()?;
 
     /****************************************************/
     /***************** Argument Guards ******************/
     /****************************************************/
 
-    // Add any argument validation here.
-    // Example: if args.arg1 == 0 { return Err(MplAgentIdentityError::InvalidArgument.into()); }
-
     /****************************************************/
     /********************* Actions **********************/
     /****************************************************/
     // Create the agent identity account.
-    AgentIdentityV1::create_account(&ctx.accounts, agent_identity_bump)?;
+    AgentIdentityV2::create_account(&ctx.accounts, agent_identity_bump)?;
 
     // Initialize the account using zero-copy.
     // Borrow the account data mutably and cast to our struct.
     let mut data = ctx.accounts.agent_identity.try_borrow_mut_data()?;
-    let agent_identity: &mut AgentIdentityV1 =
-        bytemuck::from_bytes_mut(&mut data[..core::mem::size_of::<AgentIdentityV1>()]);
+    let agent_identity: &mut AgentIdentityV2 =
+        bytemuck::from_bytes_mut(&mut data[..core::mem::size_of::<AgentIdentityV2>()]);
 
     agent_identity.initialize(agent_identity_bump, ctx.accounts.asset.key);
 
@@ -162,7 +167,7 @@ pub fn register_identity_v1<'a>(
     }
     .invoke_signed_with_remaining_accounts(
         &[&[
-            AgentIdentityV1::PREFIX,
+            AgentIdentityV2::PREFIX,
             ctx.accounts.asset.key.as_ref(),
             &[agent_identity_bump],
         ]],

@@ -1,5 +1,6 @@
 use bytemuck::{Pod, Zeroable};
 use mpl_utils::{assert_derivation, create_or_allocate_account_raw};
+use podded::pod::OptionalPubkey;
 use shank::ShankAccount;
 use solana_program::{
     account_info::AccountInfo, entrypoint::ProgramResult, program_error::ProgramError,
@@ -10,17 +11,9 @@ use crate::{error::MplAgentIdentityError, instruction::accounts::RegisterIdentit
 
 use super::Key;
 
-/// PDA account structure using zero-copy patterns.
-///
-/// # Layout
-/// - key: 1 byte (account discriminator)
-/// - bump: 1 byte (PDA bump seed)
-/// - _padding: 6 bytes (alignment to 8 bytes)
-///
-/// Total: 8 bytes (8-byte aligned)
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Pod, Zeroable, ShankAccount)]
-pub struct AgentIdentityV1 {
+pub struct AgentIdentityV2 {
     /// Account discriminator.
     #[idl_type(Key)]
     pub key: u8,
@@ -31,13 +24,18 @@ pub struct AgentIdentityV1 {
     pub _padding: [u8; 6],
     /// The address of the asset.
     pub asset: Pubkey,
+    /// The address of the agent token.
+    pub agent_token: OptionalPubkey,
+    // Reserved for future use.
+    #[padding]
+    pub _reserved: [u8; 32],
 }
 
 // Compile-time assertion to ensure struct is 8-byte aligned.
-const _: () = assert!(core::mem::size_of::<AgentIdentityV1>() % 8 == 0);
-const _: () = assert!(core::mem::size_of::<AgentIdentityV1>() == 40);
+const _: () = assert!(core::mem::size_of::<AgentIdentityV2>() % 8 == 0);
+const _: () = assert!(core::mem::size_of::<AgentIdentityV2>() == 104);
 
-impl AgentIdentityV1 {
+impl AgentIdentityV2 {
     /// PDA seed prefix for this account type.
     pub const PREFIX: &'static [u8] = b"agent_identity";
 
@@ -58,7 +56,7 @@ impl AgentIdentityV1 {
             accounts.agent_identity,
             accounts.system_program,
             accounts.payer,
-            core::mem::size_of::<AgentIdentityV1>(),
+            core::mem::size_of::<AgentIdentityV2>(),
             &[Self::PREFIX, accounts.asset.key.as_ref(), &[bump]],
         )
     }
@@ -67,9 +65,10 @@ impl AgentIdentityV1 {
     #[inline]
     pub fn initialize(&mut self, bump: u8, asset: &Pubkey) {
         solana_program::msg!("Initializing agent identity account");
-        self.key = Key::AgentIdentityV1 as u8;
+        self.key = Key::AgentIdentityV2 as u8;
         self.bump = bump;
         self._padding = [0u8; 6];
         self.asset = *asset;
+        self.agent_token = OptionalPubkey::default();
     }
 }

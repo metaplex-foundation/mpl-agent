@@ -11,54 +11,42 @@ use anchor_lang::prelude::{AnchorDeserialize, AnchorSerialize};
 use borsh::{BorshDeserialize, BorshSerialize};
 
 /// Accounts.
-pub struct RegisterIdentityV1 {
-    /// The agent identity PDA
+pub struct SetAgentTokenV1 {
+    /// The agent identity PDA. Must be of type AgentIdentityV1 or AgentIdentityV2.
     pub agent_identity: solana_program::pubkey::Pubkey,
     /// The address of the Core asset
     pub asset: solana_program::pubkey::Pubkey,
-    /// The address of the collection
-    pub collection: Option<solana_program::pubkey::Pubkey>,
+    /// The address of the agent token
+    pub agent_token: solana_program::pubkey::Pubkey,
     /// The payer for additional rent
     pub payer: solana_program::pubkey::Pubkey,
-    /// Authority for the asset. If not provided, the payer will be used.
+    /// Authority must be the asset signer. If not provided, the payer will be used.
     pub authority: Option<solana_program::pubkey::Pubkey>,
-    /// The MPL Core program
-    pub mpl_core_program: solana_program::pubkey::Pubkey,
     /// The system program
     pub system_program: solana_program::pubkey::Pubkey,
 }
 
-impl RegisterIdentityV1 {
-    pub fn instruction(
-        &self,
-        args: RegisterIdentityV1InstructionArgs,
-    ) -> solana_program::instruction::Instruction {
-        self.instruction_with_remaining_accounts(args, &[])
+impl SetAgentTokenV1 {
+    pub fn instruction(&self) -> solana_program::instruction::Instruction {
+        self.instruction_with_remaining_accounts(&[])
     }
     #[allow(clippy::vec_init_then_push)]
     pub fn instruction_with_remaining_accounts(
         &self,
-        args: RegisterIdentityV1InstructionArgs,
         remaining_accounts: &[solana_program::instruction::AccountMeta],
     ) -> solana_program::instruction::Instruction {
-        let mut accounts = Vec::with_capacity(7 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(6 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new(
             self.agent_identity,
             false,
         ));
-        accounts.push(solana_program::instruction::AccountMeta::new(
+        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
             self.asset, false,
         ));
-        if let Some(collection) = self.collection {
-            accounts.push(solana_program::instruction::AccountMeta::new(
-                collection, false,
-            ));
-        } else {
-            accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-                crate::MPL_AGENT_IDENTITY_ID,
-                false,
-            ));
-        }
+        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+            self.agent_token,
+            false,
+        ));
         accounts.push(solana_program::instruction::AccountMeta::new(
             self.payer, true,
         ));
@@ -73,17 +61,11 @@ impl RegisterIdentityV1 {
             ));
         }
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            self.mpl_core_program,
-            false,
-        ));
-        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
             self.system_program,
             false,
         ));
         accounts.extend_from_slice(remaining_accounts);
-        let mut data = borsh::to_vec(&(RegisterIdentityV1InstructionData::new())).unwrap();
-        let mut args = borsh::to_vec(&args).unwrap();
-        data.append(&mut args);
+        let data = borsh::to_vec(&(SetAgentTokenV1InstructionData::new())).unwrap();
 
         solana_program::instruction::Instruction {
             program_id: crate::MPL_AGENT_IDENTITY_ID,
@@ -95,57 +77,46 @@ impl RegisterIdentityV1 {
 
 #[cfg_attr(not(feature = "anchor"), derive(BorshSerialize, BorshDeserialize))]
 #[cfg_attr(feature = "anchor", derive(AnchorSerialize, AnchorDeserialize))]
-pub struct RegisterIdentityV1InstructionData {
+pub struct SetAgentTokenV1InstructionData {
     discriminator: u8,
     padding: [u8; 7],
 }
 
-impl RegisterIdentityV1InstructionData {
+impl SetAgentTokenV1InstructionData {
     pub fn new() -> Self {
         Self {
-            discriminator: 0,
+            discriminator: 1,
             padding: [0, 0, 0, 0, 0, 0, 0],
         }
     }
 }
 
-#[cfg_attr(not(feature = "anchor"), derive(BorshSerialize, BorshDeserialize))]
-#[cfg_attr(feature = "anchor", derive(AnchorSerialize, AnchorDeserialize))]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct RegisterIdentityV1InstructionArgs {
-    pub agent_registration_uri: String,
-}
-
-/// Instruction builder for `RegisterIdentityV1`.
+/// Instruction builder for `SetAgentTokenV1`.
 ///
 /// ### Accounts:
 ///
 ///   0. `[writable]` agent_identity
-///   1. `[writable]` asset
-///   2. `[writable, optional]` collection
+///   1. `[]` asset
+///   2. `[]` agent_token
 ///   3. `[writable, signer]` payer
 ///   4. `[signer, optional]` authority
-///   5. `[optional]` mpl_core_program (default to `CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d`)
-///   6. `[optional]` system_program (default to `11111111111111111111111111111111`)
+///   5. `[optional]` system_program (default to `11111111111111111111111111111111`)
 #[derive(Default)]
-pub struct RegisterIdentityV1Builder {
+pub struct SetAgentTokenV1Builder {
     agent_identity: Option<solana_program::pubkey::Pubkey>,
     asset: Option<solana_program::pubkey::Pubkey>,
-    collection: Option<solana_program::pubkey::Pubkey>,
+    agent_token: Option<solana_program::pubkey::Pubkey>,
     payer: Option<solana_program::pubkey::Pubkey>,
     authority: Option<solana_program::pubkey::Pubkey>,
-    mpl_core_program: Option<solana_program::pubkey::Pubkey>,
     system_program: Option<solana_program::pubkey::Pubkey>,
-    agent_registration_uri: Option<String>,
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
 }
 
-impl RegisterIdentityV1Builder {
+impl SetAgentTokenV1Builder {
     pub fn new() -> Self {
         Self::default()
     }
-    /// The agent identity PDA
+    /// The agent identity PDA. Must be of type AgentIdentityV1 or AgentIdentityV2.
     #[inline(always)]
     pub fn agent_identity(&mut self, agent_identity: solana_program::pubkey::Pubkey) -> &mut Self {
         self.agent_identity = Some(agent_identity);
@@ -157,11 +128,10 @@ impl RegisterIdentityV1Builder {
         self.asset = Some(asset);
         self
     }
-    /// `[optional account]`
-    /// The address of the collection
+    /// The address of the agent token
     #[inline(always)]
-    pub fn collection(&mut self, collection: Option<solana_program::pubkey::Pubkey>) -> &mut Self {
-        self.collection = collection;
+    pub fn agent_token(&mut self, agent_token: solana_program::pubkey::Pubkey) -> &mut Self {
+        self.agent_token = Some(agent_token);
         self
     }
     /// The payer for additional rent
@@ -171,20 +141,10 @@ impl RegisterIdentityV1Builder {
         self
     }
     /// `[optional account]`
-    /// Authority for the asset. If not provided, the payer will be used.
+    /// Authority must be the asset signer. If not provided, the payer will be used.
     #[inline(always)]
     pub fn authority(&mut self, authority: Option<solana_program::pubkey::Pubkey>) -> &mut Self {
         self.authority = authority;
-        self
-    }
-    /// `[optional account, default to 'CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d']`
-    /// The MPL Core program
-    #[inline(always)]
-    pub fn mpl_core_program(
-        &mut self,
-        mpl_core_program: solana_program::pubkey::Pubkey,
-    ) -> &mut Self {
-        self.mpl_core_program = Some(mpl_core_program);
         self
     }
     /// `[optional account, default to '11111111111111111111111111111111']`
@@ -192,11 +152,6 @@ impl RegisterIdentityV1Builder {
     #[inline(always)]
     pub fn system_program(&mut self, system_program: solana_program::pubkey::Pubkey) -> &mut Self {
         self.system_program = Some(system_program);
-        self
-    }
-    #[inline(always)]
-    pub fn agent_registration_uri(&mut self, agent_registration_uri: String) -> &mut Self {
-        self.agent_registration_uri = Some(agent_registration_uri);
         self
     }
     /// Add an aditional account to the instruction.
@@ -219,86 +174,68 @@ impl RegisterIdentityV1Builder {
     }
     #[allow(clippy::clone_on_copy)]
     pub fn instruction(&self) -> solana_program::instruction::Instruction {
-        let accounts = RegisterIdentityV1 {
+        let accounts = SetAgentTokenV1 {
             agent_identity: self.agent_identity.expect("agent_identity is not set"),
             asset: self.asset.expect("asset is not set"),
-            collection: self.collection,
+            agent_token: self.agent_token.expect("agent_token is not set"),
             payer: self.payer.expect("payer is not set"),
             authority: self.authority,
-            mpl_core_program: self.mpl_core_program.unwrap_or(solana_program::pubkey!(
-                "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d"
-            )),
             system_program: self
                 .system_program
                 .unwrap_or(solana_program::pubkey!("11111111111111111111111111111111")),
         };
-        let args = RegisterIdentityV1InstructionArgs {
-            agent_registration_uri: self
-                .agent_registration_uri
-                .clone()
-                .expect("agent_registration_uri is not set"),
-        };
 
-        accounts.instruction_with_remaining_accounts(args, &self.__remaining_accounts)
+        accounts.instruction_with_remaining_accounts(&self.__remaining_accounts)
     }
 }
 
-/// `register_identity_v1` CPI accounts.
-pub struct RegisterIdentityV1CpiAccounts<'a, 'b> {
-    /// The agent identity PDA
+/// `set_agent_token_v1` CPI accounts.
+pub struct SetAgentTokenV1CpiAccounts<'a, 'b> {
+    /// The agent identity PDA. Must be of type AgentIdentityV1 or AgentIdentityV2.
     pub agent_identity: &'b solana_program::account_info::AccountInfo<'a>,
     /// The address of the Core asset
     pub asset: &'b solana_program::account_info::AccountInfo<'a>,
-    /// The address of the collection
-    pub collection: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    /// The address of the agent token
+    pub agent_token: &'b solana_program::account_info::AccountInfo<'a>,
     /// The payer for additional rent
     pub payer: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Authority for the asset. If not provided, the payer will be used.
+    /// Authority must be the asset signer. If not provided, the payer will be used.
     pub authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    /// The MPL Core program
-    pub mpl_core_program: &'b solana_program::account_info::AccountInfo<'a>,
     /// The system program
     pub system_program: &'b solana_program::account_info::AccountInfo<'a>,
 }
 
-/// `register_identity_v1` CPI instruction.
-pub struct RegisterIdentityV1Cpi<'a, 'b> {
+/// `set_agent_token_v1` CPI instruction.
+pub struct SetAgentTokenV1Cpi<'a, 'b> {
     /// The program to invoke.
     pub __program: &'b solana_program::account_info::AccountInfo<'a>,
-    /// The agent identity PDA
+    /// The agent identity PDA. Must be of type AgentIdentityV1 or AgentIdentityV2.
     pub agent_identity: &'b solana_program::account_info::AccountInfo<'a>,
     /// The address of the Core asset
     pub asset: &'b solana_program::account_info::AccountInfo<'a>,
-    /// The address of the collection
-    pub collection: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    /// The address of the agent token
+    pub agent_token: &'b solana_program::account_info::AccountInfo<'a>,
     /// The payer for additional rent
     pub payer: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Authority for the asset. If not provided, the payer will be used.
+    /// Authority must be the asset signer. If not provided, the payer will be used.
     pub authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    /// The MPL Core program
-    pub mpl_core_program: &'b solana_program::account_info::AccountInfo<'a>,
     /// The system program
     pub system_program: &'b solana_program::account_info::AccountInfo<'a>,
-    /// The arguments for the instruction.
-    pub __args: RegisterIdentityV1InstructionArgs,
 }
 
-impl<'a, 'b> RegisterIdentityV1Cpi<'a, 'b> {
+impl<'a, 'b> SetAgentTokenV1Cpi<'a, 'b> {
     pub fn new(
         program: &'b solana_program::account_info::AccountInfo<'a>,
-        accounts: RegisterIdentityV1CpiAccounts<'a, 'b>,
-        args: RegisterIdentityV1InstructionArgs,
+        accounts: SetAgentTokenV1CpiAccounts<'a, 'b>,
     ) -> Self {
         Self {
             __program: program,
             agent_identity: accounts.agent_identity,
             asset: accounts.asset,
-            collection: accounts.collection,
+            agent_token: accounts.agent_token,
             payer: accounts.payer,
             authority: accounts.authority,
-            mpl_core_program: accounts.mpl_core_program,
             system_program: accounts.system_program,
-            __args: args,
         }
     }
     #[inline(always)]
@@ -334,26 +271,19 @@ impl<'a, 'b> RegisterIdentityV1Cpi<'a, 'b> {
             bool,
         )],
     ) -> solana_program::entrypoint::ProgramResult {
-        let mut accounts = Vec::with_capacity(7 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(6 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new(
             *self.agent_identity.key,
             false,
         ));
-        accounts.push(solana_program::instruction::AccountMeta::new(
+        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
             *self.asset.key,
             false,
         ));
-        if let Some(collection) = self.collection {
-            accounts.push(solana_program::instruction::AccountMeta::new(
-                *collection.key,
-                false,
-            ));
-        } else {
-            accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-                crate::MPL_AGENT_IDENTITY_ID,
-                false,
-            ));
-        }
+        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+            *self.agent_token.key,
+            false,
+        ));
         accounts.push(solana_program::instruction::AccountMeta::new(
             *self.payer.key,
             true,
@@ -370,10 +300,6 @@ impl<'a, 'b> RegisterIdentityV1Cpi<'a, 'b> {
             ));
         }
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            *self.mpl_core_program.key,
-            false,
-        ));
-        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
             *self.system_program.key,
             false,
         ));
@@ -384,27 +310,22 @@ impl<'a, 'b> RegisterIdentityV1Cpi<'a, 'b> {
                 is_signer: remaining_account.2,
             })
         });
-        let mut data = borsh::to_vec(&(RegisterIdentityV1InstructionData::new())).unwrap();
-        let mut args = borsh::to_vec(&self.__args).unwrap();
-        data.append(&mut args);
+        let data = borsh::to_vec(&(SetAgentTokenV1InstructionData::new())).unwrap();
 
         let instruction = solana_program::instruction::Instruction {
             program_id: crate::MPL_AGENT_IDENTITY_ID,
             accounts,
             data,
         };
-        let mut account_infos = Vec::with_capacity(7 + 1 + remaining_accounts.len());
+        let mut account_infos = Vec::with_capacity(6 + 1 + remaining_accounts.len());
         account_infos.push(self.__program.clone());
         account_infos.push(self.agent_identity.clone());
         account_infos.push(self.asset.clone());
-        if let Some(collection) = self.collection {
-            account_infos.push(collection.clone());
-        }
+        account_infos.push(self.agent_token.clone());
         account_infos.push(self.payer.clone());
         if let Some(authority) = self.authority {
             account_infos.push(authority.clone());
         }
-        account_infos.push(self.mpl_core_program.clone());
         account_infos.push(self.system_program.clone());
         remaining_accounts
             .iter()
@@ -418,38 +339,35 @@ impl<'a, 'b> RegisterIdentityV1Cpi<'a, 'b> {
     }
 }
 
-/// Instruction builder for `RegisterIdentityV1` via CPI.
+/// Instruction builder for `SetAgentTokenV1` via CPI.
 ///
 /// ### Accounts:
 ///
 ///   0. `[writable]` agent_identity
-///   1. `[writable]` asset
-///   2. `[writable, optional]` collection
+///   1. `[]` asset
+///   2. `[]` agent_token
 ///   3. `[writable, signer]` payer
 ///   4. `[signer, optional]` authority
-///   5. `[]` mpl_core_program
-///   6. `[]` system_program
-pub struct RegisterIdentityV1CpiBuilder<'a, 'b> {
-    instruction: Box<RegisterIdentityV1CpiBuilderInstruction<'a, 'b>>,
+///   5. `[]` system_program
+pub struct SetAgentTokenV1CpiBuilder<'a, 'b> {
+    instruction: Box<SetAgentTokenV1CpiBuilderInstruction<'a, 'b>>,
 }
 
-impl<'a, 'b> RegisterIdentityV1CpiBuilder<'a, 'b> {
+impl<'a, 'b> SetAgentTokenV1CpiBuilder<'a, 'b> {
     pub fn new(program: &'b solana_program::account_info::AccountInfo<'a>) -> Self {
-        let instruction = Box::new(RegisterIdentityV1CpiBuilderInstruction {
+        let instruction = Box::new(SetAgentTokenV1CpiBuilderInstruction {
             __program: program,
             agent_identity: None,
             asset: None,
-            collection: None,
+            agent_token: None,
             payer: None,
             authority: None,
-            mpl_core_program: None,
             system_program: None,
-            agent_registration_uri: None,
             __remaining_accounts: Vec::new(),
         });
         Self { instruction }
     }
-    /// The agent identity PDA
+    /// The agent identity PDA. Must be of type AgentIdentityV1 or AgentIdentityV2.
     #[inline(always)]
     pub fn agent_identity(
         &mut self,
@@ -464,14 +382,13 @@ impl<'a, 'b> RegisterIdentityV1CpiBuilder<'a, 'b> {
         self.instruction.asset = Some(asset);
         self
     }
-    /// `[optional account]`
-    /// The address of the collection
+    /// The address of the agent token
     #[inline(always)]
-    pub fn collection(
+    pub fn agent_token(
         &mut self,
-        collection: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+        agent_token: &'b solana_program::account_info::AccountInfo<'a>,
     ) -> &mut Self {
-        self.instruction.collection = collection;
+        self.instruction.agent_token = Some(agent_token);
         self
     }
     /// The payer for additional rent
@@ -481,22 +398,13 @@ impl<'a, 'b> RegisterIdentityV1CpiBuilder<'a, 'b> {
         self
     }
     /// `[optional account]`
-    /// Authority for the asset. If not provided, the payer will be used.
+    /// Authority must be the asset signer. If not provided, the payer will be used.
     #[inline(always)]
     pub fn authority(
         &mut self,
         authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     ) -> &mut Self {
         self.instruction.authority = authority;
-        self
-    }
-    /// The MPL Core program
-    #[inline(always)]
-    pub fn mpl_core_program(
-        &mut self,
-        mpl_core_program: &'b solana_program::account_info::AccountInfo<'a>,
-    ) -> &mut Self {
-        self.instruction.mpl_core_program = Some(mpl_core_program);
         self
     }
     /// The system program
@@ -506,11 +414,6 @@ impl<'a, 'b> RegisterIdentityV1CpiBuilder<'a, 'b> {
         system_program: &'b solana_program::account_info::AccountInfo<'a>,
     ) -> &mut Self {
         self.instruction.system_program = Some(system_program);
-        self
-    }
-    #[inline(always)]
-    pub fn agent_registration_uri(&mut self, agent_registration_uri: String) -> &mut Self {
-        self.instruction.agent_registration_uri = Some(agent_registration_uri);
         self
     }
     /// Add an additional account to the instruction.
@@ -554,14 +457,7 @@ impl<'a, 'b> RegisterIdentityV1CpiBuilder<'a, 'b> {
         &self,
         signers_seeds: &[&[&[u8]]],
     ) -> solana_program::entrypoint::ProgramResult {
-        let args = RegisterIdentityV1InstructionArgs {
-            agent_registration_uri: self
-                .instruction
-                .agent_registration_uri
-                .clone()
-                .expect("agent_registration_uri is not set"),
-        };
-        let instruction = RegisterIdentityV1Cpi {
+        let instruction = SetAgentTokenV1Cpi {
             __program: self.instruction.__program,
 
             agent_identity: self
@@ -571,22 +467,19 @@ impl<'a, 'b> RegisterIdentityV1CpiBuilder<'a, 'b> {
 
             asset: self.instruction.asset.expect("asset is not set"),
 
-            collection: self.instruction.collection,
+            agent_token: self
+                .instruction
+                .agent_token
+                .expect("agent_token is not set"),
 
             payer: self.instruction.payer.expect("payer is not set"),
 
             authority: self.instruction.authority,
 
-            mpl_core_program: self
-                .instruction
-                .mpl_core_program
-                .expect("mpl_core_program is not set"),
-
             system_program: self
                 .instruction
                 .system_program
                 .expect("system_program is not set"),
-            __args: args,
         };
         instruction.invoke_signed_with_remaining_accounts(
             signers_seeds,
@@ -595,16 +488,14 @@ impl<'a, 'b> RegisterIdentityV1CpiBuilder<'a, 'b> {
     }
 }
 
-struct RegisterIdentityV1CpiBuilderInstruction<'a, 'b> {
+struct SetAgentTokenV1CpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
     agent_identity: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     asset: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    collection: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    agent_token: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     payer: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    mpl_core_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     system_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    agent_registration_uri: Option<String>,
     /// Additional instruction accounts `(AccountInfo, is_writable, is_signer)`.
     __remaining_accounts: Vec<(
         &'b solana_program::account_info::AccountInfo<'a>,

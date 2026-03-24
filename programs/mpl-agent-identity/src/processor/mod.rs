@@ -1,18 +1,14 @@
-mod register;
+mod register_identity_v1;
+mod set_agent_token_v1;
+
+pub use register_identity_v1::{register_identity_v1, RegisterIdentityV1Args};
+pub use set_agent_token_v1::{set_agent_token_v1, SetAgentTokenV1Args};
 
 use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, msg, pubkey::Pubkey};
 
 use crate::error::MplAgentIdentityError;
 use crate::instruction::MplAgentIdentityInstructionDiscriminant;
 
-pub use register::{register_identity_v1, RegisterIdentityV1Args};
-
-/// Process incoming instructions.
-///
-/// # Arguments
-/// * `_program_id` - The program ID (unused but available for validation)
-/// * `accounts` - The accounts required for the instruction
-/// * `instruction_data` - The instruction data containing the discriminant and arguments
 #[inline]
 pub fn process_instruction<'a>(
     _program_id: &Pubkey,
@@ -29,6 +25,10 @@ pub fn process_instruction<'a>(
         Ok(MplAgentIdentityInstructionDiscriminant::RegisterIdentityV1) => {
             msg!("Instruction: RegisterIdentityV1");
             register_identity_v1(accounts, instruction_data)
+        }
+        Ok(MplAgentIdentityInstructionDiscriminant::SetAgentTokenV1) => {
+            msg!("Instruction: SetAgentTokenV1");
+            set_agent_token_v1(accounts, instruction_data)
         }
         Err(_) => Err(MplAgentIdentityError::InvalidInstructionData.into()),
     }

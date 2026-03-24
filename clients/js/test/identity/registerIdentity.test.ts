@@ -1,8 +1,8 @@
 import test from 'ava';
 import { fetchAsset } from '@metaplex-foundation/mpl-core';
 import {
-  fetchAgentIdentityV1,
-  findAgentIdentityV1Pda,
+  fetchAgentIdentityV2,
+  findAgentIdentityV2Pda,
   Key,
   registerIdentityV1,
 } from '../../src/generated/identity';
@@ -24,14 +24,13 @@ test('it can register an asset', async (t) => {
   }).sendAndConfirm(umi);
 
   // And there's an Agent Identity PDA.
-  const agentIdentityPda = findAgentIdentityV1Pda(umi, { asset });
-  const agentIdentity = await fetchAgentIdentityV1(umi, agentIdentityPda);
-  t.is(agentIdentity.key, Key.AgentIdentityV1);
+  const agentIdentityPda = findAgentIdentityV2Pda(umi, { asset });
+  const agentIdentity = await fetchAgentIdentityV2(umi, agentIdentityPda);
+  t.is(agentIdentity.key, Key.AgentIdentityV2);
   t.is(agentIdentity.bump, agentIdentityPda[1]);
 
-  // Then the asset has an AppData plugin.
   const assetData = await fetchAsset(umi, asset);
-  // And the asset has an AgentIdentity plugin.
+  // Then the asset has an AgentIdentity plugin.
   t.is(assetData?.agentIdentities?.length, 1);
   t.like(assetData?.agentIdentities?.[0], {
     type: 'AgentIdentity',
@@ -44,4 +43,25 @@ test('it can register an asset', async (t) => {
   t.truthy(lifecycleChecks?.transfer);
   t.truthy(lifecycleChecks?.update);
   t.truthy(lifecycleChecks?.execute);
+});
+
+test('it cannot register an asset twice', async (t) => {
+  const umi = await createUmi();
+  const { collection, asset } = await createCollectionAndAsset(umi);
+
+  // First registration succeeds.
+  await registerIdentityV1(umi, {
+    asset,
+    collection,
+    agentRegistrationUri: 'https://example.com/agent.json',
+  }).sendAndConfirm(umi);
+
+  // Second registration should fail.
+  const result = registerIdentityV1(umi, {
+    asset,
+    collection,
+    agentRegistrationUri: 'https://example.com/agent2.json',
+  }).sendAndConfirm(umi);
+
+  await t.throwsAsync(result, { name: 'AgentIdentityAlreadyRegistered' });
 });

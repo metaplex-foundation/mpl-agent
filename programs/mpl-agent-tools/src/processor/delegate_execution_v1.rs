@@ -1,5 +1,7 @@
 use bytemuck::{from_bytes, Pod, Zeroable};
-use mpl_agent_identity::{accounts::AgentIdentityV1, types::Key as MplAgentIdentityKey};
+use mpl_agent_identity::{accounts::AgentIdentityV2, types::Key as MplAgentIdentityKey};
+// Note: We use AgentIdentityV2 only for find_pda (same seeds as V1).
+// We read bump from raw bytes to avoid borsh deserialization issues with V1-sized accounts.
 use mpl_core::{accounts::BaseAssetV1, types::Key as MplCoreKey};
 use shank::ShankType;
 use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, system_program};
@@ -64,21 +66,24 @@ pub fn delegate_execution_v1<'a>(
     }
 
     // Assert that the agent identity is correct and initialized.
-    if ctx.accounts.agent_identity.owner != &mpl_agent_identity::ID
-        || ctx.accounts.agent_identity.data_len() == 0
-        || ctx.accounts.agent_identity.try_borrow_data()?[0]
-            != MplAgentIdentityKey::AgentIdentityV1 as u8
+    // Accept both V1 and V2 discriminators since registration now creates V2 accounts.
     {
-        return Err(MplAgentToolsError::AgentIdentityNotRegistered.into());
+        let agent_identity_data = ctx.accounts.agent_identity.try_borrow_data()?;
+        if ctx.accounts.agent_identity.owner != &mpl_agent_identity::ID
+            || agent_identity_data.is_empty()
+            || (agent_identity_data[0] != MplAgentIdentityKey::AgentIdentityV1 as u8
+                && agent_identity_data[0] != MplAgentIdentityKey::AgentIdentityV2 as u8)
+        {
+            return Err(MplAgentToolsError::AgentIdentityNotRegistered.into());
+        }
     }
 
-    let agent_identity = AgentIdentityV1::try_from(ctx.accounts.agent_identity)?;
-
+    // PDA seeds are the same for V1 and V2; bump is at byte offset 1 in both.
     let (agent_identity_pda, agent_identity_bump) =
-        AgentIdentityV1::find_pda(ctx.accounts.agent_asset.key);
+        AgentIdentityV2::find_pda(ctx.accounts.agent_asset.key);
 
     if ctx.accounts.agent_identity.key != &agent_identity_pda
-        || agent_identity.bump != agent_identity_bump
+        || ctx.accounts.agent_identity.try_borrow_data()?[1] != agent_identity_bump
     {
         return Err(MplAgentToolsError::InvalidAgentIdentity.into());
     }

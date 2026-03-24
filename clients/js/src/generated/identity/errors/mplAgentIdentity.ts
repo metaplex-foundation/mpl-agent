@@ -80,6 +80,77 @@ export class InvalidCoreAssetError extends ProgramError {
 codeToErrorMap.set(0x4, InvalidCoreAssetError);
 nameToErrorMap.set('InvalidCoreAsset', InvalidCoreAssetError);
 
+/** InvalidAgentToken: Invalid Agent Token */
+export class InvalidAgentTokenError extends ProgramError {
+  override readonly name: string = 'InvalidAgentToken';
+
+  readonly code: number = 0x5; // 5
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid Agent Token', program, cause);
+  }
+}
+codeToErrorMap.set(0x5, InvalidAgentTokenError);
+nameToErrorMap.set('InvalidAgentToken', InvalidAgentTokenError);
+
+/** OnlyAssetSignerCanSetAgentToken: Only the Asset Signer can set the agent token */
+export class OnlyAssetSignerCanSetAgentTokenError extends ProgramError {
+  override readonly name: string = 'OnlyAssetSignerCanSetAgentToken';
+
+  readonly code: number = 0x6; // 6
+
+  constructor(program: Program, cause?: Error) {
+    super('Only the Asset Signer can set the agent token', program, cause);
+  }
+}
+codeToErrorMap.set(0x6, OnlyAssetSignerCanSetAgentTokenError);
+nameToErrorMap.set(
+  'OnlyAssetSignerCanSetAgentToken',
+  OnlyAssetSignerCanSetAgentTokenError
+);
+
+/** AgentTokenAlreadySet: Agent Token already set */
+export class AgentTokenAlreadySetError extends ProgramError {
+  override readonly name: string = 'AgentTokenAlreadySet';
+
+  readonly code: number = 0x7; // 7
+
+  constructor(program: Program, cause?: Error) {
+    super('Agent Token already set', program, cause);
+  }
+}
+codeToErrorMap.set(0x7, AgentTokenAlreadySetError);
+nameToErrorMap.set('AgentTokenAlreadySet', AgentTokenAlreadySetError);
+
+/** InvalidAgentIdentity: Invalid Agent Identity */
+export class InvalidAgentIdentityError extends ProgramError {
+  override readonly name: string = 'InvalidAgentIdentity';
+
+  readonly code: number = 0x8; // 8
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid Agent Identity', program, cause);
+  }
+}
+codeToErrorMap.set(0x8, InvalidAgentIdentityError);
+nameToErrorMap.set('InvalidAgentIdentity', InvalidAgentIdentityError);
+
+/** AgentIdentityAlreadyRegistered: Agent Identity already registered */
+export class AgentIdentityAlreadyRegisteredError extends ProgramError {
+  override readonly name: string = 'AgentIdentityAlreadyRegistered';
+
+  readonly code: number = 0x9; // 9
+
+  constructor(program: Program, cause?: Error) {
+    super('Agent Identity already registered', program, cause);
+  }
+}
+codeToErrorMap.set(0x9, AgentIdentityAlreadyRegisteredError);
+nameToErrorMap.set(
+  'AgentIdentityAlreadyRegistered',
+  AgentIdentityAlreadyRegisteredError
+);
+
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors

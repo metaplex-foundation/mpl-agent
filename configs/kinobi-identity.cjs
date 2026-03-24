@@ -26,6 +26,12 @@ kinobi.update(
         k.variablePdaSeedNode("asset", k.publicKeyTypeNode(), "The address of the asset"),
       ],
     },
+    agentIdentityV2: {
+      seeds: [
+        k.constantPdaSeedNodeFromString("agent_identity"),
+        k.variablePdaSeedNode("asset", k.publicKeyTypeNode(), "The address of the asset"),
+      ],
+    },
   })
 );
 
@@ -34,7 +40,7 @@ kinobi.update(
   new k.updateInstructionsVisitor({
     registerIdentityV1: {
       accounts: {
-        agentIdentity: {defaultValue: k.pdaValueNode("agentIdentityV1")},
+        agentIdentity: {defaultValue: k.pdaValueNode("agentIdentityV2")},
       },
     },
   })

@@ -1,7 +1,12 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { createUmi as basecreateUmi } from '@metaplex-foundation/umi-bundle-tests';
 import { generateSigner, PublicKey, Umi } from '@metaplex-foundation/umi';
-import { create, createCollection } from '@metaplex-foundation/mpl-core';
+import {
+  create,
+  createCollection,
+  mplCore,
+} from '@metaplex-foundation/mpl-core';
+import { mplToolbox } from '@metaplex-foundation/mpl-toolbox';
 import {
   mplAgentIdentity,
   mplAgentReputation,
@@ -11,6 +16,8 @@ import {
 
 export const createUmi = async () =>
   (await basecreateUmi())
+    .use(mplCore())
+    .use(mplToolbox())
     .use(mplAgentIdentity())
     .use(mplAgentReputation())
     .use(mplAgentValidation())

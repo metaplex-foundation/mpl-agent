@@ -27,6 +27,26 @@ pub enum MplAgentIdentityError {
     /// 4 - Invalid Asset
     #[error("Invalid Core Asset")]
     InvalidCoreAsset,
+
+    /// 5 - Invalid Agent Token
+    #[error("Invalid Agent Token")]
+    InvalidAgentToken,
+
+    /// 6 - Only the Asset Signer can set the agent token
+    #[error("Only the Asset Signer can set the agent token")]
+    OnlyAssetSignerCanSetAgentToken,
+
+    /// 7 - Agent Token already set
+    #[error("Agent Token already set")]
+    AgentTokenAlreadySet,
+
+    /// 8 - Invalid Agent Identity
+    #[error("Invalid Agent Identity")]
+    InvalidAgentIdentity,
+
+    /// 9 - Agent Identity already registered
+    #[error("Agent Identity already registered")]
+    AgentIdentityAlreadyRegistered,
 }
 
 impl PrintProgramError for MplAgentIdentityError {
