@@ -151,6 +151,32 @@ nameToErrorMap.set(
   AgentIdentityAlreadyRegisteredError
 );
 
+/** InvalidGenesisAccount: Invalid Genesis Account */
+export class InvalidGenesisAccountError extends ProgramError {
+  override readonly name: string = 'InvalidGenesisAccount';
+
+  readonly code: number = 0xa; // 10
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid Genesis Account', program, cause);
+  }
+}
+codeToErrorMap.set(0xa, InvalidGenesisAccountError);
+nameToErrorMap.set('InvalidGenesisAccount', InvalidGenesisAccountError);
+
+/** GenesisNotMintFunded: Genesis account is not mint-funded */
+export class GenesisNotMintFundedError extends ProgramError {
+  override readonly name: string = 'GenesisNotMintFunded';
+
+  readonly code: number = 0xb; // 11
+
+  constructor(program: Program, cause?: Error) {
+    super('Genesis account is not mint-funded', program, cause);
+  }
+}
+codeToErrorMap.set(0xb, GenesisNotMintFundedError);
+nameToErrorMap.set('GenesisNotMintFunded', GenesisNotMintFundedError);
+
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors

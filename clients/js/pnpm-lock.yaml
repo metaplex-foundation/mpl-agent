@@ -19,6 +19,9 @@ devDependencies:
   '@ava/typescript':
     specifier: ^5.0.0
     version: 5.0.0
+  '@metaplex-foundation/genesis':
+    specifier: ^0.26.2
+    version: 0.26.2(@metaplex-foundation/umi@1.5.1)
   '@metaplex-foundation/umi':
     specifier: ^1.5.1
     version: 1.5.1
@@ -1630,6 +1633,17 @@ packages:
       - supports-color
     dev: true
 
+  /@metaplex-foundation/genesis@0.26.2(@metaplex-foundation/umi@1.5.1):
+    resolution: {integrity: sha512-z0QNEIbM0oHlglI0PSGWjVqPI0FQx4vqBHEsQTKdUK10biVc2zlutAutzzXhB9xZGAoO+1K7A44pLlZPPJ38hg==}
+    peerDependencies:
+      '@metaplex-foundation/umi': ^1.4.1
+    dependencies:
+      '@metaplex-foundation/mpl-token-metadata': 3.4.0(@metaplex-foundation/umi@1.5.1)
+      '@metaplex-foundation/mpl-toolbox': 0.10.0(@metaplex-foundation/umi@1.5.1)
+      '@metaplex-foundation/umi': 1.5.1
+      '@noble/hashes': 1.8.0
+    dev: true
+
   /@metaplex-foundation/mpl-core@1.8.0(@metaplex-foundation/umi@1.5.1)(@noble/hashes@1.3.1):
     resolution: {integrity: sha512-QwJYzApk2Q5se3oe1LVmApM3wHQ3KoFZl3/ePiRPnqj+z/F4nzkF6jftEsGYZ57xPXYOmSkePayNiFeRhnzaFw==}
     peerDependencies:
@@ -1641,13 +1655,21 @@ packages:
       '@noble/hashes': 1.3.1
     dev: false
 
+  /@metaplex-foundation/mpl-token-metadata@3.4.0(@metaplex-foundation/umi@1.5.1):
+    resolution: {integrity: sha512-AxBAYCK73JWxY3g9//z/C9krkR0t1orXZDknUPS4+GjwGH2vgPfsk04yfZ31Htka2AdS9YE/3wH7sMUBHKn9Rg==}
+    peerDependencies:
+      '@metaplex-foundation/umi': '>= 0.8.2 <= 1'
+    dependencies:
+      '@metaplex-foundation/mpl-toolbox': 0.10.0(@metaplex-foundation/umi@1.5.1)
+      '@metaplex-foundation/umi': 1.5.1
+    dev: true
+
   /@metaplex-foundation/mpl-toolbox@0.10.0(@metaplex-foundation/umi@1.5.1):
     resolution: {integrity: sha512-84KD1L5cFyw5xnntHwL4uPwfcrkKSiwuDeypiVr92qCUFuF3ZENa2zlFVPu+pQcjTlod2LmEX3MhBmNjRMpdKg==}
     peerDependencies:
       '@metaplex-foundation/umi': '>= 0.8.2 <= 1'
     dependencies:
       '@metaplex-foundation/umi': 1.5.1
-    dev: false
 
   /@metaplex-foundation/umi-bundle-tests@1.5.1(@metaplex-foundation/umi@1.5.1)(@solana/web3.js@1.73.0):
     resolution: {integrity: sha512-b7RzqWrU2xWnU0MLDSDJ7BZ80f0eevXcLB/vfoeCv0VBQB6wo33G9FuxpfQWvcgobBIPY0U2a5Ih9AUYXF4Shg==}
@@ -1809,6 +1831,11 @@ packages:
   /@noble/hashes@1.3.1:
     resolution: {integrity: sha512-EbqwksQwz9xDRGfDST86whPBgM65E0OH/pCgqW0GBVzO22bNE+NuIbeTb714+IfSjU3aRk47EUvXIb5bTsenKA==}
     engines: {node: '>= 16'}
+
+  /@noble/hashes@1.8.0:
+    resolution: {integrity: sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A==}
+    engines: {node: ^14.21.3 || >=16}
+    dev: true
 
   /@noble/secp256k1@1.7.0:
     resolution: {integrity: sha512-kbacwGSsH/CTout0ZnZWxnW1B+jH/7r/WAAKLBtrRJ/+CUH7lgmQzl3GTrQua3SGKWNSDsS6lmjnDpIJ5Dxyaw==}

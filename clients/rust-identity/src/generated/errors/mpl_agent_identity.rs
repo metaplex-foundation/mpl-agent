@@ -41,6 +41,12 @@ pub enum MplAgentIdentityError {
     /// 9 (0x9) - Agent Identity already registered
     #[error("Agent Identity already registered")]
     AgentIdentityAlreadyRegistered,
+    /// 10 (0xA) - Invalid Genesis Account
+    #[error("Invalid Genesis Account")]
+    InvalidGenesisAccount,
+    /// 11 (0xB) - Genesis account is not mint-funded
+    #[error("Genesis account is not mint-funded")]
+    GenesisNotMintFunded,
 }
 
 impl From<MplAgentIdentityError> for ProgramError {
@@ -63,6 +69,8 @@ impl TryFrom<u32> for MplAgentIdentityError {
             7 => Ok(MplAgentIdentityError::AgentTokenAlreadySet),
             8 => Ok(MplAgentIdentityError::InvalidAgentIdentity),
             9 => Ok(MplAgentIdentityError::AgentIdentityAlreadyRegistered),
+            10 => Ok(MplAgentIdentityError::InvalidGenesisAccount),
+            11 => Ok(MplAgentIdentityError::GenesisNotMintFunded),
             _ => Err(ProgramError::InvalidArgument),
         }
     }
@@ -85,6 +93,8 @@ impl ToStr for MplAgentIdentityError {
             MplAgentIdentityError::AgentIdentityAlreadyRegistered => {
                 "Agent Identity already registered"
             }
+            MplAgentIdentityError::InvalidGenesisAccount => "Invalid Genesis Account",
+            MplAgentIdentityError::GenesisNotMintFunded => "Genesis account is not mint-funded",
         }
     }
 }

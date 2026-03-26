@@ -7,6 +7,7 @@ import {
   mplCore,
 } from '@metaplex-foundation/mpl-core';
 import { mplToolbox } from '@metaplex-foundation/mpl-toolbox';
+import { genesis } from '@metaplex-foundation/genesis';
 import {
   mplAgentIdentity,
   mplAgentReputation,
@@ -21,7 +22,8 @@ export const createUmi = async () =>
     .use(mplAgentIdentity())
     .use(mplAgentReputation())
     .use(mplAgentValidation())
-    .use(mplAgentTools());
+    .use(mplAgentTools())
+    .use(genesis());
 
 export async function createCollectionAndAsset(
   umi: Umi

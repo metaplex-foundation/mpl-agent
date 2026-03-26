@@ -30,6 +30,11 @@ module.exports = {
         programId: "TLREGni9ZEyGC3vnPZtqUh95xQ8oPqJSvNjvB7FGK8S",
         deployPath: getProgram("mpl_agent_tools_program.so"),
       },
+      {
+        label: "Genesis",
+        programId: "GNS1S5J5AspKXgpjz6SvKL66kPaKWAhaGRhCqPRxii2B",
+        deployPath: getProgram("genesis_program.so"),
+      },
       // Below are external programs that should be included in the local validator.
       // You may configure which ones to fetch from the cluster when building
       // programs within the `configs/program-scripts/dump.sh` script.

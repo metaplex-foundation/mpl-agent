@@ -97,11 +97,11 @@
           ]
         },
         {
-          "name": "agentToken",
+          "name": "genesisAccount",
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "The address of the agent token"
+            "The Genesis account for the agent's token launch"
           ]
         },
         {
@@ -390,6 +390,16 @@
       "code": 9,
       "name": "AgentIdentityAlreadyRegistered",
       "msg": "Agent Identity already registered"
+    },
+    {
+      "code": 10,
+      "name": "InvalidGenesisAccount",
+      "msg": "Invalid Genesis Account"
+    },
+    {
+      "code": 11,
+      "name": "GenesisNotMintFunded",
+      "msg": "Genesis account is not mint-funded"
     }
   ],
   "metadata": {

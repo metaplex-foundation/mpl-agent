@@ -1,25 +1,42 @@
 use bytemuck::{Pod, Zeroable};
 use mpl_core::accounts::AssetSigner;
 use mpl_core::types::Key as MplCoreKey;
-use mpl_utils::token::SPL_TOKEN_PROGRAM_IDS;
-use mpl_utils::{assert_owner_in, assert_signer, resize_or_reallocate_account_raw};
+use mpl_utils::{assert_signer, resize_or_reallocate_account_raw};
 use podded::pod::{Nullable, OptionalPubkey};
 use shank::ShankType;
 use solana_program::program_error::ProgramError;
+use solana_program::pubkey::Pubkey;
 use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, system_program};
-use spl_token_2022_interface::extension::StateWithExtensions;
-use spl_token_2022_interface::state::Mint;
 
 use crate::instruction::accounts::SetAgentTokenV1Accounts;
 use crate::state::Key;
 use crate::{error::MplAgentIdentityError, state::AgentIdentityV2};
+
+/// Genesis program ID.
+const GENESIS_PROGRAM_ID: Pubkey =
+    solana_program::pubkey!("GNS1S5J5AspKXgpjz6SvKL66kPaKWAhaGRhCqPRxii2B");
+
+/// GenesisAccountV2 discriminator.
+const GENESIS_ACCOUNT_V2_DISCRIMINATOR: u8 = 18;
+
+/// Offset of `base_mint` (Pubkey) in GenesisAccountV2.
+const GENESIS_BASE_MINT_OFFSET: usize = 40;
+
+/// Offset of `funding_mode` (u8) in GenesisAccountV2.
+const GENESIS_FUNDING_MODE_OFFSET: usize = 128;
+
+/// Minimum size of a GenesisAccountV2 account.
+const GENESIS_MIN_SIZE: usize = 136;
+
+/// FundingMode::Mint variant value.
+const FUNDING_MODE_MINT: u8 = 0;
 
 impl<'a> SetAgentTokenV1Accounts<'a> {
     pub fn validate(&self) -> Result<(), ProgramError> {
         let Self {
             agent_identity,
             asset,
-            agent_token,
+            genesis_account,
             payer,
             authority,
             system_program,
@@ -44,17 +61,28 @@ impl<'a> SetAgentTokenV1Accounts<'a> {
             return Err(MplAgentIdentityError::InvalidCoreAsset.into());
         }
 
-        // Agent Token
-        // Assert that the agent token is owned by the SPL Token program.
-        assert_owner_in(
-            agent_token,
-            &SPL_TOKEN_PROGRAM_IDS,
-            MplAgentIdentityError::InvalidAgentToken,
-        )?;
-        // And that it is a mint account.
-        let mint_data = agent_token.try_borrow_data()?;
-        let _mint = StateWithExtensions::<Mint>::unpack(&mint_data)
-            .map_err(|_| MplAgentIdentityError::InvalidAgentToken)?;
+        // Genesis Account
+        // Assert that the genesis account is owned by the Genesis program.
+        if genesis_account.owner != &GENESIS_PROGRAM_ID {
+            return Err(MplAgentIdentityError::InvalidGenesisAccount.into());
+        }
+
+        let genesis_data = genesis_account.try_borrow_data()?;
+
+        // Assert minimum size.
+        if genesis_data.len() < GENESIS_MIN_SIZE {
+            return Err(MplAgentIdentityError::InvalidGenesisAccount.into());
+        }
+
+        // Assert discriminator is GenesisAccountV2.
+        if genesis_data[0] != GENESIS_ACCOUNT_V2_DISCRIMINATOR {
+            return Err(MplAgentIdentityError::InvalidGenesisAccount.into());
+        }
+
+        // Assert funding_mode is Mint.
+        if genesis_data[GENESIS_FUNDING_MODE_OFFSET] != FUNDING_MODE_MINT {
+            return Err(MplAgentIdentityError::GenesisNotMintFunded.into());
+        }
 
         // Payer
         assert_signer(payer)?;
@@ -138,7 +166,16 @@ pub fn set_agent_token_v1<'a>(
         return Err(MplAgentIdentityError::AgentTokenAlreadySet.into());
     }
 
-    agent_identity.agent_token = OptionalPubkey::new(*ctx.accounts.agent_token.key);
+    // Extract base_mint from the Genesis account data.
+    let genesis_data = ctx.accounts.genesis_account.try_borrow_data()?;
+    let base_mint = Pubkey::from(
+        <[u8; 32]>::try_from(
+            &genesis_data[GENESIS_BASE_MINT_OFFSET..GENESIS_BASE_MINT_OFFSET + 32],
+        )
+        .unwrap(),
+    );
+
+    agent_identity.agent_token = OptionalPubkey::new(base_mint);
 
     Ok(())
 }

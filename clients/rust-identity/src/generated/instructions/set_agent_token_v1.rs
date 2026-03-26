@@ -16,8 +16,8 @@ pub struct SetAgentTokenV1 {
     pub agent_identity: solana_program::pubkey::Pubkey,
     /// The address of the Core asset
     pub asset: solana_program::pubkey::Pubkey,
-    /// The address of the agent token
-    pub agent_token: solana_program::pubkey::Pubkey,
+    /// The Genesis account for the agent's token launch
+    pub genesis_account: solana_program::pubkey::Pubkey,
     /// The payer for additional rent
     pub payer: solana_program::pubkey::Pubkey,
     /// Authority must be the asset signer. If not provided, the payer will be used.
@@ -44,7 +44,7 @@ impl SetAgentTokenV1 {
             self.asset, false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            self.agent_token,
+            self.genesis_account,
             false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
@@ -97,7 +97,7 @@ impl SetAgentTokenV1InstructionData {
 ///
 ///   0. `[writable]` agent_identity
 ///   1. `[]` asset
-///   2. `[]` agent_token
+///   2. `[]` genesis_account
 ///   3. `[writable, signer]` payer
 ///   4. `[signer, optional]` authority
 ///   5. `[optional]` system_program (default to `11111111111111111111111111111111`)
@@ -105,7 +105,7 @@ impl SetAgentTokenV1InstructionData {
 pub struct SetAgentTokenV1Builder {
     agent_identity: Option<solana_program::pubkey::Pubkey>,
     asset: Option<solana_program::pubkey::Pubkey>,
-    agent_token: Option<solana_program::pubkey::Pubkey>,
+    genesis_account: Option<solana_program::pubkey::Pubkey>,
     payer: Option<solana_program::pubkey::Pubkey>,
     authority: Option<solana_program::pubkey::Pubkey>,
     system_program: Option<solana_program::pubkey::Pubkey>,
@@ -128,10 +128,13 @@ impl SetAgentTokenV1Builder {
         self.asset = Some(asset);
         self
     }
-    /// The address of the agent token
+    /// The Genesis account for the agent's token launch
     #[inline(always)]
-    pub fn agent_token(&mut self, agent_token: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.agent_token = Some(agent_token);
+    pub fn genesis_account(
+        &mut self,
+        genesis_account: solana_program::pubkey::Pubkey,
+    ) -> &mut Self {
+        self.genesis_account = Some(genesis_account);
         self
     }
     /// The payer for additional rent
@@ -177,7 +180,7 @@ impl SetAgentTokenV1Builder {
         let accounts = SetAgentTokenV1 {
             agent_identity: self.agent_identity.expect("agent_identity is not set"),
             asset: self.asset.expect("asset is not set"),
-            agent_token: self.agent_token.expect("agent_token is not set"),
+            genesis_account: self.genesis_account.expect("genesis_account is not set"),
             payer: self.payer.expect("payer is not set"),
             authority: self.authority,
             system_program: self
@@ -195,8 +198,8 @@ pub struct SetAgentTokenV1CpiAccounts<'a, 'b> {
     pub agent_identity: &'b solana_program::account_info::AccountInfo<'a>,
     /// The address of the Core asset
     pub asset: &'b solana_program::account_info::AccountInfo<'a>,
-    /// The address of the agent token
-    pub agent_token: &'b solana_program::account_info::AccountInfo<'a>,
+    /// The Genesis account for the agent's token launch
+    pub genesis_account: &'b solana_program::account_info::AccountInfo<'a>,
     /// The payer for additional rent
     pub payer: &'b solana_program::account_info::AccountInfo<'a>,
     /// Authority must be the asset signer. If not provided, the payer will be used.
@@ -213,8 +216,8 @@ pub struct SetAgentTokenV1Cpi<'a, 'b> {
     pub agent_identity: &'b solana_program::account_info::AccountInfo<'a>,
     /// The address of the Core asset
     pub asset: &'b solana_program::account_info::AccountInfo<'a>,
-    /// The address of the agent token
-    pub agent_token: &'b solana_program::account_info::AccountInfo<'a>,
+    /// The Genesis account for the agent's token launch
+    pub genesis_account: &'b solana_program::account_info::AccountInfo<'a>,
     /// The payer for additional rent
     pub payer: &'b solana_program::account_info::AccountInfo<'a>,
     /// Authority must be the asset signer. If not provided, the payer will be used.
@@ -232,7 +235,7 @@ impl<'a, 'b> SetAgentTokenV1Cpi<'a, 'b> {
             __program: program,
             agent_identity: accounts.agent_identity,
             asset: accounts.asset,
-            agent_token: accounts.agent_token,
+            genesis_account: accounts.genesis_account,
             payer: accounts.payer,
             authority: accounts.authority,
             system_program: accounts.system_program,
@@ -281,7 +284,7 @@ impl<'a, 'b> SetAgentTokenV1Cpi<'a, 'b> {
             false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            *self.agent_token.key,
+            *self.genesis_account.key,
             false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
@@ -321,7 +324,7 @@ impl<'a, 'b> SetAgentTokenV1Cpi<'a, 'b> {
         account_infos.push(self.__program.clone());
         account_infos.push(self.agent_identity.clone());
         account_infos.push(self.asset.clone());
-        account_infos.push(self.agent_token.clone());
+        account_infos.push(self.genesis_account.clone());
         account_infos.push(self.payer.clone());
         if let Some(authority) = self.authority {
             account_infos.push(authority.clone());
@@ -345,7 +348,7 @@ impl<'a, 'b> SetAgentTokenV1Cpi<'a, 'b> {
 ///
 ///   0. `[writable]` agent_identity
 ///   1. `[]` asset
-///   2. `[]` agent_token
+///   2. `[]` genesis_account
 ///   3. `[writable, signer]` payer
 ///   4. `[signer, optional]` authority
 ///   5. `[]` system_program
@@ -359,7 +362,7 @@ impl<'a, 'b> SetAgentTokenV1CpiBuilder<'a, 'b> {
             __program: program,
             agent_identity: None,
             asset: None,
-            agent_token: None,
+            genesis_account: None,
             payer: None,
             authority: None,
             system_program: None,
@@ -382,13 +385,13 @@ impl<'a, 'b> SetAgentTokenV1CpiBuilder<'a, 'b> {
         self.instruction.asset = Some(asset);
         self
     }
-    /// The address of the agent token
+    /// The Genesis account for the agent's token launch
     #[inline(always)]
-    pub fn agent_token(
+    pub fn genesis_account(
         &mut self,
-        agent_token: &'b solana_program::account_info::AccountInfo<'a>,
+        genesis_account: &'b solana_program::account_info::AccountInfo<'a>,
     ) -> &mut Self {
-        self.instruction.agent_token = Some(agent_token);
+        self.instruction.genesis_account = Some(genesis_account);
         self
     }
     /// The payer for additional rent
@@ -467,10 +470,10 @@ impl<'a, 'b> SetAgentTokenV1CpiBuilder<'a, 'b> {
 
             asset: self.instruction.asset.expect("asset is not set"),
 
-            agent_token: self
+            genesis_account: self
                 .instruction
-                .agent_token
-                .expect("agent_token is not set"),
+                .genesis_account
+                .expect("genesis_account is not set"),
 
             payer: self.instruction.payer.expect("payer is not set"),
 
@@ -492,7 +495,7 @@ struct SetAgentTokenV1CpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
     agent_identity: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     asset: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    agent_token: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    genesis_account: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     payer: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     system_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
