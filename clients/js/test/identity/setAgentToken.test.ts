@@ -7,10 +7,16 @@ import {
 } from '@metaplex-foundation/umi';
 import { execute, findAssetSignerPda } from '@metaplex-foundation/mpl-core';
 import {
-  createAccountWithRent,
+  createAssociatedToken,
   createMint,
-  SPL_TOKEN_PROGRAM_ID,
+  findAssociatedTokenPda,
+  mintTokensTo,
+  setComputeUnitLimit,
 } from '@metaplex-foundation/mpl-toolbox';
+import {
+  initializeV2,
+  findGenesisAccountV2Pda,
+} from '@metaplex-foundation/genesis';
 import {
   fetchAgentIdentityV2,
   findAgentIdentityV2Pda,
@@ -19,6 +25,31 @@ import {
   setAgentTokenV1,
 } from '../../src/generated/identity';
 import { createCollectionAndAsset, createUmi } from '../_setup';
+
+/** Create a Genesis account via initializeV2 with the given funding mode. */
+async function createGenesisAccount(
+  umi: Awaited<ReturnType<typeof createUmi>>,
+  fundingMode: number
+) {
+  const baseMint = generateSigner(umi);
+  const genesisAccountPda = findGenesisAccountV2Pda(umi, {
+    baseMint: baseMint.publicKey,
+    genesisIndex: 0,
+  });
+
+  await initializeV2(umi, {
+    baseMint,
+    fundingMode,
+    totalSupplyBaseToken: 1_000_000_000n,
+    name: 'Test Token',
+    uri: 'https://example.com/metadata.json',
+    symbol: 'TST',
+  })
+    .prepend(setComputeUnitLimit(umi, { units: 400_000 }))
+    .sendAndConfirm(umi);
+
+  return { baseMint: baseMint.publicKey, genesisAccount: genesisAccountPda };
+}
 
 test('it can set an agent token', async (t) => {
   const umi = await createUmi();
@@ -31,14 +62,10 @@ test('it can set an agent token', async (t) => {
     agentRegistrationUri: 'https://example.com/agent.json',
   }).sendAndConfirm(umi);
 
-  // Create a token account (owned by SPL Token program).
-  const agentTokenSigner = generateSigner(umi);
-  await createMint(umi, {
-    mint: agentTokenSigner,
-  }).sendAndConfirm(umi);
+  // Create a Genesis account with funding_mode = Mint (0).
+  const { baseMint, genesisAccount } = await createGenesisAccount(umi, 0);
 
   // Set agent token via Execute CPI.
-  const agentIdentityPda = findAgentIdentityV2Pda(umi, { asset });
   const assetSignerPda = findAssetSignerPda(umi, { asset });
 
   await execute(umi, {
@@ -46,15 +73,16 @@ test('it can set an agent token', async (t) => {
     collection: { publicKey: collection },
     instructions: setAgentTokenV1(umi, {
       asset,
-      agentToken: agentTokenSigner.publicKey,
+      genesisAccount,
       authority: createNoopSigner(publicKey(assetSignerPda)),
     }),
   }).sendAndConfirm(umi);
 
-  // Verify the agent token was set.
+  // Verify the agent token was set to the base_mint (NOT the genesis account address).
+  const agentIdentityPda = findAgentIdentityV2Pda(umi, { asset });
   const agentIdentity = await fetchAgentIdentityV2(umi, agentIdentityPda);
   t.is(agentIdentity.key, Key.AgentIdentityV2);
-  t.deepEqual(agentIdentity.agentToken, some(agentTokenSigner.publicKey));
+  t.deepEqual(agentIdentity.agentToken, some(baseMint));
 });
 
 test('it cannot set agent token without asset signer authority', async (t) => {
@@ -67,15 +95,12 @@ test('it cannot set agent token without asset signer authority', async (t) => {
     agentRegistrationUri: 'https://example.com/agent.json',
   }).sendAndConfirm(umi);
 
-  const agentTokenSigner = generateSigner(umi);
-  await createMint(umi, {
-    mint: agentTokenSigner,
-  }).sendAndConfirm(umi);
+  const { genesisAccount } = await createGenesisAccount(umi, 0);
 
   // Call SetAgentTokenV1 directly (not via Execute) - payer is authority, not asset signer.
   const result = setAgentTokenV1(umi, {
     asset,
-    agentToken: agentTokenSigner.publicKey,
+    genesisAccount,
   }).sendAndConfirm(umi);
 
   await t.throwsAsync(result, { name: 'OnlyAssetSignerCanSetAgentToken' });
@@ -91,15 +116,14 @@ test('it cannot set agent token twice', async (t) => {
     agentRegistrationUri: 'https://example.com/agent.json',
   }).sendAndConfirm(umi);
 
-  const agentTokenSigner1 = generateSigner(umi);
-  await createMint(umi, {
-    mint: agentTokenSigner1,
-  }).sendAndConfirm(umi);
-
-  const agentTokenSigner2 = generateSigner(umi);
-  await createMint(umi, {
-    mint: agentTokenSigner2,
-  }).sendAndConfirm(umi);
+  const { genesisAccount: genesisAccount1 } = await createGenesisAccount(
+    umi,
+    0
+  );
+  const { genesisAccount: genesisAccount2 } = await createGenesisAccount(
+    umi,
+    0
+  );
 
   const assetSignerPda = findAssetSignerPda(umi, { asset });
 
@@ -109,7 +133,7 @@ test('it cannot set agent token twice', async (t) => {
     collection: { publicKey: collection },
     instructions: setAgentTokenV1(umi, {
       asset,
-      agentToken: agentTokenSigner1.publicKey,
+      genesisAccount: genesisAccount1,
       authority: createNoopSigner(publicKey(assetSignerPda)),
     }),
   }).sendAndConfirm(umi);
@@ -120,7 +144,7 @@ test('it cannot set agent token twice', async (t) => {
     collection: { publicKey: collection },
     instructions: setAgentTokenV1(umi, {
       asset,
-      agentToken: agentTokenSigner2.publicKey,
+      genesisAccount: genesisAccount2,
       authority: createNoopSigner(publicKey(assetSignerPda)),
     }),
   }).sendAndConfirm(umi);
@@ -128,7 +152,7 @@ test('it cannot set agent token twice', async (t) => {
   await t.throwsAsync(result, { message: /0x7/ });
 });
 
-test('it cannot set agent token with invalid token account', async (t) => {
+test('it cannot set agent token with invalid genesis account', async (t) => {
   const umi = await createUmi();
   const { collection, asset } = await createCollectionAndAsset(umi);
 
@@ -138,8 +162,8 @@ test('it cannot set agent token with invalid token account', async (t) => {
     agentRegistrationUri: 'https://example.com/agent.json',
   }).sendAndConfirm(umi);
 
-  // Use a random account (not owned by SPL Token program) as the token.
-  const fakeToken = generateSigner(umi);
+  // Use a random account (not owned by the Genesis program).
+  const fakeAccount = generateSigner(umi);
 
   const assetSignerPda = findAssetSignerPda(umi, { asset });
 
@@ -148,12 +172,86 @@ test('it cannot set agent token with invalid token account', async (t) => {
     collection: { publicKey: collection },
     instructions: setAgentTokenV1(umi, {
       asset,
-      agentToken: fakeToken.publicKey,
+      genesisAccount: fakeAccount.publicKey,
       authority: createNoopSigner(publicKey(assetSignerPda)),
     }),
   }).sendAndConfirm(umi);
 
-  await t.throwsAsync(result, { message: /0x5/ });
+  await t.throwsAsync(result, { message: /0xa/ });
+});
+
+test('it cannot set agent token with transfer-funded genesis', async (t) => {
+  const umi = await createUmi();
+  const { collection, asset } = await createCollectionAndAsset(umi);
+
+  await registerIdentityV1(umi, {
+    asset,
+    collection,
+    agentRegistrationUri: 'https://example.com/agent.json',
+  }).sendAndConfirm(umi);
+
+  // Create a Genesis account with funding_mode = Transfer (1).
+  // Transfer mode requires pre-creating the mint and funding an ATA.
+  const authority = generateSigner(umi);
+  const baseMint = generateSigner(umi);
+  const totalSupply = 1_000_000_000n;
+
+  // Create mint with authority as mint/freeze authority.
+  await createMint(umi, {
+    mint: baseMint,
+    mintAuthority: authority.publicKey,
+    freezeAuthority: authority.publicKey,
+    decimals: 9,
+  }).sendAndConfirm(umi);
+
+  // Create authority's ATA and mint tokens to it.
+  const authorityAta = findAssociatedTokenPda(umi, {
+    mint: baseMint.publicKey,
+    owner: authority.publicKey,
+  });
+  await createAssociatedToken(umi, {
+    mint: baseMint.publicKey,
+    owner: authority.publicKey,
+  }).sendAndConfirm(umi);
+
+  await mintTokensTo(umi, {
+    mint: baseMint.publicKey,
+    token: authorityAta,
+    mintAuthority: authority,
+    amount: totalSupply,
+  }).sendAndConfirm(umi);
+
+  // Initialize Genesis with Transfer mode.
+  const genesisAccountPda = findGenesisAccountV2Pda(umi, {
+    baseMint: baseMint.publicKey,
+    genesisIndex: 0,
+  });
+
+  await initializeV2(umi, {
+    baseMint,
+    authority,
+    fundingMode: 1,
+    totalSupplyBaseToken: totalSupply,
+    name: 'Transfer Token',
+    uri: 'https://example.com/metadata.json',
+    symbol: 'TFR',
+  })
+    .prepend(setComputeUnitLimit(umi, { units: 400_000 }))
+    .sendAndConfirm(umi);
+
+  const assetSignerPda = findAssetSignerPda(umi, { asset });
+
+  const result = execute(umi, {
+    asset: { publicKey: asset },
+    collection: { publicKey: collection },
+    instructions: setAgentTokenV1(umi, {
+      asset,
+      genesisAccount: genesisAccountPda,
+      authority: createNoopSigner(publicKey(assetSignerPda)),
+    }),
+  }).sendAndConfirm(umi);
+
+  await t.throwsAsync(result, { message: /0xb/ });
 });
 
 test('it cannot set agent token on unregistered identity', async (t) => {
@@ -162,13 +260,7 @@ test('it cannot set agent token on unregistered identity', async (t) => {
 
   // Do NOT register identity.
 
-  const agentTokenSigner = generateSigner(umi);
-  await createAccountWithRent(umi, {
-    newAccount: agentTokenSigner,
-    space: 165,
-    programId: SPL_TOKEN_PROGRAM_ID,
-  }).sendAndConfirm(umi);
-  const agentToken = agentTokenSigner.publicKey;
+  const { genesisAccount } = await createGenesisAccount(umi, 0);
   const assetSignerPda = findAssetSignerPda(umi, { asset });
 
   const result = execute(umi, {
@@ -176,7 +268,7 @@ test('it cannot set agent token on unregistered identity', async (t) => {
     collection: { publicKey: collection },
     instructions: setAgentTokenV1(umi, {
       asset,
-      agentToken,
+      genesisAccount,
       authority: createNoopSigner(publicKey(assetSignerPda)),
     }),
   }).sendAndConfirm(umi);

@@ -35,8 +35,8 @@ export type SetAgentTokenV1InstructionAccounts = {
   agentIdentity?: PublicKey | Pda;
   /** The address of the Core asset */
   asset: PublicKey | Pda;
-  /** The address of the agent token */
-  agentToken: PublicKey | Pda;
+  /** The Genesis account for the agent's token launch */
+  genesisAccount: PublicKey | Pda;
   /** The payer for additional rent */
   payer?: Signer;
   /** Authority must be the asset signer. If not provided, the payer will be used. */
@@ -102,10 +102,10 @@ export function setAgentTokenV1(
       isWritable: false as boolean,
       value: input.asset ?? null,
     },
-    agentToken: {
+    genesisAccount: {
       index: 2,
       isWritable: false as boolean,
-      value: input.agentToken ?? null,
+      value: input.genesisAccount ?? null,
     },
     payer: {
       index: 3,

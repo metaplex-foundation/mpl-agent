@@ -42,7 +42,7 @@ pub enum MplAgentIdentityInstruction {
     /// Set an agent token if it is not already set. If the account also happens to be an AgentIdentityV1, it will be upgraded to an AgentIdentityV2.
     #[account(0, writable, name="agent_identity", desc = "The agent identity PDA. Must be of type AgentIdentityV1 or AgentIdentityV2.")]
     #[account(1, name="asset", desc = "The address of the Core asset")]
-    #[account(2, name="agent_token", desc = "The address of the agent token")]
+    #[account(2, name="genesis_account", desc = "The Genesis account for the agent's token launch")]
     #[account(3, writable, signer, name="payer", desc = "The payer for additional rent")]
     #[account(4, optional, signer, name="authority", desc = "Authority must be the asset signer. If not provided, the payer will be used.")]
     #[account(5, name="system_program", desc = "The system program")]

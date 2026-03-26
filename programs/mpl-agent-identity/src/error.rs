@@ -47,6 +47,14 @@ pub enum MplAgentIdentityError {
     /// 9 - Agent Identity already registered
     #[error("Agent Identity already registered")]
     AgentIdentityAlreadyRegistered,
+
+    /// 10 - Invalid Genesis Account
+    #[error("Invalid Genesis Account")]
+    InvalidGenesisAccount,
+
+    /// 11 - Genesis account is not mint-funded
+    #[error("Genesis account is not mint-funded")]
+    GenesisNotMintFunded,
 }
 
 impl PrintProgramError for MplAgentIdentityError {

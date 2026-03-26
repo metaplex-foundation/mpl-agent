@@ -5,11 +5,11 @@ use solana_program_test::BanksClientError;
 use solana_program_test::ProgramTest;
 use solana_sdk::transaction::TransactionError;
 use solana_sdk::{
+    account::AccountSharedData,
     pubkey::Pubkey,
     signature::{Keypair, Signer},
     transaction::Transaction,
 };
-use spl_token_interface::instruction::initialize_mint2;
 
 /// Asserts that a BanksClientError is a custom program error matching the
 /// expected error variant. Callers pass the error enum variant cast as u32,
@@ -25,6 +25,9 @@ pub fn assert_custom_error(error: BanksClientError, expected_code: u32) {
 
 pub const MPL_CORE_ID: Pubkey =
     solana_program::pubkey!("CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d");
+
+pub const GENESIS_PROGRAM_ID: Pubkey =
+    solana_program::pubkey!("GNS1S5J5AspKXgpjz6SvKL66kPaKWAhaGRhCqPRxii2B");
 
 pub fn setup() -> ProgramTest {
     let mut program_test =
@@ -99,38 +102,44 @@ pub async fn register_identity(
     agent_identity_pda
 }
 
+/// Create a fake GenesisAccountV2 account in the test environment.
+///
+/// Layout (136 bytes total):
+///   offset 0:   key (u8) = 18 (GenesisAccountV2 discriminator)
+///   offset 4:   finalized (u8)
+///   offset 8:   authority (Pubkey, 32 bytes)
+///   offset 40:  base_mint (Pubkey, 32 bytes)
+///   offset 128: funding_mode (u8) — 0=Mint, 1=Transfer
+///
+/// Returns the address of the genesis account.
 #[allow(dead_code)]
-pub async fn create_mint(context: &mut solana_program_test::ProgramTestContext) -> Pubkey {
-    let mint_keypair = Keypair::new();
-    let mint_address = mint_keypair.pubkey();
+pub async fn create_genesis_account(
+    context: &mut solana_program_test::ProgramTestContext,
+    base_mint: Pubkey,
+    finalized: u8,
+    funding_mode: u8,
+) -> Pubkey {
+    let genesis_keypair = Keypair::new();
+    let genesis_address = genesis_keypair.pubkey();
+
+    let mut data = vec![0u8; 136];
+    // key (discriminator) at offset 0
+    data[0] = 18;
+    // finalized at offset 4
+    data[4] = finalized;
+    // authority at offset 8 (use payer as authority)
+    data[8..40].copy_from_slice(context.payer.pubkey().as_ref());
+    // base_mint at offset 40
+    data[40..72].copy_from_slice(base_mint.as_ref());
+    // funding_mode at offset 128
+    data[128] = funding_mode;
 
     let rent = context.banks_client.get_rent().await.unwrap();
-    let lamports = rent.minimum_balance(82);
+    let lamports = rent.minimum_balance(136);
 
-    let create_account_ix = solana_sdk::system_instruction::create_account(
-        &context.payer.pubkey(),
-        &mint_address,
-        lamports,
-        82,
-        &spl_token_interface::ID,
-    );
+    let mut account_data = AccountSharedData::new(lamports, 136, &GENESIS_PROGRAM_ID);
+    account_data.set_data_from_slice(&data);
+    context.set_account(&genesis_address, &account_data);
 
-    let init_mint_ix = initialize_mint2(
-        &spl_token_interface::ID,
-        &mint_address,
-        &context.payer.pubkey(),
-        None,
-        9,
-    )
-    .unwrap();
-
-    let tx = Transaction::new_signed_with_payer(
-        &[create_account_ix, init_mint_ix],
-        Some(&context.payer.pubkey()),
-        &[&context.payer, &mint_keypair],
-        context.last_blockhash,
-    );
-    context.banks_client.process_transaction(tx).await.unwrap();
-
-    mint_address
+    genesis_address
 }
