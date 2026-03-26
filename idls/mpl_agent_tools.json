@@ -125,6 +125,72 @@
         "type": "u8",
         "value": 1
       }
+    },
+    {
+      "name": "RevokeExecutionV1",
+      "accounts": [
+        {
+          "name": "executionDelegateRecord",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The execution delegate record to close"
+          ]
+        },
+        {
+          "name": "agentAsset",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The agent asset"
+          ]
+        },
+        {
+          "name": "destination",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The destination for the refunded rent"
+          ]
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "The payer"
+          ]
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true,
+          "isOptional": true,
+          "docs": [
+            "Authority — must be asset owner or executive authority"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The system program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "revokeExecutionV1Args",
+          "type": {
+            "defined": "RevokeExecutionV1Args"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 2
+      }
     }
   ],
   "accounts": [
@@ -249,6 +315,26 @@
       }
     },
     {
+      "name": "RevokeExecutionV1Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                7
+              ]
+            },
+            "attrs": [
+              "padding"
+            ]
+          }
+        ]
+      }
+    },
+    {
       "name": "Key",
       "type": {
         "kind": "enum",
@@ -326,6 +412,16 @@
       "code": 11,
       "name": "InvalidExecutiveProfileDerivation",
       "msg": "Invalid Executive Profile Derivation"
+    },
+    {
+      "code": 12,
+      "name": "ExecutionDelegateRecordMustBeInitialized",
+      "msg": "Execution Delegate Record must be initialized"
+    },
+    {
+      "code": 13,
+      "name": "UnauthorizedRevoke",
+      "msg": "Authority must be asset owner or executive to revoke"
     }
   ],
   "metadata": {

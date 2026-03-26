@@ -1,6 +1,6 @@
 use shank::{ShankContext, ShankInstruction};
 
-use crate::processor::{DelegateExecutionV1Args, RegisterExecutiveV1Args};
+use crate::processor::{DelegateExecutionV1Args, RegisterExecutiveV1Args, RevokeExecutionV1Args};
 
 /// Instruction discriminants for routing.
 /// The first byte of instruction data determines which instruction to execute.
@@ -9,6 +9,7 @@ use crate::processor::{DelegateExecutionV1Args, RegisterExecutiveV1Args};
 pub enum MplAgentToolsInstructionDiscriminant {
     RegisterExecutorV1 = 0,
     DelegateExecutionV1 = 1,
+    RevokeExecutionV1 = 2,
 }
 
 impl TryFrom<u8> for MplAgentToolsInstructionDiscriminant {
@@ -18,6 +19,7 @@ impl TryFrom<u8> for MplAgentToolsInstructionDiscriminant {
         match value {
             0 => Ok(MplAgentToolsInstructionDiscriminant::RegisterExecutorV1),
             1 => Ok(MplAgentToolsInstructionDiscriminant::DelegateExecutionV1),
+            2 => Ok(MplAgentToolsInstructionDiscriminant::RevokeExecutionV1),
             _ => Err(()),
         }
     }
@@ -45,4 +47,13 @@ pub enum MplAgentToolsInstruction {
     #[account(5, optional, signer, name="authority", desc = "Authority the executive signs with when executing agent actions")]
     #[account(6, name="system_program", desc = "The system program")]
     DelegateExecutionV1(DelegateExecutionV1Args),
+
+    /// Revoke an Execution Delegate for an Agent Asset.
+    #[account(0, writable, name="execution_delegate_record", desc = "The execution delegate record to close")]
+    #[account(1, name="agent_asset", desc = "The agent asset")]
+    #[account(2, writable, name="destination", desc = "The destination for the refunded rent")]
+    #[account(3, writable, signer, name="payer", desc = "The payer")]
+    #[account(4, optional, signer, name="authority", desc = "Authority — must be asset owner or executive authority")]
+    #[account(5, name="system_program", desc = "The system program")]
+    RevokeExecutionV1(RevokeExecutionV1Args),
 }

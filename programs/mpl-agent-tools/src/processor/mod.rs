@@ -1,5 +1,6 @@
 mod delegate_execution_v1;
 mod register_executive_v1;
+mod revoke_execution_v1;
 
 use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, msg, pubkey::Pubkey};
 
@@ -8,6 +9,7 @@ use crate::instruction::MplAgentToolsInstructionDiscriminant;
 
 pub use delegate_execution_v1::{delegate_execution_v1, DelegateExecutionV1Args};
 pub use register_executive_v1::{register_executive_v1, RegisterExecutiveV1Args};
+pub use revoke_execution_v1::{revoke_execution_v1, RevokeExecutionV1Args};
 
 /// Process incoming instructions.
 ///
@@ -43,6 +45,14 @@ pub fn process_instruction<'a>(
                 &instruction_data[..core::mem::size_of::<DelegateExecutionV1Args>()],
             );
             delegate_execution_v1(accounts, args)
+        }
+        Ok(MplAgentToolsInstructionDiscriminant::RevokeExecutionV1) => {
+            msg!("Instruction: RevokeExecutionV1");
+            // Zero-copy: cast instruction data to args struct.
+            let args: &RevokeExecutionV1Args = bytemuck::from_bytes(
+                &instruction_data[..core::mem::size_of::<RevokeExecutionV1Args>()],
+            );
+            revoke_execution_v1(accounts, args)
         }
         Err(_) => Err(MplAgentToolsError::InvalidInstructionData.into()),
     }

@@ -8,3 +8,4 @@
 
 export * from './delegateExecutionV1';
 export * from './registerExecutiveV1';
+export * from './revokeExecutionV1';

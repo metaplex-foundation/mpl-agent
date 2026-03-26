@@ -7,6 +7,8 @@
 
 pub(crate) mod r#delegate_execution_v1;
 pub(crate) mod r#register_executive_v1;
+pub(crate) mod r#revoke_execution_v1;
 
 pub use self::r#delegate_execution_v1::*;
 pub use self::r#register_executive_v1::*;
+pub use self::r#revoke_execution_v1::*;

@@ -54,6 +54,7 @@ kinobi.update(
         executionDelegateRecord: {defaultValue: k.pdaValueNode("executionDelegateRecordV1")},
       },
     },
+    revokeExecutionV1: {},
   })
 );
 

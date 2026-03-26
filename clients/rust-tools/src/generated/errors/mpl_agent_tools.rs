@@ -47,6 +47,12 @@ pub enum MplAgentToolsError {
     /// 11 (0xB) - Invalid Executive Profile Derivation
     #[error("Invalid Executive Profile Derivation")]
     InvalidExecutiveProfileDerivation,
+    /// 12 (0xC) - Execution Delegate Record must be initialized
+    #[error("Execution Delegate Record must be initialized")]
+    ExecutionDelegateRecordMustBeInitialized,
+    /// 13 (0xD) - Authority must be asset owner or executive to revoke
+    #[error("Authority must be asset owner or executive to revoke")]
+    UnauthorizedRevoke,
 }
 
 impl From<MplAgentToolsError> for ProgramError {
@@ -71,6 +77,8 @@ impl TryFrom<u32> for MplAgentToolsError {
             9 => Ok(MplAgentToolsError::AgentIdentityNotRegistered),
             10 => Ok(MplAgentToolsError::AssetOwnerMustBeTheOneToDelegateExecution),
             11 => Ok(MplAgentToolsError::InvalidExecutiveProfileDerivation),
+            12 => Ok(MplAgentToolsError::ExecutionDelegateRecordMustBeInitialized),
+            13 => Ok(MplAgentToolsError::UnauthorizedRevoke),
             _ => Err(ProgramError::InvalidArgument),
         }
     }
@@ -100,6 +108,12 @@ impl ToStr for MplAgentToolsError {
             }
             MplAgentToolsError::InvalidExecutiveProfileDerivation => {
                 "Invalid Executive Profile Derivation"
+            }
+            MplAgentToolsError::ExecutionDelegateRecordMustBeInitialized => {
+                "Execution Delegate Record must be initialized"
+            }
+            MplAgentToolsError::UnauthorizedRevoke => {
+                "Authority must be asset owner or executive to revoke"
             }
         }
     }

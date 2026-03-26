@@ -189,6 +189,39 @@ nameToErrorMap.set(
   InvalidExecutiveProfileDerivationError
 );
 
+/** ExecutionDelegateRecordMustBeInitialized: Execution Delegate Record must be initialized */
+export class ExecutionDelegateRecordMustBeInitializedError extends ProgramError {
+  override readonly name: string = 'ExecutionDelegateRecordMustBeInitialized';
+
+  readonly code: number = 0xc; // 12
+
+  constructor(program: Program, cause?: Error) {
+    super('Execution Delegate Record must be initialized', program, cause);
+  }
+}
+codeToErrorMap.set(0xc, ExecutionDelegateRecordMustBeInitializedError);
+nameToErrorMap.set(
+  'ExecutionDelegateRecordMustBeInitialized',
+  ExecutionDelegateRecordMustBeInitializedError
+);
+
+/** UnauthorizedRevoke: Authority must be asset owner or executive to revoke */
+export class UnauthorizedRevokeError extends ProgramError {
+  override readonly name: string = 'UnauthorizedRevoke';
+
+  readonly code: number = 0xd; // 13
+
+  constructor(program: Program, cause?: Error) {
+    super(
+      'Authority must be asset owner or executive to revoke',
+      program,
+      cause
+    );
+  }
+}
+codeToErrorMap.set(0xd, UnauthorizedRevokeError);
+nameToErrorMap.set('UnauthorizedRevoke', UnauthorizedRevokeError);
+
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors

@@ -55,6 +55,14 @@ pub enum MplAgentToolsError {
     /// 11 - Invalid Executive Profile Derivation
     #[error("Invalid Executive Profile Derivation")]
     InvalidExecutiveProfileDerivation,
+
+    /// 12 - Execution Delegate Record must be initialized
+    #[error("Execution Delegate Record must be initialized")]
+    ExecutionDelegateRecordMustBeInitialized,
+
+    /// 13 - Authority must be asset owner or executive to revoke
+    #[error("Authority must be asset owner or executive to revoke")]
+    UnauthorizedRevoke,
 }
 
 impl PrintProgramError for MplAgentToolsError {
