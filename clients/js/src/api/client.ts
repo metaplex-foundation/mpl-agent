@@ -85,11 +85,11 @@ export async function mintAgent(
     );
   }
 
+  const rawText = await response.text().catch(() => '<unable to read body>');
   let body: any;
   try {
-    body = await response.json();
+    body = JSON.parse(rawText);
   } catch (parseError) {
-    const rawText = await response.text().catch(() => '<unable to read body>');
     throw agentApiError(
       `Failed to parse mintAgent response as JSON: ${(parseError as Error).message} — raw body: ${rawText}`,
       response.status,
