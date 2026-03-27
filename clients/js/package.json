@@ -36,6 +36,7 @@
     "@ava/typescript": "^5.0.0",
     "@metaplex-foundation/genesis": "^0.26.2",
     "@metaplex-foundation/umi": "^1.5.1",
+    "@metaplex-foundation/umi-bundle-defaults": "^1.5.1",
     "@metaplex-foundation/umi-bundle-tests": "^1.5.1",
     "@solana/web3.js": "^1.73.0",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
@@ -55,6 +56,10 @@
     "vercel": "^28.16.0"
   },
   "ava": {
+    "files": [
+      "test/**/*.test.ts",
+      "!test/api/**"
+    ],
     "typescript": {
       "compile": false,
       "rewritePaths": {
