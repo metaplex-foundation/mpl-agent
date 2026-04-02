@@ -116,6 +116,7 @@ pub async fn register_identity(
 pub async fn create_genesis_account(
     context: &mut solana_program_test::ProgramTestContext,
     base_mint: Pubkey,
+    authority: Pubkey,
     finalized: u8,
     funding_mode: u8,
 ) -> Pubkey {
@@ -127,8 +128,8 @@ pub async fn create_genesis_account(
     data[0] = 18;
     // finalized at offset 4
     data[4] = finalized;
-    // authority at offset 8 (use payer as authority)
-    data[8..40].copy_from_slice(context.payer.pubkey().as_ref());
+    // authority at offset 8
+    data[8..40].copy_from_slice(authority.as_ref());
     // base_mint at offset 40
     data[40..72].copy_from_slice(base_mint.as_ref());
     // funding_mode at offset 128

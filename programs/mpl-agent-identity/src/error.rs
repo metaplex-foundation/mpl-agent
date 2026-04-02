@@ -55,6 +55,10 @@ pub enum MplAgentIdentityError {
     /// 11 - Genesis account is not mint-funded
     #[error("Genesis account is not mint-funded")]
     GenesisNotMintFunded,
+
+    /// 12 - Asset signer is not the genesis authority
+    #[error("Asset signer is not the genesis authority")]
+    AssetSignerNotGenesisAuthority,
 }
 
 impl PrintProgramError for MplAgentIdentityError {

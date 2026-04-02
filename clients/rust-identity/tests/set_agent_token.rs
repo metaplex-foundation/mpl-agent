@@ -60,8 +60,14 @@ async fn set_agent_token() {
     let (collection, asset) = setup::create_collection_and_asset(&mut context).await;
     let agent_identity_pda = setup::register_identity(&mut context, asset, collection).await;
 
+    let (asset_signer_pda, _) = Pubkey::find_program_address(
+        &["mpl-core-execute".as_bytes(), asset.as_ref()],
+        &setup::MPL_CORE_ID,
+    );
+
     let base_mint = Keypair::new().pubkey();
-    let genesis_account = create_genesis_account(&mut context, base_mint, 0, 0).await;
+    let genesis_account =
+        create_genesis_account(&mut context, base_mint, asset_signer_pda, 0, 0).await;
 
     let ix = build_set_agent_token_via_execute(
         asset,
@@ -101,7 +107,8 @@ async fn cannot_set_agent_token_without_asset_signer() {
     let agent_identity_pda = setup::register_identity(&mut context, asset, collection).await;
 
     let base_mint = Keypair::new().pubkey();
-    let genesis_account = create_genesis_account(&mut context, base_mint, 0, 0).await;
+    let payer_pubkey = context.payer.pubkey();
+    let genesis_account = create_genesis_account(&mut context, base_mint, payer_pubkey, 0, 0).await;
 
     // Call SetAgentTokenV1 directly (not via Execute), so payer is the authority.
     let ix = SetAgentTokenV1Builder::new()
@@ -136,8 +143,14 @@ async fn cannot_set_agent_token_twice() {
     let (collection, asset) = setup::create_collection_and_asset(&mut context).await;
     let agent_identity_pda = setup::register_identity(&mut context, asset, collection).await;
 
+    let (asset_signer_pda, _) = Pubkey::find_program_address(
+        &["mpl-core-execute".as_bytes(), asset.as_ref()],
+        &setup::MPL_CORE_ID,
+    );
+
     let base_mint = Keypair::new().pubkey();
-    let genesis_account = create_genesis_account(&mut context, base_mint, 0, 0).await;
+    let genesis_account =
+        create_genesis_account(&mut context, base_mint, asset_signer_pda, 0, 0).await;
 
     // First set succeeds.
     let ix = build_set_agent_token_via_execute(
@@ -158,7 +171,8 @@ async fn cannot_set_agent_token_twice() {
 
     // Second set with a different genesis account should fail.
     let base_mint_2 = Keypair::new().pubkey();
-    let genesis_account_2 = create_genesis_account(&mut context, base_mint_2, 0, 0).await;
+    let genesis_account_2 =
+        create_genesis_account(&mut context, base_mint_2, asset_signer_pda, 0, 0).await;
 
     let ix = build_set_agent_token_via_execute(
         asset,
@@ -229,7 +243,8 @@ async fn cannot_set_agent_token_with_transfer_funded_genesis() {
 
     // Create a genesis account with funding_mode = Transfer (1).
     let base_mint = Keypair::new().pubkey();
-    let genesis_account = create_genesis_account(&mut context, base_mint, 0, 1).await;
+    let payer_pubkey = context.payer.pubkey();
+    let genesis_account = create_genesis_account(&mut context, base_mint, payer_pubkey, 0, 1).await;
 
     let ix = build_set_agent_token_via_execute(
         asset,
@@ -305,7 +320,8 @@ async fn cannot_set_agent_token_on_unregistered_identity() {
     // Don't register identity — PDA won't be initialized.
     let (agent_identity_pda, _) = AgentIdentityV2::find_pda(&asset);
     let base_mint = Keypair::new().pubkey();
-    let genesis_account = create_genesis_account(&mut context, base_mint, 0, 0).await;
+    let payer_pubkey = context.payer.pubkey();
+    let genesis_account = create_genesis_account(&mut context, base_mint, payer_pubkey, 0, 0).await;
 
     let ix = build_set_agent_token_via_execute(
         asset,
@@ -383,8 +399,14 @@ async fn set_agent_token_migrates_v1_to_v2() {
     assert_eq!(account.data[0], 1); // Key::AgentIdentityV1
 
     // Set agent token via Execute CPI — this should migrate V1 -> V2.
+    let (asset_signer_pda, _) = Pubkey::find_program_address(
+        &["mpl-core-execute".as_bytes(), asset.as_ref()],
+        &setup::MPL_CORE_ID,
+    );
+
     let base_mint = Keypair::new().pubkey();
-    let genesis_account = create_genesis_account(&mut context, base_mint, 0, 0).await;
+    let genesis_account =
+        create_genesis_account(&mut context, base_mint, asset_signer_pda, 0, 0).await;
 
     let ix = build_set_agent_token_via_execute(
         asset,
@@ -428,8 +450,14 @@ async fn set_agent_token_on_v1_cannot_set_twice() {
     downgrade_to_v1(&mut context, agent_identity_pda, asset).await;
 
     // First set migrates V1 -> V2 and sets the token.
+    let (asset_signer_pda, _) = Pubkey::find_program_address(
+        &["mpl-core-execute".as_bytes(), asset.as_ref()],
+        &setup::MPL_CORE_ID,
+    );
+
     let base_mint = Keypair::new().pubkey();
-    let genesis_account = create_genesis_account(&mut context, base_mint, 0, 0).await;
+    let genesis_account =
+        create_genesis_account(&mut context, base_mint, asset_signer_pda, 0, 0).await;
 
     let ix = build_set_agent_token_via_execute(
         asset,
@@ -449,7 +477,8 @@ async fn set_agent_token_on_v1_cannot_set_twice() {
 
     // Second set should fail (now it's V2 with token already set).
     let base_mint_2 = Keypair::new().pubkey();
-    let genesis_account_2 = create_genesis_account(&mut context, base_mint_2, 0, 0).await;
+    let genesis_account_2 =
+        create_genesis_account(&mut context, base_mint_2, asset_signer_pda, 0, 0).await;
 
     let ix = build_set_agent_token_via_execute(
         asset,

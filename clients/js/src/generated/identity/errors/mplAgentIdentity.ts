@@ -177,6 +177,22 @@ export class GenesisNotMintFundedError extends ProgramError {
 codeToErrorMap.set(0xb, GenesisNotMintFundedError);
 nameToErrorMap.set('GenesisNotMintFunded', GenesisNotMintFundedError);
 
+/** AssetSignerNotGenesisAuthority: Asset signer is not the genesis authority */
+export class AssetSignerNotGenesisAuthorityError extends ProgramError {
+  override readonly name: string = 'AssetSignerNotGenesisAuthority';
+
+  readonly code: number = 0xc; // 12
+
+  constructor(program: Program, cause?: Error) {
+    super('Asset signer is not the genesis authority', program, cause);
+  }
+}
+codeToErrorMap.set(0xc, AssetSignerNotGenesisAuthorityError);
+nameToErrorMap.set(
+  'AssetSignerNotGenesisAuthority',
+  AssetSignerNotGenesisAuthorityError
+);
+
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors

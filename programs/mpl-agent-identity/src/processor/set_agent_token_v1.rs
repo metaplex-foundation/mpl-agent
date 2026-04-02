@@ -19,6 +19,9 @@ const GENESIS_PROGRAM_ID: Pubkey =
 /// GenesisAccountV2 discriminator.
 const GENESIS_ACCOUNT_V2_DISCRIMINATOR: u8 = 18;
 
+/// Offset of `authority` (Pubkey) in GenesisAccountV2.
+const GENESIS_AUTHORITY_OFFSET: usize = 8;
+
 /// Offset of `base_mint` (Pubkey) in GenesisAccountV2.
 const GENESIS_BASE_MINT_OFFSET: usize = 40;
 
@@ -132,6 +135,19 @@ pub fn set_agent_token_v1<'a>(
     if asset_signer_pda.0 != *ctx.accounts.authority.unwrap_or(ctx.accounts.payer).key {
         return Err(MplAgentIdentityError::OnlyAssetSignerCanSetAgentToken.into());
     }
+
+    // Assert that the asset signer is the genesis authority.
+    let genesis_data = ctx.accounts.genesis_account.try_borrow_data()?;
+    let genesis_authority = Pubkey::from(
+        <[u8; 32]>::try_from(
+            &genesis_data[GENESIS_AUTHORITY_OFFSET..GENESIS_AUTHORITY_OFFSET + 32],
+        )
+        .unwrap(),
+    );
+    if asset_signer_pda.0 != genesis_authority {
+        return Err(MplAgentIdentityError::AssetSignerNotGenesisAuthority.into());
+    }
+    drop(genesis_data);
 
     /****************************************************/
     /***************** Argument Guards ******************/

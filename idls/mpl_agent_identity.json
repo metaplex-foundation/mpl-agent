@@ -400,6 +400,11 @@
       "code": 11,
       "name": "GenesisNotMintFunded",
       "msg": "Genesis account is not mint-funded"
+    },
+    {
+      "code": 12,
+      "name": "AssetSignerNotGenesisAuthority",
+      "msg": "Asset signer is not the genesis authority"
     }
   ],
   "metadata": {
