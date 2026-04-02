@@ -1,10 +1,10 @@
-# Agent Registration via Genesis App API
+# Agent Registration via Metaplex API
 
-This guide covers registering an AI agent on-chain using the Metaplex Agent Registry SDK and the Genesis App API.
+This guide covers registering an AI agent on-chain using the Metaplex Agent Registry SDK and the Metaplex API.
 
 ## Overview
 
-The simplest way to register an agent is through the hosted **Genesis App API** at `https://api.metaplex.com`. The flow is:
+The simplest way to register an agent is through the hosted **Metaplex API** at `https://api.metaplex.com`. The flow is:
 
 1. Call `POST /v1/agents/mint` with the agent metadata and your wallet address
 2. The API stores agent metadata on metaplex.com and returns an unsigned Solana transaction
