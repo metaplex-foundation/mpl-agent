@@ -1,7 +1,14 @@
 module.exports = {
   extends: ['airbnb-base', 'airbnb-typescript/base', 'prettier'],
   plugins: ['prettier'],
-  overrides: [],
+  overrides: [
+    {
+      files: ['src/generated/**'],
+      rules: {
+        '@typescript-eslint/no-shadow': 'off',
+      },
+    },
+  ],
   parserOptions: {
     ecmaVersion: 'latest',
     sourceType: 'module',
