@@ -94,7 +94,7 @@ jobs:
 
       - name: Publish
         working-directory: ./clients/js
-        run: npm publish --access public --tag ${{ inputs.tag }} --provenance
+        run: npm publish --access public --tag ${{ inputs.tag }}
 
       - name: Create release pull request
         if: ${{ github.event.inputs.create_release == 'true' }}
