@@ -33,6 +33,12 @@ kinobi.update(
         k.variablePdaSeedNode("agentAsset", k.publicKeyTypeNode(), "The address of the agent asset"),
       ],
     },
+    x402EndpointV1: {
+      seeds: [
+        k.constantPdaSeedNodeFromString("x402_endpoint"),
+        k.variablePdaSeedNode("asset", k.publicKeyTypeNode(), "The address of the agent asset"),
+      ],
+    },
   })
 );
 
@@ -55,6 +61,11 @@ kinobi.update(
       },
     },
     revokeExecutionV1: {},
+    registerX402V1: {
+      accounts: {
+        x402Endpoint: {defaultValue: k.pdaValueNode("x402EndpointV1", [k.pdaSeedValueNode("asset", k.accountValueNode("agentAsset"))])},
+      },
+    },
   })
 );
 

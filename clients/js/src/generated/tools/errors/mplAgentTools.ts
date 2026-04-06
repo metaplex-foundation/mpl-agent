@@ -222,6 +222,67 @@ export class UnauthorizedRevokeError extends ProgramError {
 codeToErrorMap.set(0xd, UnauthorizedRevokeError);
 nameToErrorMap.set('UnauthorizedRevoke', UnauthorizedRevokeError);
 
+/** InvalidX402EndpointDerivation: Invalid x402 Endpoint Derivation */
+export class InvalidX402EndpointDerivationError extends ProgramError {
+  override readonly name: string = 'InvalidX402EndpointDerivation';
+
+  readonly code: number = 0xe; // 14
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid x402 Endpoint Derivation', program, cause);
+  }
+}
+codeToErrorMap.set(0xe, InvalidX402EndpointDerivationError);
+nameToErrorMap.set(
+  'InvalidX402EndpointDerivation',
+  InvalidX402EndpointDerivationError
+);
+
+/** X402EndpointMustBeUninitialized: x402 Endpoint must be uninitialized */
+export class X402EndpointMustBeUninitializedError extends ProgramError {
+  override readonly name: string = 'X402EndpointMustBeUninitialized';
+
+  readonly code: number = 0xf; // 15
+
+  constructor(program: Program, cause?: Error) {
+    super('x402 Endpoint must be uninitialized', program, cause);
+  }
+}
+codeToErrorMap.set(0xf, X402EndpointMustBeUninitializedError);
+nameToErrorMap.set(
+  'X402EndpointMustBeUninitialized',
+  X402EndpointMustBeUninitializedError
+);
+
+/** AssetOwnerMustRegisterX402: Asset owner must register x402 endpoint */
+export class AssetOwnerMustRegisterX402Error extends ProgramError {
+  override readonly name: string = 'AssetOwnerMustRegisterX402';
+
+  readonly code: number = 0x10; // 16
+
+  constructor(program: Program, cause?: Error) {
+    super('Asset owner must register x402 endpoint', program, cause);
+  }
+}
+codeToErrorMap.set(0x10, AssetOwnerMustRegisterX402Error);
+nameToErrorMap.set(
+  'AssetOwnerMustRegisterX402',
+  AssetOwnerMustRegisterX402Error
+);
+
+/** InvalidUrlLength: Invalid URL length */
+export class InvalidUrlLengthError extends ProgramError {
+  override readonly name: string = 'InvalidUrlLength';
+
+  readonly code: number = 0x11; // 17
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid URL length', program, cause);
+  }
+}
+codeToErrorMap.set(0x11, InvalidUrlLengthError);
+nameToErrorMap.set('InvalidUrlLength', InvalidUrlLengthError);
+
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors

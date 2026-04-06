@@ -7,6 +7,8 @@
 
 pub(crate) mod r#execution_delegate_record_v1;
 pub(crate) mod r#executive_profile_v1;
+pub(crate) mod r#x402_endpoint_v1;
 
 pub use self::r#execution_delegate_record_v1::*;
 pub use self::r#executive_profile_v1::*;
+pub use self::r#x402_endpoint_v1::*;

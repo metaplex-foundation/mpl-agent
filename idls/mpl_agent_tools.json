@@ -191,6 +191,64 @@
         "type": "u8",
         "value": 2
       }
+    },
+    {
+      "name": "RegisterX402V1",
+      "accounts": [
+        {
+          "name": "x402Endpoint",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The x402 endpoint account"
+          ]
+        },
+        {
+          "name": "agentAsset",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The agent MPL Core asset"
+          ]
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "The payer for additional rent"
+          ]
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true,
+          "isOptional": true,
+          "docs": [
+            "Authority — must be the asset owner"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The system program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "registerX402v1Args",
+          "type": {
+            "defined": "RegisterX402V1Args"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 3
+      }
     }
   ],
   "accounts": [
@@ -271,6 +329,54 @@
           }
         ]
       }
+    },
+    {
+      "name": "X402EndpointV1",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "key",
+            "type": {
+              "defined": "Key"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                6
+              ]
+            },
+            "attrs": [
+              "padding"
+            ]
+          },
+          {
+            "name": "asset",
+            "type": "publicKey"
+          },
+          {
+            "name": "authority",
+            "type": "publicKey"
+          },
+          {
+            "name": "url",
+            "type": "string",
+            "attrs": [
+              "idl-type"
+            ]
+          }
+        ]
+      }
     }
   ],
   "types": [
@@ -315,6 +421,33 @@
       }
     },
     {
+      "name": "RegisterX402V1Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                7
+              ]
+            },
+            "attrs": [
+              "padding"
+            ]
+          },
+          {
+            "name": "url",
+            "type": "string",
+            "attrs": [
+              "idl-type"
+            ]
+          }
+        ]
+      }
+    },
+    {
       "name": "RevokeExecutionV1Args",
       "type": {
         "kind": "struct",
@@ -347,6 +480,9 @@
           },
           {
             "name": "ExecutionDelegateRecordV1"
+          },
+          {
+            "name": "X402EndpointV1"
           }
         ]
       }
@@ -422,6 +558,26 @@
       "code": 13,
       "name": "UnauthorizedRevoke",
       "msg": "Authority must be asset owner or executive to revoke"
+    },
+    {
+      "code": 14,
+      "name": "InvalidX402EndpointDerivation",
+      "msg": "Invalid x402 Endpoint Derivation"
+    },
+    {
+      "code": 15,
+      "name": "X402EndpointMustBeUninitialized",
+      "msg": "x402 Endpoint must be uninitialized"
+    },
+    {
+      "code": 16,
+      "name": "AssetOwnerMustRegisterX402",
+      "msg": "Asset owner must register x402 endpoint"
+    },
+    {
+      "code": 17,
+      "name": "InvalidUrlLength",
+      "msg": "Invalid URL length"
     }
   ],
   "metadata": {
