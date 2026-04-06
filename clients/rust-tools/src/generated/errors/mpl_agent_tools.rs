@@ -53,6 +53,18 @@ pub enum MplAgentToolsError {
     /// 13 (0xD) - Authority must be asset owner or executive to revoke
     #[error("Authority must be asset owner or executive to revoke")]
     UnauthorizedRevoke,
+    /// 14 (0xE) - Invalid x402 Endpoint Derivation
+    #[error("Invalid x402 Endpoint Derivation")]
+    InvalidX402EndpointDerivation,
+    /// 15 (0xF) - x402 Endpoint must be uninitialized
+    #[error("x402 Endpoint must be uninitialized")]
+    X402EndpointMustBeUninitialized,
+    /// 16 (0x10) - Asset owner must register x402 endpoint
+    #[error("Asset owner must register x402 endpoint")]
+    AssetOwnerMustRegisterX402,
+    /// 17 (0x11) - Invalid URL length
+    #[error("Invalid URL length")]
+    InvalidUrlLength,
 }
 
 impl From<MplAgentToolsError> for ProgramError {
@@ -79,6 +91,10 @@ impl TryFrom<u32> for MplAgentToolsError {
             11 => Ok(MplAgentToolsError::InvalidExecutiveProfileDerivation),
             12 => Ok(MplAgentToolsError::ExecutionDelegateRecordMustBeInitialized),
             13 => Ok(MplAgentToolsError::UnauthorizedRevoke),
+            14 => Ok(MplAgentToolsError::InvalidX402EndpointDerivation),
+            15 => Ok(MplAgentToolsError::X402EndpointMustBeUninitialized),
+            16 => Ok(MplAgentToolsError::AssetOwnerMustRegisterX402),
+            17 => Ok(MplAgentToolsError::InvalidUrlLength),
             _ => Err(ProgramError::InvalidArgument),
         }
     }
@@ -115,6 +131,14 @@ impl ToStr for MplAgentToolsError {
             MplAgentToolsError::UnauthorizedRevoke => {
                 "Authority must be asset owner or executive to revoke"
             }
+            MplAgentToolsError::InvalidX402EndpointDerivation => "Invalid x402 Endpoint Derivation",
+            MplAgentToolsError::X402EndpointMustBeUninitialized => {
+                "x402 Endpoint must be uninitialized"
+            }
+            MplAgentToolsError::AssetOwnerMustRegisterX402 => {
+                "Asset owner must register x402 endpoint"
+            }
+            MplAgentToolsError::InvalidUrlLength => "Invalid URL length",
         }
     }
 }

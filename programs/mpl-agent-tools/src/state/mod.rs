@@ -1,8 +1,10 @@
 mod execution_delegate_record_v1;
 mod executive_profile_v1;
+mod x402_endpoint_v1;
 
 pub use execution_delegate_record_v1::*;
 pub use executive_profile_v1::*;
+pub use x402_endpoint_v1::*;
 
 use shank::ShankType;
 
@@ -14,6 +16,7 @@ pub enum Key {
     Uninitialized,
     ExecutiveProfileV1,
     ExecutionDelegateRecordV1,
+    X402EndpointV1,
 }
 
 impl From<u8> for Key {
@@ -22,6 +25,7 @@ impl From<u8> for Key {
             0 => Key::Uninitialized,
             1 => Key::ExecutiveProfileV1,
             2 => Key::ExecutionDelegateRecordV1,
+            3 => Key::X402EndpointV1,
             _ => Key::Uninitialized,
         }
     }

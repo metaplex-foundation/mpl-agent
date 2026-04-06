@@ -1,5 +1,6 @@
 mod delegate_execution_v1;
 mod register_executive_v1;
+mod register_x402_v1;
 mod revoke_execution_v1;
 
 use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, msg, pubkey::Pubkey};
@@ -9,6 +10,7 @@ use crate::instruction::MplAgentToolsInstructionDiscriminant;
 
 pub use delegate_execution_v1::{delegate_execution_v1, DelegateExecutionV1Args};
 pub use register_executive_v1::{register_executive_v1, RegisterExecutiveV1Args};
+pub use register_x402_v1::{register_x402_v1, RegisterX402V1Args};
 pub use revoke_execution_v1::{revoke_execution_v1, RevokeExecutionV1Args};
 
 /// Process incoming instructions.
@@ -53,6 +55,14 @@ pub fn process_instruction<'a>(
                 &instruction_data[..core::mem::size_of::<RevokeExecutionV1Args>()],
             );
             revoke_execution_v1(accounts, args)
+        }
+        Ok(MplAgentToolsInstructionDiscriminant::RegisterX402V1) => {
+            msg!("Instruction: RegisterX402V1");
+            // Zero-copy: cast instruction data to args struct.
+            let args: &RegisterX402V1Args = bytemuck::from_bytes(
+                &instruction_data[..core::mem::size_of::<RegisterX402V1Args>()],
+            );
+            register_x402_v1(accounts, args)
         }
         Err(_) => Err(MplAgentToolsError::InvalidInstructionData.into()),
     }

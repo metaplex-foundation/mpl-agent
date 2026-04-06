@@ -8,3 +8,4 @@
 
 export * from './executionDelegateRecordV1';
 export * from './executiveProfileV1';
+export * from './x402EndpointV1';

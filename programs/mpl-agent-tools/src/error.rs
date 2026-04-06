@@ -63,6 +63,22 @@ pub enum MplAgentToolsError {
     /// 13 - Authority must be asset owner or executive to revoke
     #[error("Authority must be asset owner or executive to revoke")]
     UnauthorizedRevoke,
+
+    /// 14 - Invalid x402 Endpoint Derivation
+    #[error("Invalid x402 Endpoint Derivation")]
+    InvalidX402EndpointDerivation,
+
+    /// 15 - x402 Endpoint must be uninitialized
+    #[error("x402 Endpoint must be uninitialized")]
+    X402EndpointMustBeUninitialized,
+
+    /// 16 - Asset owner must register x402 endpoint
+    #[error("Asset owner must register x402 endpoint")]
+    AssetOwnerMustRegisterX402,
+
+    /// 17 - Invalid URL length
+    #[error("Invalid URL length")]
+    InvalidUrlLength,
 }
 
 impl PrintProgramError for MplAgentToolsError {

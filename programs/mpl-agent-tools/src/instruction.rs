@@ -1,6 +1,8 @@
 use shank::{ShankContext, ShankInstruction};
 
-use crate::processor::{DelegateExecutionV1Args, RegisterExecutiveV1Args, RevokeExecutionV1Args};
+use crate::processor::{
+    DelegateExecutionV1Args, RegisterExecutiveV1Args, RegisterX402V1Args, RevokeExecutionV1Args,
+};
 
 /// Instruction discriminants for routing.
 /// The first byte of instruction data determines which instruction to execute.
@@ -10,6 +12,7 @@ pub enum MplAgentToolsInstructionDiscriminant {
     RegisterExecutorV1 = 0,
     DelegateExecutionV1 = 1,
     RevokeExecutionV1 = 2,
+    RegisterX402V1 = 3,
 }
 
 impl TryFrom<u8> for MplAgentToolsInstructionDiscriminant {
@@ -20,6 +23,7 @@ impl TryFrom<u8> for MplAgentToolsInstructionDiscriminant {
             0 => Ok(MplAgentToolsInstructionDiscriminant::RegisterExecutorV1),
             1 => Ok(MplAgentToolsInstructionDiscriminant::DelegateExecutionV1),
             2 => Ok(MplAgentToolsInstructionDiscriminant::RevokeExecutionV1),
+            3 => Ok(MplAgentToolsInstructionDiscriminant::RegisterX402V1),
             _ => Err(()),
         }
     }
@@ -56,4 +60,12 @@ pub enum MplAgentToolsInstruction {
     #[account(4, optional, signer, name="authority", desc = "Authority — must be asset owner or executive authority")]
     #[account(5, name="system_program", desc = "The system program")]
     RevokeExecutionV1(RevokeExecutionV1Args),
+
+    /// Register an x402 payment endpoint for an agent asset for easy discovery.
+    #[account(0, writable, name="x402_endpoint", desc = "The x402 endpoint account")]
+    #[account(1, name="agent_asset", desc = "The agent MPL Core asset")]
+    #[account(2, writable, signer, name="payer", desc = "The payer for additional rent")]
+    #[account(3, optional, signer, name="authority", desc = "Authority — must be the asset owner")]
+    #[account(4, name="system_program", desc = "The system program")]
+    RegisterX402V1(RegisterX402V1Args),
 }

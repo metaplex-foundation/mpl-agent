@@ -12,6 +12,7 @@ export enum Key {
   Uninitialized,
   ExecutiveProfileV1,
   ExecutionDelegateRecordV1,
+  X402EndpointV1,
 }
 
 export type KeyArgs = Key;
