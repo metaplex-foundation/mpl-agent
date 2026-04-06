@@ -19,8 +19,7 @@ use solana_program::pubkey::Pubkey;
 pub struct X402EndpointV1 {
     pub key: Key,
     pub bump: u8,
-    pub url_len: u8,
-    pub padding: [u8; 5],
+    pub padding: [u8; 6],
     #[cfg_attr(
         feature = "serde",
         serde(with = "serde_with::As::<serde_with::DisplayFromStr>")
@@ -31,13 +30,10 @@ pub struct X402EndpointV1 {
         serde(with = "serde_with::As::<serde_with::DisplayFromStr>")
     )]
     pub authority: Pubkey,
-    #[cfg_attr(feature = "serde", serde(with = "serde_with::As::<serde_with::Bytes>"))]
-    pub url: [u8; 128],
+    pub url: String,
 }
 
 impl X402EndpointV1 {
-    pub const LEN: usize = 200;
-
     /// Prefix values used to generate a PDA for this account.
     ///
     /// Values are positional and appear in the following order:

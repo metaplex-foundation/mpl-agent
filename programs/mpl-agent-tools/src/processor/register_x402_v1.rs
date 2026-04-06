@@ -4,9 +4,7 @@ use shank::ShankType;
 use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, system_program};
 
 use crate::{
-    error::MplAgentToolsError,
-    instruction::accounts::RegisterX402V1Accounts,
-    state::{X402EndpointV1, MAX_URL_LEN},
+    error::MplAgentToolsError, instruction::accounts::RegisterX402V1Accounts, state::X402EndpointV1,
 };
 
 #[repr(C)]
@@ -18,19 +16,25 @@ pub struct RegisterX402V1Args {
     /// Padding for alignment.
     #[padding]
     pub _padding: [u8; 7],
-    /// Length of the URL in the url field.
-    pub url_len: u8,
-    /// The x402 endpoint URL bytes (fixed-size buffer, padded with zeroes).
-    pub url: [u8; 128],
+    /// The x402 endpoint URL.
+    /// Parsed manually from the Borsh string representation (u32 length + bytes).
+    #[idl_type("String")]
+    url: [u8; 0],
 }
 
 // Compile-time assertion to ensure struct is properly sized.
-const _: () = assert!(core::mem::size_of::<RegisterX402V1Args>() == 137);
+const _: () = assert!(core::mem::size_of::<RegisterX402V1Args>() == 8);
 
 pub fn register_x402_v1<'a>(
     accounts: &'a [AccountInfo<'a>],
-    args: &RegisterX402V1Args,
+    instruction_data: &[u8],
 ) -> ProgramResult {
+    // Parse the URL string from instruction data (after the 8-byte header).
+    let (_, string_data) = instruction_data.split_at(core::mem::size_of::<RegisterX402V1Args>());
+
+    let url_length = u32::from_le_bytes(string_data[..4].try_into().unwrap()) as usize;
+    let url_bytes = &string_data[4..4 + url_length];
+
     /****************************************************/
     /****************** Account Setup *******************/
     /****************************************************/
@@ -79,8 +83,7 @@ pub fn register_x402_v1<'a>(
     /****************************************************/
 
     // Validate URL length.
-    let url_len = args.url_len as usize;
-    if url_len == 0 || url_len > MAX_URL_LEN {
+    if url_length == 0 {
         return Err(MplAgentToolsError::InvalidUrlLength.into());
     }
 
@@ -88,21 +91,20 @@ pub fn register_x402_v1<'a>(
     /********************* Actions **********************/
     /****************************************************/
 
-    // Create the x402 endpoint account.
-    X402EndpointV1::create_account(&ctx.accounts, bump)?;
+    // Create the x402 endpoint account with space for the trailing URL string.
+    X402EndpointV1::create_account(&ctx.accounts, bump, url_length)?;
 
-    // Initialize the account using zero-copy.
+    // Initialize the fixed portion of the account using zero-copy.
     let mut data = ctx.accounts.x402_endpoint.try_borrow_mut_data()?;
     let endpoint: &mut X402EndpointV1 =
         bytemuck::from_bytes_mut(&mut data[..core::mem::size_of::<X402EndpointV1>()]);
 
-    endpoint.initialize(
-        bump,
-        ctx.accounts.agent_asset.key,
-        signer.key,
-        &args.url,
-        args.url_len,
-    );
+    endpoint.initialize(bump, ctx.accounts.agent_asset.key, signer.key);
+
+    // Write the trailing URL string (u32 length + bytes).
+    let url_offset = core::mem::size_of::<X402EndpointV1>();
+    data[url_offset..url_offset + 4].copy_from_slice(&(url_length as u32).to_le_bytes());
+    data[url_offset + 4..url_offset + 4 + url_length].copy_from_slice(url_bytes);
 
     Ok(())
 }

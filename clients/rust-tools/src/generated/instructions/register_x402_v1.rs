@@ -97,8 +97,7 @@ impl RegisterX402V1InstructionData {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct RegisterX402V1InstructionArgs {
-    pub url_len: u8,
-    pub url: [u8; 128],
+    pub url: String,
 }
 
 /// Instruction builder for `RegisterX402V1`.
@@ -117,8 +116,7 @@ pub struct RegisterX402V1Builder {
     payer: Option<solana_program::pubkey::Pubkey>,
     authority: Option<solana_program::pubkey::Pubkey>,
     system_program: Option<solana_program::pubkey::Pubkey>,
-    url_len: Option<u8>,
-    url: Option<[u8; 128]>,
+    url: Option<String>,
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
 }
 
@@ -159,12 +157,7 @@ impl RegisterX402V1Builder {
         self
     }
     #[inline(always)]
-    pub fn url_len(&mut self, url_len: u8) -> &mut Self {
-        self.url_len = Some(url_len);
-        self
-    }
-    #[inline(always)]
-    pub fn url(&mut self, url: [u8; 128]) -> &mut Self {
+    pub fn url(&mut self, url: String) -> &mut Self {
         self.url = Some(url);
         self
     }
@@ -198,7 +191,6 @@ impl RegisterX402V1Builder {
                 .unwrap_or(solana_program::pubkey!("11111111111111111111111111111111")),
         };
         let args = RegisterX402V1InstructionArgs {
-            url_len: self.url_len.clone().expect("url_len is not set"),
             url: self.url.clone().expect("url is not set"),
         };
 
@@ -374,7 +366,6 @@ impl<'a, 'b> RegisterX402V1CpiBuilder<'a, 'b> {
             payer: None,
             authority: None,
             system_program: None,
-            url_len: None,
             url: None,
             __remaining_accounts: Vec::new(),
         });
@@ -424,12 +415,7 @@ impl<'a, 'b> RegisterX402V1CpiBuilder<'a, 'b> {
         self
     }
     #[inline(always)]
-    pub fn url_len(&mut self, url_len: u8) -> &mut Self {
-        self.instruction.url_len = Some(url_len);
-        self
-    }
-    #[inline(always)]
-    pub fn url(&mut self, url: [u8; 128]) -> &mut Self {
+    pub fn url(&mut self, url: String) -> &mut Self {
         self.instruction.url = Some(url);
         self
     }
@@ -475,11 +461,6 @@ impl<'a, 'b> RegisterX402V1CpiBuilder<'a, 'b> {
         signers_seeds: &[&[&[u8]]],
     ) -> solana_program::entrypoint::ProgramResult {
         let args = RegisterX402V1InstructionArgs {
-            url_len: self
-                .instruction
-                .url_len
-                .clone()
-                .expect("url_len is not set"),
             url: self.instruction.url.clone().expect("url is not set"),
         };
         let instruction = RegisterX402V1Cpi {
@@ -519,8 +500,7 @@ struct RegisterX402V1CpiBuilderInstruction<'a, 'b> {
     payer: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     system_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    url_len: Option<u8>,
-    url: Option<[u8; 128]>,
+    url: Option<String>,
     /// Additional instruction accounts `(AccountInfo, is_writable, is_signer)`.
     __remaining_accounts: Vec<(
         &'b solana_program::account_info::AccountInfo<'a>,

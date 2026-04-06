@@ -72,13 +72,6 @@ async fn create_collection_and_asset(
     (collection.pubkey(), asset.pubkey())
 }
 
-fn make_url_bytes(url: &str) -> [u8; 128] {
-    let mut buf = [0u8; 128];
-    let bytes = url.as_bytes();
-    buf[..bytes.len()].copy_from_slice(bytes);
-    buf
-}
-
 /// It can register an x402 endpoint for an agent asset.
 #[tokio::test]
 async fn register_x402_endpoint() {
@@ -87,15 +80,13 @@ async fn register_x402_endpoint() {
     let (_collection, asset) = create_collection_and_asset(&mut context).await;
 
     let url = "https://example.com/x402/pay";
-    let url_bytes = make_url_bytes(url);
     let (x402_endpoint_pda, _) = X402EndpointV1::find_pda(&asset);
 
     let ix = RegisterX402V1Builder::new()
         .x402_endpoint(x402_endpoint_pda)
         .agent_asset(asset)
         .payer(context.payer.pubkey())
-        .url_len(url.len() as u8)
-        .url(url_bytes)
+        .url(url.to_string())
         .instruction();
 
     let tx = Transaction::new_signed_with_payer(
@@ -114,14 +105,11 @@ async fn register_x402_endpoint() {
         .unwrap()
         .unwrap();
 
-    assert_eq!(account.data.len(), X402EndpointV1::LEN);
-
     let endpoint = X402EndpointV1::from_bytes(&account.data).unwrap();
     assert_eq!(endpoint.key, Key::X402EndpointV1);
-    assert_eq!(endpoint.url_len, url.len() as u8);
     assert_eq!(endpoint.asset, asset);
     assert_eq!(endpoint.authority, context.payer.pubkey());
-    assert_eq!(&endpoint.url[..url.len()], url.as_bytes());
+    assert_eq!(endpoint.url, url);
 }
 
 /// It can register an x402 endpoint with a custom authority (asset owner).
@@ -182,7 +170,6 @@ async fn register_x402_endpoint_custom_authority() {
     context.banks_client.process_transaction(tx).await.unwrap();
 
     let url = "https://api.agent.example.com/x402";
-    let url_bytes = make_url_bytes(url);
     let (x402_endpoint_pda, _) = X402EndpointV1::find_pda(&asset.pubkey());
 
     let ix = RegisterX402V1Builder::new()
@@ -190,8 +177,7 @@ async fn register_x402_endpoint_custom_authority() {
         .agent_asset(asset.pubkey())
         .payer(context.payer.pubkey())
         .authority(Some(authority.pubkey()))
-        .url_len(url.len() as u8)
-        .url(url_bytes)
+        .url(url.to_string())
         .instruction();
 
     let recent_blockhash = context.banks_client.get_latest_blockhash().await.unwrap();
@@ -213,7 +199,7 @@ async fn register_x402_endpoint_custom_authority() {
     let endpoint = X402EndpointV1::from_bytes(&account.data).unwrap();
     assert_eq!(endpoint.key, Key::X402EndpointV1);
     assert_eq!(endpoint.authority, authority.pubkey());
-    assert_eq!(&endpoint.url[..url.len()], url.as_bytes());
+    assert_eq!(endpoint.url, url);
 }
 
 /// It cannot register an x402 endpoint if not the asset owner.
@@ -225,7 +211,6 @@ async fn cannot_register_x402_if_not_owner() {
 
     let non_owner = Keypair::new();
     let url = "https://example.com/x402/pay";
-    let url_bytes = make_url_bytes(url);
     let (x402_endpoint_pda, _) = X402EndpointV1::find_pda(&asset);
 
     let ix = RegisterX402V1Builder::new()
@@ -233,8 +218,7 @@ async fn cannot_register_x402_if_not_owner() {
         .agent_asset(asset)
         .payer(context.payer.pubkey())
         .authority(Some(non_owner.pubkey()))
-        .url_len(url.len() as u8)
-        .url(url_bytes)
+        .url(url.to_string())
         .instruction();
 
     let tx = Transaction::new_signed_with_payer(
@@ -260,15 +244,13 @@ async fn cannot_register_x402_twice() {
     let (_collection, asset) = create_collection_and_asset(&mut context).await;
 
     let url = "https://example.com/x402/pay";
-    let url_bytes = make_url_bytes(url);
     let (x402_endpoint_pda, _) = X402EndpointV1::find_pda(&asset);
 
     let ix = RegisterX402V1Builder::new()
         .x402_endpoint(x402_endpoint_pda)
         .agent_asset(asset)
         .payer(context.payer.pubkey())
-        .url_len(url.len() as u8)
-        .url(url_bytes)
+        .url(url.to_string())
         .instruction();
 
     let tx = Transaction::new_signed_with_payer(
@@ -284,8 +266,7 @@ async fn cannot_register_x402_twice() {
         .x402_endpoint(x402_endpoint_pda)
         .agent_asset(asset)
         .payer(context.payer.pubkey())
-        .url_len(url.len() as u8)
-        .url(url_bytes)
+        .url(url.to_string())
         .instruction();
 
     let recent_blockhash = context.banks_client.get_latest_blockhash().await.unwrap();

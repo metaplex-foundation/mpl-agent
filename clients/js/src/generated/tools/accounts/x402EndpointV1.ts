@@ -35,20 +35,18 @@ export type X402EndpointV1 = Account<X402EndpointV1AccountData>;
 export type X402EndpointV1AccountData = {
   key: Key;
   bump: number;
-  urlLen: number;
   padding: Array<number>;
   asset: PublicKey;
   authority: PublicKey;
-  url: Array<number>;
+  url: string;
 };
 
 export type X402EndpointV1AccountDataArgs = {
   key: KeyArgs;
   bump: number;
-  urlLen: number;
   asset: PublicKey;
   authority: PublicKey;
-  url: Array<number>;
+  url: string;
 };
 
 export function getX402EndpointV1AccountDataSerializer(): Serializer<
@@ -64,15 +62,14 @@ export function getX402EndpointV1AccountDataSerializer(): Serializer<
       [
         ['key', getKeySerializer()],
         ['bump', u8()],
-        ['urlLen', u8()],
-        ['padding', array(u8(), { size: 5 })],
+        ['padding', array(u8(), { size: 6 })],
         ['asset', publicKeySerializer()],
         ['authority', publicKeySerializer()],
-        ['url', array(u8(), { size: 128 })],
+        ['url', string()],
       ],
       { description: 'X402EndpointV1AccountData' }
     ),
-    (value) => ({ ...value, padding: [0, 0, 0, 0, 0] })
+    (value) => ({ ...value, padding: [0, 0, 0, 0, 0, 0] })
   ) as Serializer<X402EndpointV1AccountDataArgs, X402EndpointV1AccountData>;
 }
 
@@ -152,27 +149,21 @@ export function getX402EndpointV1GpaBuilder(
     .registerFields<{
       key: KeyArgs;
       bump: number;
-      urlLen: number;
       padding: Array<number>;
       asset: PublicKey;
       authority: PublicKey;
-      url: Array<number>;
+      url: string;
     }>({
       key: [0, getKeySerializer()],
       bump: [1, u8()],
-      urlLen: [2, u8()],
-      padding: [3, array(u8(), { size: 5 })],
+      padding: [2, array(u8(), { size: 6 })],
       asset: [8, publicKeySerializer()],
       authority: [40, publicKeySerializer()],
-      url: [72, array(u8(), { size: 128 })],
+      url: [72, string()],
     })
     .deserializeUsing<X402EndpointV1>((account) =>
       deserializeX402EndpointV1(account)
     );
-}
-
-export function getX402EndpointV1Size(): number {
-  return 200;
 }
 
 export function findX402EndpointV1Pda(

@@ -58,11 +58,7 @@ pub fn process_instruction<'a>(
         }
         Ok(MplAgentToolsInstructionDiscriminant::RegisterX402V1) => {
             msg!("Instruction: RegisterX402V1");
-            // Zero-copy: cast instruction data to args struct.
-            let args: &RegisterX402V1Args = bytemuck::from_bytes(
-                &instruction_data[..core::mem::size_of::<RegisterX402V1Args>()],
-            );
-            register_x402_v1(accounts, args)
+            register_x402_v1(accounts, instruction_data)
         }
         Err(_) => Err(MplAgentToolsError::InvalidInstructionData.into()),
     }

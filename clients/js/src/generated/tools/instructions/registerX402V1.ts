@@ -18,6 +18,7 @@ import {
   Serializer,
   array,
   mapSerializer,
+  string,
   struct,
   u8,
 } from '@metaplex-foundation/umi/serializers';
@@ -47,14 +48,10 @@ export type RegisterX402V1InstructionAccounts = {
 export type RegisterX402V1InstructionData = {
   discriminator: number;
   padding: Array<number>;
-  urlLen: number;
-  url: Array<number>;
+  url: string;
 };
 
-export type RegisterX402V1InstructionDataArgs = {
-  urlLen: number;
-  url: Array<number>;
-};
+export type RegisterX402V1InstructionDataArgs = { url: string };
 
 export function getRegisterX402V1InstructionDataSerializer(): Serializer<
   RegisterX402V1InstructionDataArgs,
@@ -69,8 +66,7 @@ export function getRegisterX402V1InstructionDataSerializer(): Serializer<
       [
         ['discriminator', u8()],
         ['padding', array(u8(), { size: 7 })],
-        ['urlLen', u8()],
-        ['url', array(u8(), { size: 128 })],
+        ['url', string()],
       ],
       { description: 'RegisterX402V1InstructionData' }
     ),
