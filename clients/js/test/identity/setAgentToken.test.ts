@@ -66,20 +66,38 @@ async function createGenesisAccountViaExecute(
   });
   const assetSignerPda = findAssetSignerPda(umi, { asset });
 
-  await execute(umi, {
+  // Build the inner initializeV2 instruction.
+  const innerTx = initializeV2(umi, {
+    baseMint,
+    authority: createNoopSigner(publicKey(assetSignerPda)),
+    fundingMode,
+    totalSupplyBaseToken: 1_000_000_000n,
+    name: 'Test Token',
+    uri: 'https://example.com/metadata.json',
+    symbol: 'TST',
+  });
+
+  // Wrap in execute CPI.
+  const executeTx = execute(umi, {
     asset: { publicKey: asset },
     collection: { publicKey: collection },
-    instructions: initializeV2(umi, {
-      baseMint,
-      authority: createNoopSigner(publicKey(assetSignerPda)),
-      fundingMode,
-      totalSupplyBaseToken: 1_000_000_000n,
-      name: 'Test Token',
-      uri: 'https://example.com/metadata.json',
-      symbol: 'TST',
-    }),
-  })
-    .prepend(setComputeUnitLimit(umi, { units: 400_000 }))
+    instructions: innerTx,
+  });
+
+  // The mpl-core execute() helper doesn't propagate inner TransactionBuilder
+  // signers. Manually add them (excluding the asset signer which signs via CPI).
+  const assetSignerKey = publicKey(assetSignerPda);
+  const innerSigners = innerTx.items.flatMap((item) => item.signers);
+  const items = executeTx.items;
+  for (const item of items) {
+    item.signers.push(
+      ...innerSigners.filter((s) => s.publicKey !== assetSignerKey)
+    );
+  }
+
+  await executeTx
+    .setItems(items)
+    .prepend(setComputeUnitLimit(umi, { units: 600_000 }))
     .sendAndConfirm(umi);
 
   return { baseMint: baseMint.publicKey, genesisAccount: genesisAccountPda };
