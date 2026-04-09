@@ -26,7 +26,8 @@ import {
 } from '../../src/generated/identity';
 import { createCollectionAndAsset, createUmi } from '../_setup';
 
-/** Create a Genesis account via initializeV2 with the given funding mode. */
+/** Create a Genesis account via initializeV2 with the given funding mode.
+ *  Authority defaults to the umi payer. */
 async function createGenesisAccount(
   umi: Awaited<ReturnType<typeof createUmi>>,
   fundingMode: number
@@ -51,6 +52,39 @@ async function createGenesisAccount(
   return { baseMint: baseMint.publicKey, genesisAccount: genesisAccountPda };
 }
 
+/** Create a Genesis account via Execute CPI so the asset signer PDA is the authority. */
+async function createGenesisAccountViaExecute(
+  umi: Awaited<ReturnType<typeof createUmi>>,
+  asset: ReturnType<typeof publicKey>,
+  collection: ReturnType<typeof publicKey>,
+  fundingMode: number
+) {
+  const baseMint = generateSigner(umi);
+  const genesisAccountPda = findGenesisAccountV2Pda(umi, {
+    baseMint: baseMint.publicKey,
+    genesisIndex: 0,
+  });
+  const assetSignerPda = findAssetSignerPda(umi, { asset });
+
+  await execute(umi, {
+    asset: { publicKey: asset },
+    collection: { publicKey: collection },
+    instructions: initializeV2(umi, {
+      baseMint,
+      authority: createNoopSigner(publicKey(assetSignerPda)),
+      fundingMode,
+      totalSupplyBaseToken: 1_000_000_000n,
+      name: 'Test Token',
+      uri: 'https://example.com/metadata.json',
+      symbol: 'TST',
+    }),
+  })
+    .prepend(setComputeUnitLimit(umi, { units: 400_000 }))
+    .sendAndConfirm(umi);
+
+  return { baseMint: baseMint.publicKey, genesisAccount: genesisAccountPda };
+}
+
 test('it can set an agent token', async (t) => {
   const umi = await createUmi();
   const { collection, asset } = await createCollectionAndAsset(umi);
@@ -62,8 +96,13 @@ test('it can set an agent token', async (t) => {
     agentRegistrationUri: 'https://example.com/agent.json',
   }).sendAndConfirm(umi);
 
-  // Create a Genesis account with funding_mode = Mint (0).
-  const { baseMint, genesisAccount } = await createGenesisAccount(umi, 0);
+  // Create a Genesis account via Execute CPI so asset signer is the authority.
+  const { baseMint, genesisAccount } = await createGenesisAccountViaExecute(
+    umi,
+    asset,
+    collection,
+    0
+  );
 
   // Set agent token via Execute CPI.
   const assetSignerPda = findAssetSignerPda(umi, { asset });
@@ -116,14 +155,10 @@ test('it cannot set agent token twice', async (t) => {
     agentRegistrationUri: 'https://example.com/agent.json',
   }).sendAndConfirm(umi);
 
-  const { genesisAccount: genesisAccount1 } = await createGenesisAccount(
-    umi,
-    0
-  );
-  const { genesisAccount: genesisAccount2 } = await createGenesisAccount(
-    umi,
-    0
-  );
+  const { genesisAccount: genesisAccount1 } =
+    await createGenesisAccountViaExecute(umi, asset, collection, 0);
+  const { genesisAccount: genesisAccount2 } =
+    await createGenesisAccountViaExecute(umi, asset, collection, 0);
 
   const assetSignerPda = findAssetSignerPda(umi, { asset });
 
