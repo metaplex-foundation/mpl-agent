@@ -107,8 +107,8 @@ async fn cannot_set_agent_token_without_asset_signer() {
     let agent_identity_pda = setup::register_identity(&mut context, asset, collection).await;
 
     let base_mint = Keypair::new().pubkey();
-    let genesis_account =
-        create_genesis_account(&mut context, base_mint, 0, 0, context.payer.pubkey()).await;
+    let payer_key = context.payer.pubkey();
+    let genesis_account = create_genesis_account(&mut context, base_mint, 0, 0, payer_key).await;
 
     // Call SetAgentTokenV1 directly (not via Execute), so payer is the authority.
     let ix = SetAgentTokenV1Builder::new()
@@ -243,8 +243,8 @@ async fn cannot_set_agent_token_with_transfer_funded_genesis() {
 
     // Create a genesis account with funding_mode = Transfer (1).
     let base_mint = Keypair::new().pubkey();
-    let genesis_account =
-        create_genesis_account(&mut context, base_mint, 0, 1, context.payer.pubkey()).await;
+    let payer_key = context.payer.pubkey();
+    let genesis_account = create_genesis_account(&mut context, base_mint, 0, 1, payer_key).await;
 
     let ix = build_set_agent_token_via_execute(
         asset,
@@ -356,8 +356,8 @@ async fn cannot_set_agent_token_on_unregistered_identity() {
     // Don't register identity — PDA won't be initialized.
     let (agent_identity_pda, _) = AgentIdentityV2::find_pda(&asset);
     let base_mint = Keypair::new().pubkey();
-    let genesis_account =
-        create_genesis_account(&mut context, base_mint, 0, 0, context.payer.pubkey()).await;
+    let payer_key = context.payer.pubkey();
+    let genesis_account = create_genesis_account(&mut context, base_mint, 0, 0, payer_key).await;
 
     let ix = build_set_agent_token_via_execute(
         asset,
