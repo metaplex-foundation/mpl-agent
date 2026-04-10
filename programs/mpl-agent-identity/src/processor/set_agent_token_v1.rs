@@ -28,6 +28,9 @@ const GENESIS_FUNDING_MODE_OFFSET: usize = 128;
 /// Minimum size of a GenesisAccountV2 account.
 const GENESIS_MIN_SIZE: usize = 136;
 
+/// Offset of `authority` (Pubkey) in GenesisAccountV2.
+const GENESIS_AUTHORITY_OFFSET: usize = 8;
+
 /// FundingMode::Mint variant value.
 const FUNDING_MODE_MINT: u8 = 0;
 
@@ -131,6 +134,20 @@ pub fn set_agent_token_v1<'a>(
     let asset_signer_pda = AssetSigner::find_pda(ctx.accounts.asset.key);
     if asset_signer_pda.0 != *ctx.accounts.authority.unwrap_or(ctx.accounts.payer).key {
         return Err(MplAgentIdentityError::OnlyAssetSignerCanSetAgentToken.into());
+    }
+
+    // Assert that the genesis account authority matches the agent's wallet (asset signer PDA).
+    {
+        let genesis_data = ctx.accounts.genesis_account.try_borrow_data()?;
+        let genesis_authority = Pubkey::from(
+            <[u8; 32]>::try_from(
+                &genesis_data[GENESIS_AUTHORITY_OFFSET..GENESIS_AUTHORITY_OFFSET + 32],
+            )
+            .unwrap(),
+        );
+        if genesis_authority != asset_signer_pda.0 {
+            return Err(MplAgentIdentityError::GenesisAuthorityMismatch.into());
+        }
     }
 
     /****************************************************/

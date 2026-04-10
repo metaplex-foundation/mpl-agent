@@ -55,6 +55,10 @@ pub enum MplAgentIdentityError {
     /// 11 - Genesis account is not mint-funded
     #[error("Genesis account is not mint-funded")]
     GenesisNotMintFunded,
+
+    /// 12 - Genesis account authority does not match the agent wallet
+    #[error("Genesis account authority does not match the agent wallet")]
+    GenesisAuthorityMismatch,
 }
 
 impl PrintProgramError for MplAgentIdentityError {

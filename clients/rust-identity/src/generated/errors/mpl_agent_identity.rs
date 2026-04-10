@@ -47,6 +47,9 @@ pub enum MplAgentIdentityError {
     /// 11 (0xB) - Genesis account is not mint-funded
     #[error("Genesis account is not mint-funded")]
     GenesisNotMintFunded,
+    /// 12 (0xC) - Genesis account authority does not match the agent wallet
+    #[error("Genesis account authority does not match the agent wallet")]
+    GenesisAuthorityMismatch,
 }
 
 impl From<MplAgentIdentityError> for ProgramError {
@@ -71,6 +74,7 @@ impl TryFrom<u32> for MplAgentIdentityError {
             9 => Ok(MplAgentIdentityError::AgentIdentityAlreadyRegistered),
             10 => Ok(MplAgentIdentityError::InvalidGenesisAccount),
             11 => Ok(MplAgentIdentityError::GenesisNotMintFunded),
+            12 => Ok(MplAgentIdentityError::GenesisAuthorityMismatch),
             _ => Err(ProgramError::InvalidArgument),
         }
     }
@@ -95,6 +99,9 @@ impl ToStr for MplAgentIdentityError {
             }
             MplAgentIdentityError::InvalidGenesisAccount => "Invalid Genesis Account",
             MplAgentIdentityError::GenesisNotMintFunded => "Genesis account is not mint-funded",
+            MplAgentIdentityError::GenesisAuthorityMismatch => {
+                "Genesis account authority does not match the agent wallet"
+            }
         }
     }
 }
