@@ -1,10 +1,11 @@
 use bytemuck::{from_bytes, Pod, Zeroable};
-use mpl_agent_identity::{accounts::AgentIdentityV2, types::Key as MplAgentIdentityKey};
-// Note: We use AgentIdentityV2 only for find_pda (same seeds as V1).
-// We read bump from raw bytes to avoid borsh deserialization issues with V1-sized accounts.
+use mpl_agent_identity::types::Key as MplAgentIdentityKey;
+// Note: We validate identity account layout via raw bytes to support both V1 and V2 sized accounts.
 use mpl_core::{accounts::BaseAssetV1, types::Key as MplCoreKey};
 use shank::ShankType;
-use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, system_program};
+use solana_program::{
+    account_info::AccountInfo, entrypoint::ProgramResult, pubkey::Pubkey, system_program,
+};
 
 use crate::{
     error::MplAgentToolsError,
@@ -69,7 +70,7 @@ pub fn delegate_execution_v1<'a>(
     // Accept both V1 and V2 discriminators since registration now creates V2 accounts.
     {
         let agent_identity_data = ctx.accounts.agent_identity.try_borrow_data()?;
-        if ctx.accounts.agent_identity.owner != &mpl_agent_identity::ID
+        if ctx.accounts.agent_identity.owner.to_bytes() != mpl_agent_identity::ID.to_bytes()
             || agent_identity_data.is_empty()
             || (agent_identity_data[0] != MplAgentIdentityKey::AgentIdentityV1 as u8
                 && agent_identity_data[0] != MplAgentIdentityKey::AgentIdentityV2 as u8)
@@ -79,8 +80,11 @@ pub fn delegate_execution_v1<'a>(
     }
 
     // PDA seeds are the same for V1 and V2; bump is at byte offset 1 in both.
-    let (agent_identity_pda, agent_identity_bump) =
-        AgentIdentityV2::find_pda(ctx.accounts.agent_asset.key);
+    let mpl_agent_identity_program_id = Pubkey::new_from_array(mpl_agent_identity::ID.to_bytes());
+    let (agent_identity_pda, agent_identity_bump) = Pubkey::find_program_address(
+        &[b"agent_identity", ctx.accounts.agent_asset.key.as_ref()],
+        &mpl_agent_identity_program_id,
+    );
 
     if ctx.accounts.agent_identity.key != &agent_identity_pda
         || ctx.accounts.agent_identity.try_borrow_data()?[1] != agent_identity_bump
