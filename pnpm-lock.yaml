@@ -11,13 +11,18 @@ overrides:
   '@metaplex-foundation/umi': ^1.5.1
   '@metaplex-foundation/umi-public-keys': ^1.5.1
 
+patchedDependencies:
+  '@metaplex-foundation/kinobi@1.0.0-alpha.2':
+    hash: hkmn7osf32vqin222l7zi6rd54
+    path: patches/@metaplex-foundation__kinobi@1.0.0-alpha.2.patch
+
 devDependencies:
   '@metaplex-foundation/amman':
     specifier: ^0.12.1
     version: 0.12.1(typescript@4.9.5)
   '@metaplex-foundation/kinobi':
     specifier: 1.0.0-alpha.2
-    version: 1.0.0-alpha.2(fastestsmallesttextencoderdecoder@1.0.22)
+    version: 1.0.0-alpha.2(patch_hash=hkmn7osf32vqin222l7zi6rd54)(fastestsmallesttextencoderdecoder@1.0.22)
   '@metaplex-foundation/shank-js':
     specifier: ^0.1.7
     version: 0.1.7
@@ -102,7 +107,7 @@ packages:
     resolution: {integrity: sha512-S9RulC2fFCFOQraz61bij+5YCHhSO9llJegK8c8Y6731fSi6snUSQJdCUqYS8AIgR0TKbQvdvgSyIIdbDFZbBA==}
     dev: true
 
-  /@metaplex-foundation/kinobi@1.0.0-alpha.2(fastestsmallesttextencoderdecoder@1.0.22):
+  /@metaplex-foundation/kinobi@1.0.0-alpha.2(patch_hash=hkmn7osf32vqin222l7zi6rd54)(fastestsmallesttextencoderdecoder@1.0.22):
     resolution: {integrity: sha512-tA/D/CEX6fA/GPwDX4t+ci/nflS2gYeLSFgsYlnceMjXd2WSKU9CkTdXKtkYsRUZD+k8QzCcFfopdlG1LTVRSw==}
     dependencies:
       '@noble/hashes': 1.4.0
@@ -116,6 +121,7 @@ packages:
       - chokidar
       - fastestsmallesttextencoderdecoder
     dev: true
+    patched: true
 
   /@metaplex-foundation/rustbin@0.3.5:
     resolution: {integrity: sha512-m0wkRBEQB/8krwMwKBvFugufZtYwMXiGHud2cTDAv+aGXK4M90y0Hx67/wpu+AqqoQfdV8VM9YezUOHKD+Z5kA==}
