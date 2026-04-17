@@ -14,7 +14,6 @@ use solana_sdk::{
     instruction::AccountMeta,
     pubkey::Pubkey,
     signature::{Keypair, Signer},
-    system_instruction, system_program,
     transaction::{Transaction, TransactionError},
 };
 
@@ -29,6 +28,7 @@ fn assert_custom_error(error: BanksClientError, expected_code: u32) {
 
 const MPL_CORE_ID: Pubkey = solana_program::pubkey!("CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d");
 const SPL_NOOP_ID: Pubkey = solana_program::pubkey!("noopb9bkMVfRPU8AsbpTUg8AQkHtKwMYZiFUjNRtMmV");
+const SYSTEM_PROGRAM_ID: Pubkey = solana_program::pubkey!("11111111111111111111111111111111");
 
 fn setup() -> ProgramTest {
     let mut program_test = ProgramTest::new("mpl_agent_tools_program", mpl_agent_tools::ID, None);
@@ -239,7 +239,7 @@ async fn execute_as_delegate_without_owner() {
         .asset(asset)
         .collection(Some(collection))
         .asset_signer(asset_signer_pda)
-        .payer(context.payer.pubkey())
+        .payer(context.payer.pubkey(), true)
         .authority(Some(executive_authority.pubkey()))
         .program_id(SPL_NOOP_ID)
         .instruction_data(vec![])
@@ -293,11 +293,18 @@ async fn transfer_sol_via_delegate_execution() {
         &MPL_CORE_ID,
     );
 
-    let fund_ix = system_instruction::transfer(
-        &context.payer.pubkey(),
-        &asset_signer_pda,
-        1_000_000_000, // 1 SOL
-    );
+    // System Transfer instruction data: u32 type (2) + u64 lamports.
+    let mut fund_data = vec![0u8; 12];
+    fund_data[..4].copy_from_slice(&2u32.to_le_bytes()); // Transfer = 2
+    fund_data[4..12].copy_from_slice(&1_000_000_000u64.to_le_bytes()); // 1 SOL
+    let fund_ix = solana_sdk::instruction::Instruction {
+        program_id: SYSTEM_PROGRAM_ID,
+        accounts: vec![
+            AccountMeta::new(context.payer.pubkey(), true),
+            AccountMeta::new(asset_signer_pda, false),
+        ],
+        data: fund_data,
+    };
 
     let tx = Transaction::new_signed_with_payer(
         &[fund_ix],
@@ -322,9 +329,9 @@ async fn transfer_sol_via_delegate_execution() {
         .asset(asset)
         .collection(Some(collection))
         .asset_signer(asset_signer_pda)
-        .payer(context.payer.pubkey())
+        .payer(context.payer.pubkey(), true)
         .authority(Some(executive_authority.pubkey()))
-        .program_id(system_program::id())
+        .program_id(SYSTEM_PROGRAM_ID)
         .instruction_data(transfer_data)
         .add_remaining_account(AccountMeta::new_readonly(delegate_record_pda, false))
         .add_remaining_account(AccountMeta::new(asset_signer_pda, false))
@@ -373,7 +380,7 @@ async fn owner_can_still_execute() {
         .asset(asset)
         .collection(Some(collection))
         .asset_signer(asset_signer_pda)
-        .payer(context.payer.pubkey())
+        .payer(context.payer.pubkey(), true)
         .program_id(SPL_NOOP_ID)
         .instruction_data(vec![])
         .instruction();
@@ -412,7 +419,7 @@ async fn cannot_execute_without_delegate() {
         .asset(asset)
         .collection(Some(collection))
         .asset_signer(asset_signer_pda)
-        .payer(context.payer.pubkey())
+        .payer(context.payer.pubkey(), true)
         .authority(Some(attacker.pubkey()))
         .program_id(SPL_NOOP_ID)
         .instruction_data(vec![])
