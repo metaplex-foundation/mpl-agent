@@ -32,9 +32,6 @@
     "overrides": {
       "@metaplex-foundation/umi": "^1.5.1",
       "@metaplex-foundation/umi-public-keys": "^1.5.1"
-    },
-    "patchedDependencies": {
-      "@metaplex-foundation/kinobi@1.0.0-alpha.2": "patches/@metaplex-foundation__kinobi@1.0.0-alpha.2.patch"
     }
   }
 }
