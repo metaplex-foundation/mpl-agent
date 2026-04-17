@@ -11,6 +11,7 @@ ARGS=$*
 WORKING_DIR=$(pwd)
 SOLFMT="solfmt"
 export SBF_OUT_DIR="${WORKING_DIR}/${PROGRAMS_OUTPUT}"
+SBF_TOOLS_VERSION="${SBF_TOOLS_VERSION:-v1.53}"
 
 # Run tests for all Rust client crates from the workspace root.
 RUST_CLIENTS=("rust-identity" "rust-reputation" "rust-validation" "rust-tools")
@@ -20,9 +21,9 @@ for CLIENT in "${RUST_CLIENTS[@]}"; do
     cd "${WORKING_DIR}/clients/${CLIENT}"
 
     if [ ! "$(command -v $SOLFMT)" = "" ]; then
-        CARGO_TERM_COLOR=always cargo test-sbf --sbf-out-dir ${WORKING_DIR}/${PROGRAMS_OUTPUT} ${ARGS} 2>&1 | ${SOLFMT} -- --nocapture
+        CARGO_TERM_COLOR=always cargo test-sbf --tools-version ${SBF_TOOLS_VERSION} --sbf-out-dir ${WORKING_DIR}/${PROGRAMS_OUTPUT} ${ARGS} 2>&1 | ${SOLFMT} -- --nocapture
     else
-        cargo test-sbf --sbf-out-dir ${WORKING_DIR}/${PROGRAMS_OUTPUT} ${ARGS} -- --nocapture
+        cargo test-sbf --tools-version ${SBF_TOOLS_VERSION} --sbf-out-dir ${WORKING_DIR}/${PROGRAMS_OUTPUT} ${ARGS} -- --nocapture
     fi
 
     if [ $? -ne 0 ]; then

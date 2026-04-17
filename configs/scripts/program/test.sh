@@ -30,13 +30,14 @@ PROGRAMS=$(echo $PROGRAMS | jq -c '.[]' | sed 's/"//g')
 WORKING_DIR=$(pwd)
 SOLFMT="solfmt"
 export SBF_OUT_DIR="${WORKING_DIR}/${OUTPUT}"
+SBF_TOOLS_VERSION="${SBF_TOOLS_VERSION:-v1.53}"
 
 for p in ${PROGRAMS[@]}; do
     cd ${WORKING_DIR}/programs/${p}
 
     if [ ! "$(command -v $SOLFMT)" = "" ]; then
-        CARGO_TERM_COLOR=always cargo test-sbf --sbf-out-dir ${WORKING_DIR}/${OUTPUT} ${ARGS} 2>&1 | ${SOLFMT}
+        CARGO_TERM_COLOR=always cargo test-sbf --tools-version ${SBF_TOOLS_VERSION} --sbf-out-dir ${WORKING_DIR}/${OUTPUT} ${ARGS} 2>&1 | ${SOLFMT}
     else
-        RUST_LOG=error cargo test-sbf --sbf-out-dir ${WORKING_DIR}/${OUTPUT} ${ARGS}
+        RUST_LOG=error cargo test-sbf --tools-version ${SBF_TOOLS_VERSION} --sbf-out-dir ${WORKING_DIR}/${OUTPUT} ${ARGS}
     fi
 done

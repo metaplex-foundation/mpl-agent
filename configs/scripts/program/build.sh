@@ -30,8 +30,9 @@ fi
 
 WORKING_DIR=$(pwd)
 export SBF_OUT_DIR="${WORKING_DIR}/${OUTPUT}"
+SBF_TOOLS_VERSION="${SBF_TOOLS_VERSION:-v1.53}"
 
 for p in ${PROGRAMS[@]}; do
     cd ${WORKING_DIR}/programs/${p}
-    cargo build-sbf --sbf-out-dir ${WORKING_DIR}/${OUTPUT} $ARGS
+    cargo build-sbf --tools-version ${SBF_TOOLS_VERSION} --sbf-out-dir ${WORKING_DIR}/${OUTPUT} $ARGS
 done
