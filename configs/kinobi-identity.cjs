@@ -1,4 +1,6 @@
+const fs = require("fs");
 const path = require("path");
+const { execFileSync } = require("child_process");
 const k = require("@metaplex-foundation/kinobi");
 
 // Paths.
@@ -65,3 +67,18 @@ kinobi.accept(
     crateFolder: crateDir,
   })
 );
+
+// Kinobi currently emits `borsh::maybestd::io` for fixed-size option serializers,
+// but this workspace uses borsh versions that expose `borsh::io`.
+const agentIdentityV2Path = path.join(rustDir, "accounts", "agent_identity_v2.rs");
+const agentIdentityV2Content = fs.readFileSync(agentIdentityV2Path, "utf8");
+const normalizedAgentIdentityV2Content = agentIdentityV2Content.replace(
+  /borsh::maybestd::io/g,
+  "borsh::io"
+);
+if (normalizedAgentIdentityV2Content !== agentIdentityV2Content) {
+  fs.writeFileSync(agentIdentityV2Path, normalizedAgentIdentityV2Content);
+  execFileSync("rustfmt", ["--edition", "2021", agentIdentityV2Path], {
+    stdio: "inherit",
+  });
+}
