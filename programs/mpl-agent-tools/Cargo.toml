@@ -23,4 +23,4 @@ mpl-core = "0.11.2"
 # Pin crates below versions that require edition2024 (unsupported by cargo build-sbf's bundled Cargo 1.84)
 rmp = ">=0.8,<0.8.15"
 rmp-serde = ">=1.3,<1.3.1"
-mpl-agent-identity = { path = "../../clients/rust-identity" }
+mpl-agent-identity = "0.2.1"

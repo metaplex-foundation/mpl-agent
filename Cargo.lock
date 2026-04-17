@@ -3162,6 +3162,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "mpl-agent-identity"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8b64cc13e4bc690ee535b5c10cb2c759d5e997e33044f8a2c7b70557bfc0dd23"
+dependencies = [
+ "borsh 0.10.3",
+ "num-derive 0.4.1",
+ "num-traits",
+ "solana-program 2.3.0",
+ "solana-program-error 3.0.0",
+ "thiserror 1.0.69",
+]
+
+[[package]]
 name = "mpl-agent-identity-program"
 version = "0.1.0"
 dependencies = [
@@ -3219,7 +3233,7 @@ version = "0.2.0"
 dependencies = [
  "assert_matches",
  "borsh 1.6.1",
- "mpl-agent-identity",
+ "mpl-agent-identity 0.2.1",
  "mpl-core 0.12.0",
  "num-derive 0.4.1",
  "num-traits",
@@ -3238,7 +3252,7 @@ name = "mpl-agent-tools-program"
 version = "0.1.0"
 dependencies = [
  "bytemuck",
- "mpl-agent-identity",
+ "mpl-agent-identity 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "mpl-core 0.11.2",
  "mpl-utils",
  "num-derive 0.4.1",
