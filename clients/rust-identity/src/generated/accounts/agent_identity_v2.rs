@@ -32,14 +32,17 @@ const AGENT_IDENTITY_V2_AGENT_TOKEN_FIXED_SIZE_OPTION_SENTINEL: [u8; 32] = [
 ];
 
 impl BorshSerialize for AgentIdentityV2 {
-    fn serialize<W: borsh::io::Write>(&self, writer: &mut W) -> borsh::io::Result<()> {
+    fn serialize<W: borsh::maybestd::io::Write>(
+        &self,
+        writer: &mut W,
+    ) -> borsh::maybestd::io::Result<()> {
         BorshSerialize::serialize(&self.key, writer)?;
         BorshSerialize::serialize(&self.bump, writer)?;
         BorshSerialize::serialize(&self.padding, writer)?;
         BorshSerialize::serialize(&self.asset, writer)?;
         match &self.agent_token {
             Some(value) => BorshSerialize::serialize(value, writer)?,
-            None => borsh::io::Write::write_all(
+            None => borsh::maybestd::io::Write::write_all(
                 writer,
                 &AGENT_IDENTITY_V2_AGENT_TOKEN_FIXED_SIZE_OPTION_SENTINEL,
             )?,
@@ -50,14 +53,16 @@ impl BorshSerialize for AgentIdentityV2 {
 }
 
 impl BorshDeserialize for AgentIdentityV2 {
-    fn deserialize_reader<R: borsh::io::Read>(reader: &mut R) -> borsh::io::Result<Self> {
+    fn deserialize_reader<R: borsh::maybestd::io::Read>(
+        reader: &mut R,
+    ) -> borsh::maybestd::io::Result<Self> {
         let key = BorshDeserialize::deserialize_reader(reader)?;
         let bump = BorshDeserialize::deserialize_reader(reader)?;
         let padding = BorshDeserialize::deserialize_reader(reader)?;
         let asset = BorshDeserialize::deserialize_reader(reader)?;
         let agent_token = {
             let mut buffer = [0u8; 32];
-            borsh::io::Read::read_exact(reader, &mut buffer)?;
+            borsh::maybestd::io::Read::read_exact(reader, &mut buffer)?;
             if buffer == AGENT_IDENTITY_V2_AGENT_TOKEN_FIXED_SIZE_OPTION_SENTINEL {
                 None
             } else {
