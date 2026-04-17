@@ -293,18 +293,11 @@ async fn transfer_sol_via_delegate_execution() {
         &MPL_CORE_ID,
     );
 
-    // System Transfer instruction data: u32 type (2) + u64 lamports.
-    let mut fund_data = vec![0u8; 12];
-    fund_data[..4].copy_from_slice(&2u32.to_le_bytes()); // Transfer = 2
-    fund_data[4..12].copy_from_slice(&1_000_000_000u64.to_le_bytes()); // 1 SOL
-    let fund_ix = solana_sdk::instruction::Instruction {
-        program_id: SYSTEM_PROGRAM_ID,
-        accounts: vec![
-            AccountMeta::new(context.payer.pubkey(), true),
-            AccountMeta::new(asset_signer_pda, false),
-        ],
-        data: fund_data,
-    };
+    let fund_ix = solana_system_interface::instruction::transfer(
+        &context.payer.pubkey(),
+        &asset_signer_pda,
+        1_000_000_000,
+    );
 
     let tx = Transaction::new_signed_with_payer(
         &[fund_ix],
@@ -320,10 +313,12 @@ async fn transfer_sol_via_delegate_execution() {
     // correctly receives [assetSigner, recipient].
     let recipient = Keypair::new();
 
-    // System Transfer instruction data: u32 type (2) + u64 lamports
-    let mut transfer_data = vec![0u8; 12];
-    transfer_data[..4].copy_from_slice(&2u32.to_le_bytes()); // Transfer = 2
-    transfer_data[4..12].copy_from_slice(&500_000_000u64.to_le_bytes()); // 0.5 SOL
+    let transfer_data = solana_system_interface::instruction::transfer(
+        &asset_signer_pda,
+        &recipient.pubkey(),
+        500_000_000,
+    )
+    .data;
 
     let execute_ix = ExecuteV1Builder::new()
         .asset(asset)
