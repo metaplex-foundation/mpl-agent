@@ -374,7 +374,7 @@ async fn downgrade_to_v1(
 }
 
 #[tokio::test]
-async fn set_agent_token_on_v1_fails_with_invalid_realloc() {
+async fn set_agent_token_migrates_v1_to_v2() {
     let mut context = setup::setup().start_with_context().await;
 
     let (collection, asset) = setup::create_collection_and_asset(&mut context).await;
@@ -432,7 +432,7 @@ async fn set_agent_token_on_v1_fails_with_invalid_realloc() {
 }
 
 #[tokio::test]
-async fn set_agent_token_on_v1_repeated_attempts_fail_with_invalid_realloc() {
+async fn set_agent_token_on_v1_cannot_set_twice() {
     let mut context = setup::setup().start_with_context().await;
 
     let (collection, asset) = setup::create_collection_and_asset(&mut context).await;
