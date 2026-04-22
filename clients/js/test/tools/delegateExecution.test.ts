@@ -395,5 +395,5 @@ test('it cannot delegate execution with an uninitialized executive profile', asy
     agentIdentity: agentIdentityPda,
   }).sendAndConfirm(umi);
 
-  await t.throwsAsync(result, { name: 'ExecutiveProfileMustBeUninitialized' });
+  await t.throwsAsync(result, { name: 'ExecutiveProfileMustBeInitialized' });
 });

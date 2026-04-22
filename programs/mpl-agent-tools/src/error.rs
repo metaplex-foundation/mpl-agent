@@ -63,6 +63,10 @@ pub enum MplAgentToolsError {
     /// 13 - Authority must be asset owner or executive to revoke
     #[error("Authority must be asset owner or executive to revoke")]
     UnauthorizedRevoke,
+
+    /// 14 - Executive Profile must be initialized
+    #[error("Executive Profile must be initialized")]
+    ExecutiveProfileMustBeInitialized,
 }
 
 impl PrintProgramError for MplAgentToolsError {

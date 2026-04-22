@@ -26,6 +26,9 @@ pub enum MplAgentValidationError {
     /// 4 (0x4) - Invalid Core Asset
     #[error("Invalid Core Asset")]
     InvalidCoreAsset,
+    /// 5 (0x5) - Agent Validation already registered
+    #[error("Agent Validation already registered")]
+    AgentValidationAlreadyRegistered,
 }
 
 impl From<MplAgentValidationError> for ProgramError {
@@ -43,6 +46,7 @@ impl TryFrom<u32> for MplAgentValidationError {
             2 => Ok(MplAgentValidationError::InvalidAccountData),
             3 => Ok(MplAgentValidationError::InvalidMplCoreProgram),
             4 => Ok(MplAgentValidationError::InvalidCoreAsset),
+            5 => Ok(MplAgentValidationError::AgentValidationAlreadyRegistered),
             _ => Err(ProgramError::InvalidArgument),
         }
     }
@@ -56,6 +60,9 @@ impl ToStr for MplAgentValidationError {
             MplAgentValidationError::InvalidAccountData => "Invalid account data",
             MplAgentValidationError::InvalidMplCoreProgram => "Invalid MPL Core Program",
             MplAgentValidationError::InvalidCoreAsset => "Invalid Core Asset",
+            MplAgentValidationError::AgentValidationAlreadyRegistered => {
+                "Agent Validation already registered"
+            }
         }
     }
 }

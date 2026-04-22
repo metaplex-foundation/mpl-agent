@@ -178,6 +178,11 @@
       "code": 4,
       "name": "InvalidCoreAsset",
       "msg": "Invalid Core Asset"
+    },
+    {
+      "code": 5,
+      "name": "AgentReputationAlreadyRegistered",
+      "msg": "Agent Reputation already registered"
     }
   ],
   "metadata": {

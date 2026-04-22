@@ -80,6 +80,22 @@ export class InvalidCoreAssetError extends ProgramError {
 codeToErrorMap.set(0x4, InvalidCoreAssetError);
 nameToErrorMap.set('InvalidCoreAsset', InvalidCoreAssetError);
 
+/** AgentReputationAlreadyRegistered: Agent Reputation already registered */
+export class AgentReputationAlreadyRegisteredError extends ProgramError {
+  override readonly name: string = 'AgentReputationAlreadyRegistered';
+
+  readonly code: number = 0x5; // 5
+
+  constructor(program: Program, cause?: Error) {
+    super('Agent Reputation already registered', program, cause);
+  }
+}
+codeToErrorMap.set(0x5, AgentReputationAlreadyRegisteredError);
+nameToErrorMap.set(
+  'AgentReputationAlreadyRegistered',
+  AgentReputationAlreadyRegisteredError
+);
+
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors

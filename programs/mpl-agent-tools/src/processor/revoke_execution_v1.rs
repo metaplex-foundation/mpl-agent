@@ -1,6 +1,6 @@
 use bytemuck::{from_bytes, Pod, Zeroable};
 use mpl_core::{accounts::BaseAssetV1, types::Key as MplCoreKey};
-use mpl_utils::close_account_raw;
+use mpl_utils::{assert_signer, close_account_raw};
 use shank::ShankType;
 use solana_program::{
     account_info::AccountInfo, entrypoint::ProgramResult, pubkey::Pubkey, system_program,
@@ -85,8 +85,16 @@ pub fn revoke_execution_v1<'a>(
     // Read the asset to get the owner.
     let asset = BaseAssetV1::try_from(ctx.accounts.agent_asset)?;
 
-    // Determine the signer.
+    // Payer must sign.
+    assert_signer(ctx.accounts.payer)?;
+
+    // Determine the signer. If an explicit authority is provided it must also
+    // sign — pubkey equality against the asset owner or record authority is
+    // not enough on its own.
     let signer = ctx.accounts.authority.unwrap_or(ctx.accounts.payer);
+    if ctx.accounts.authority.is_some() {
+        assert_signer(signer)?;
+    }
 
     // Authorization check: signer must be the asset owner OR the executive authority.
     let is_asset_owner = asset.owner == *signer.key;

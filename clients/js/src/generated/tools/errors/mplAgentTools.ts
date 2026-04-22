@@ -222,6 +222,22 @@ export class UnauthorizedRevokeError extends ProgramError {
 codeToErrorMap.set(0xd, UnauthorizedRevokeError);
 nameToErrorMap.set('UnauthorizedRevoke', UnauthorizedRevokeError);
 
+/** ExecutiveProfileMustBeInitialized: Executive Profile must be initialized */
+export class ExecutiveProfileMustBeInitializedError extends ProgramError {
+  override readonly name: string = 'ExecutiveProfileMustBeInitialized';
+
+  readonly code: number = 0xe; // 14
+
+  constructor(program: Program, cause?: Error) {
+    super('Executive Profile must be initialized', program, cause);
+  }
+}
+codeToErrorMap.set(0xe, ExecutiveProfileMustBeInitializedError);
+nameToErrorMap.set(
+  'ExecutiveProfileMustBeInitialized',
+  ExecutiveProfileMustBeInitializedError
+);
+
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors

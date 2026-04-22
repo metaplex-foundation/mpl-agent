@@ -26,6 +26,9 @@ pub enum MplAgentReputationError {
     /// 4 (0x4) - Invalid Core Asset
     #[error("Invalid Core Asset")]
     InvalidCoreAsset,
+    /// 5 (0x5) - Agent Reputation already registered
+    #[error("Agent Reputation already registered")]
+    AgentReputationAlreadyRegistered,
 }
 
 impl From<MplAgentReputationError> for ProgramError {
@@ -43,6 +46,7 @@ impl TryFrom<u32> for MplAgentReputationError {
             2 => Ok(MplAgentReputationError::InvalidAccountData),
             3 => Ok(MplAgentReputationError::InvalidMplCoreProgram),
             4 => Ok(MplAgentReputationError::InvalidCoreAsset),
+            5 => Ok(MplAgentReputationError::AgentReputationAlreadyRegistered),
             _ => Err(ProgramError::InvalidArgument),
         }
     }
@@ -56,6 +60,9 @@ impl ToStr for MplAgentReputationError {
             MplAgentReputationError::InvalidAccountData => "Invalid account data",
             MplAgentReputationError::InvalidMplCoreProgram => "Invalid MPL Core Program",
             MplAgentReputationError::InvalidCoreAsset => "Invalid Core Asset",
+            MplAgentReputationError::AgentReputationAlreadyRegistered => {
+                "Agent Reputation already registered"
+            }
         }
     }
 }

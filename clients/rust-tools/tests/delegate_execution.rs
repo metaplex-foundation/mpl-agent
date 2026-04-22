@@ -620,6 +620,6 @@ async fn cannot_delegate_with_uninitialized_profile() {
 
     assert_custom_error(
         err,
-        MplAgentToolsError::ExecutiveProfileMustBeUninitialized as u32,
+        MplAgentToolsError::ExecutiveProfileMustBeInitialized as u32,
     );
 }

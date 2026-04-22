@@ -3,6 +3,7 @@ use mpl_agent_identity::{accounts::AgentIdentityV2, types::Key as MplAgentIdenti
 // Note: We use AgentIdentityV2 only for find_pda (same seeds as V1).
 // We read bump from raw bytes to avoid borsh deserialization issues with V1-sized accounts.
 use mpl_core::{accounts::BaseAssetV1, types::Key as MplCoreKey};
+use mpl_utils::assert_signer;
 use shank::ShankType;
 use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, system_program};
 
@@ -39,12 +40,22 @@ pub fn delegate_execution_v1<'a>(
     /****************************************************/
     /****************** Account Guards ******************/
     /****************************************************/
+    // Payer must sign.
+    assert_signer(ctx.accounts.payer)?;
+
+    // If an explicit authority is provided, it must also sign. Whichever of
+    // authority/payer we ultimately compare against the asset owner must have
+    // actually signed this transaction — pubkey equality alone is not enough.
+    if let Some(authority) = ctx.accounts.authority {
+        assert_signer(authority)?;
+    }
+
     // Assert that the executive profile is initialized and a valid executive profile.
     if ctx.accounts.executive_profile.owner != &crate::ID
         || ctx.accounts.executive_profile.data_len() == 0
         || ctx.accounts.executive_profile.try_borrow_data()?[0] != Key::ExecutiveProfileV1 as u8
     {
-        return Err(MplAgentToolsError::ExecutiveProfileMustBeUninitialized.into());
+        return Err(MplAgentToolsError::ExecutiveProfileMustBeInitialized.into());
     }
 
     let executive_profile_data = ctx.accounts.executive_profile.try_borrow_data()?;
@@ -59,7 +70,7 @@ pub fn delegate_execution_v1<'a>(
         return Err(MplAgentToolsError::InvalidCoreAsset.into());
     }
 
-    // Also assert that the owner is the one signing.
+    // Asset owner must be the (now verified) signer authorizing the delegation.
     let asset = BaseAssetV1::try_from(ctx.accounts.agent_asset)?;
     if asset.owner != *ctx.accounts.authority.unwrap_or(ctx.accounts.payer).key {
         return Err(MplAgentToolsError::AssetOwnerMustBeTheOneToDelegateExecution.into());

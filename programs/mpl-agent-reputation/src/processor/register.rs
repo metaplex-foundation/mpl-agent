@@ -8,6 +8,7 @@ use mpl_core::types::{
     AppDataInitInfo, ExternalPluginAdapterInitInfo, ExternalPluginAdapterKey,
     ExternalPluginAdapterSchema, Key as MplCoreKey, PluginAuthority,
 };
+use mpl_utils::assert_signer;
 use shank::ShankType;
 use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, system_program};
 
@@ -69,11 +70,32 @@ pub fn register_reputation_v1<'a>(
         ctx.accounts.asset.key,
     )?;
 
+    // Agent reputation PDA must not already be initialized. System CreateAccount
+    // would fail anyway, but checking up front gives a clear error and
+    // defends against any future change in the downstream helper.
+    if ctx.accounts.agent_reputation.data_len() != 0
+        || *ctx.accounts.agent_reputation.owner != system_program::id()
+    {
+        return Err(MplAgentReputationError::AgentReputationAlreadyRegistered.into());
+    }
+
     // Assert that the asset exists and is a Core asset.
     if ctx.accounts.asset.owner != &mpl_core::ID
         || ctx.accounts.asset.try_borrow_data()?[0] != MplCoreKey::AssetV1 as u8
     {
         return Err(MplAgentReputationError::InvalidCoreAsset.into());
+    }
+
+    // Payer must sign.
+    assert_signer(ctx.accounts.payer)?;
+
+    // If an explicit authority is passed it must also sign. When the AppData
+    // plugin already exists we skip the MPL Core CPI below — which is the
+    // only implicit authority check — so enforcing the signer here is the
+    // only thing preventing unauthorized reputation registration in that
+    // branch.
+    if let Some(authority) = ctx.accounts.authority {
+        assert_signer(authority)?;
     }
 
     // Validate the MPL Core program.

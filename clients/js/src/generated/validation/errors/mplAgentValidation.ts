@@ -80,6 +80,22 @@ export class InvalidCoreAssetError extends ProgramError {
 codeToErrorMap.set(0x4, InvalidCoreAssetError);
 nameToErrorMap.set('InvalidCoreAsset', InvalidCoreAssetError);
 
+/** AgentValidationAlreadyRegistered: Agent Validation already registered */
+export class AgentValidationAlreadyRegisteredError extends ProgramError {
+  override readonly name: string = 'AgentValidationAlreadyRegistered';
+
+  readonly code: number = 0x5; // 5
+
+  constructor(program: Program, cause?: Error) {
+    super('Agent Validation already registered', program, cause);
+  }
+}
+codeToErrorMap.set(0x5, AgentValidationAlreadyRegisteredError);
+nameToErrorMap.set(
+  'AgentValidationAlreadyRegistered',
+  AgentValidationAlreadyRegisteredError
+);
+
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors

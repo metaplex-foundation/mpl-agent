@@ -422,6 +422,11 @@
       "code": 13,
       "name": "UnauthorizedRevoke",
       "msg": "Authority must be asset owner or executive to revoke"
+    },
+    {
+      "code": 14,
+      "name": "ExecutiveProfileMustBeInitialized",
+      "msg": "Executive Profile must be initialized"
     }
   ],
   "metadata": {

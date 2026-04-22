@@ -27,6 +27,10 @@ pub enum MplAgentReputationError {
     /// 4 - Invalid Asset
     #[error("Invalid Core Asset")]
     InvalidCoreAsset,
+
+    /// 5 - Agent Reputation already registered
+    #[error("Agent Reputation already registered")]
+    AgentReputationAlreadyRegistered,
 }
 
 impl PrintProgramError for MplAgentReputationError {

@@ -1,4 +1,5 @@
 use bytemuck::{Pod, Zeroable};
+use mpl_utils::assert_signer;
 use shank::ShankType;
 use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, system_program};
 
@@ -34,6 +35,17 @@ pub fn register_executive_v1<'a>(
     /****************************************************/
     /****************** Account Guards ******************/
     /****************************************************/
+    // Payer must sign.
+    assert_signer(ctx.accounts.payer)?;
+
+    // The authority is the party being registered as the executive. Since the
+    // PDA is seeded on its pubkey and the profile records it verbatim, it must
+    // actually consent by signing — otherwise anyone could squat on any
+    // pubkey's profile slot.
+    if let Some(authority) = ctx.accounts.authority {
+        assert_signer(authority)?;
+    }
+
     // Assert that the executive profile is not already initialized.
     if ctx.accounts.executive_profile.owner != &system_program::ID
         || ctx.accounts.executive_profile.data_len() != 0

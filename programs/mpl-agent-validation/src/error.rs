@@ -27,6 +27,10 @@ pub enum MplAgentValidationError {
     /// 4 - Invalid Asset
     #[error("Invalid Core Asset")]
     InvalidCoreAsset,
+
+    /// 5 - Agent Validation already registered
+    #[error("Agent Validation already registered")]
+    AgentValidationAlreadyRegistered,
 }
 
 impl PrintProgramError for MplAgentValidationError {
