@@ -2,9 +2,8 @@ use bytemuck::{from_bytes, Pod, Zeroable};
 use mpl_core::{accounts::BaseAssetV1, types::Key as MplCoreKey};
 use mpl_utils::close_account_raw;
 use shank::ShankType;
-use solana_program::{
-    account_info::AccountInfo, entrypoint::ProgramResult, pubkey::Pubkey, system_program,
-};
+use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, pubkey::Pubkey};
+use solana_system_interface::program as system_program;
 
 use crate::{
     error::MplAgentToolsError,

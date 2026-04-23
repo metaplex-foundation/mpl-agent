@@ -9,14 +9,13 @@ use mpl_agent_identity::{
     types::Key,
 };
 use mpl_core::instructions::ExecuteV1Builder;
-use solana_program::instruction::InstructionError;
-use solana_program_test::{tokio, BanksClientError};
+use solana_program_test::tokio;
 use solana_sdk::{
     account::AccountSharedData,
     instruction::AccountMeta,
     pubkey::Pubkey,
     signature::{Keypair, Signer},
-    transaction::{Transaction, TransactionError},
+    transaction::Transaction,
 };
 
 use crate::setup::create_genesis_account;
@@ -53,13 +52,6 @@ fn build_set_agent_token_via_execute(
         .add_remaining_account(AccountMeta::new_readonly(asset_signer_pda, false))
         .add_remaining_account(AccountMeta::new_readonly(SYSTEM_PROGRAM_ID, false))
         .instruction()
-}
-
-fn assert_invalid_realloc_error(error: BanksClientError) {
-    match error.unwrap() {
-        TransactionError::InstructionError(_, InstructionError::InvalidRealloc) => {}
-        err => panic!("Expected InstructionError::InvalidRealloc, got: {err:?}"),
-    }
 }
 
 #[tokio::test]
@@ -392,7 +384,7 @@ async fn set_agent_token_migrates_v1_to_v2() {
         .unwrap();
     assert_eq!(account.data[0], 1); // Key::AgentIdentityV1
 
-    // Set agent token via Execute CPI.
+    // Set agent token via Execute CPI — this should migrate V1 -> V2.
     let base_mint = Keypair::new().pubkey();
     let genesis_account = create_genesis_account(&mut context, base_mint, 0, 0).await;
 
@@ -410,14 +402,9 @@ async fn set_agent_token_migrates_v1_to_v2() {
         &[&context.payer],
         context.last_blockhash,
     );
-    let err = context
-        .banks_client
-        .process_transaction(tx)
-        .await
-        .unwrap_err();
-    assert_invalid_realloc_error(err);
+    context.banks_client.process_transaction(tx).await.unwrap();
 
-    // Verify account state remains V1 after the failed migration attempt.
+    // Verify the account was migrated to V2 and the token was set.
     let account = context
         .banks_client
         .get_account(agent_identity_pda)
@@ -425,10 +412,11 @@ async fn set_agent_token_migrates_v1_to_v2() {
         .unwrap()
         .unwrap();
 
-    assert_eq!(account.data.len(), AgentIdentityV1::LEN);
-    let agent_identity = AgentIdentityV1::from_bytes(&account.data).unwrap();
-    assert_eq!(agent_identity.key, Key::AgentIdentityV1);
+    assert_eq!(account.data.len(), AgentIdentityV2::LEN);
+    let agent_identity = AgentIdentityV2::from_bytes(&account.data).unwrap();
+    assert_eq!(agent_identity.key, Key::AgentIdentityV2);
     assert_eq!(agent_identity.asset, asset);
+    assert_eq!(agent_identity.agent_token, Some(base_mint));
 }
 
 #[tokio::test]
@@ -441,7 +429,7 @@ async fn set_agent_token_on_v1_cannot_set_twice() {
     // Downgrade to V1.
     downgrade_to_v1(&mut context, agent_identity_pda, asset).await;
 
-    // First attempt fails on V1 -> V2 realloc.
+    // First set migrates V1 -> V2 and sets the token.
     let base_mint = Keypair::new().pubkey();
     let genesis_account = create_genesis_account(&mut context, base_mint, 0, 0).await;
 
@@ -459,14 +447,9 @@ async fn set_agent_token_on_v1_cannot_set_twice() {
         &[&context.payer],
         context.last_blockhash,
     );
-    let err = context
-        .banks_client
-        .process_transaction(tx)
-        .await
-        .unwrap_err();
-    assert_invalid_realloc_error(err);
+    context.banks_client.process_transaction(tx).await.unwrap();
 
-    // Second attempt also fails and does not alter account layout.
+    // Second set should fail (now it's V2 with token already set).
     let base_mint_2 = Keypair::new().pubkey();
     let genesis_account_2 = create_genesis_account(&mut context, base_mint_2, 0, 0).await;
 
@@ -491,17 +474,6 @@ async fn set_agent_token_on_v1_cannot_set_twice() {
         .process_transaction(tx)
         .await
         .unwrap_err();
-    assert_invalid_realloc_error(err);
 
-    let account = context
-        .banks_client
-        .get_account(agent_identity_pda)
-        .await
-        .unwrap()
-        .unwrap();
-
-    assert_eq!(account.data.len(), AgentIdentityV1::LEN);
-    let agent_identity = AgentIdentityV1::from_bytes(&account.data).unwrap();
-    assert_eq!(agent_identity.key, Key::AgentIdentityV1);
-    assert_eq!(agent_identity.asset, asset);
+    setup::assert_custom_error(err, MplAgentIdentityError::AgentTokenAlreadySet as u32);
 }

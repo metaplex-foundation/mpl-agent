@@ -1,9 +1,5 @@
 use num_derive::FromPrimitive;
-use solana_program::{
-    decode_error::DecodeError,
-    msg,
-    program_error::{PrintProgramError, ProgramError},
-};
+use solana_program::program_error::ProgramError;
 use thiserror::Error;
 
 #[derive(Error, Clone, Debug, Eq, PartialEq, FromPrimitive)]
@@ -29,20 +25,8 @@ pub enum MplAgentValidationError {
     InvalidCoreAsset,
 }
 
-impl PrintProgramError for MplAgentValidationError {
-    fn print<E>(&self) {
-        msg!(&self.to_string());
-    }
-}
-
 impl From<MplAgentValidationError> for ProgramError {
     fn from(e: MplAgentValidationError) -> Self {
         ProgramError::Custom(e as u32)
-    }
-}
-
-impl<T> DecodeError<T> for MplAgentValidationError {
-    fn type_of() -> &'static str {
-        "Mpl Agent Validation Error"
     }
 }

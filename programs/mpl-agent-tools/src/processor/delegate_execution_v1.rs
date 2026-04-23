@@ -4,7 +4,8 @@ use mpl_agent_identity::{accounts::AgentIdentityV2, types::Key as MplAgentIdenti
 // We read bump from raw bytes to avoid borsh deserialization issues with V1-sized accounts.
 use mpl_core::{accounts::BaseAssetV1, types::Key as MplCoreKey};
 use shank::ShankType;
-use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, system_program};
+use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult};
+use solana_system_interface::program as system_program;
 
 use crate::{
     error::MplAgentToolsError,
@@ -67,10 +68,12 @@ pub fn delegate_execution_v1<'a>(
 
     // Assert that the agent identity is correct and initialized.
     // Accept both V1 and V2 discriminators since registration now creates V2 accounts.
+    // Require at least 2 bytes so the subsequent bump read at offset 1 cannot panic
+    // on a truncated account.
     {
         let agent_identity_data = ctx.accounts.agent_identity.try_borrow_data()?;
         if ctx.accounts.agent_identity.owner != &mpl_agent_identity::ID
-            || agent_identity_data.is_empty()
+            || agent_identity_data.len() < 2
             || (agent_identity_data[0] != MplAgentIdentityKey::AgentIdentityV1 as u8
                 && agent_identity_data[0] != MplAgentIdentityKey::AgentIdentityV2 as u8)
         {

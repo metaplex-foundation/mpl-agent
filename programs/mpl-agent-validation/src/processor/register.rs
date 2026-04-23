@@ -9,7 +9,8 @@ use mpl_core::types::{
     ExternalPluginAdapterSchema, Key as MplCoreKey, PluginAuthority,
 };
 use shank::ShankType;
-use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, system_program};
+use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult};
+use solana_system_interface::program as system_program;
 
 use crate::{
     error::MplAgentValidationError, instruction::accounts::RegisterValidationV1Accounts,
