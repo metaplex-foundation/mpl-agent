@@ -1,11 +1,13 @@
 #!/bin/bash
 
+set -o pipefail
+
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 OUTPUT="./programs/.bin"
 # saves external programs binaries to the output directory
 source ${SCRIPT_DIR}/dump.sh ${OUTPUT}
 # go to parent folder
-cd $(dirname $(dirname $(dirname ${SCRIPT_DIR})))
+cd "$(dirname "$(dirname "$(dirname "${SCRIPT_DIR}")")")" || exit 1
 
 if [ -z ${PROGRAMS+x} ]; then
     PROGRAMS="$(cat .github/.env | grep "PROGRAMS" | cut -d '=' -f 2)"
@@ -33,6 +35,6 @@ export SBF_OUT_DIR="${WORKING_DIR}/${OUTPUT}"
 SBF_TOOLS_VERSION="${SBF_TOOLS_VERSION:-v1.53}"
 
 for p in ${PROGRAMS[@]}; do
-    cd ${WORKING_DIR}/programs/${p}
+    cd "${WORKING_DIR}/programs/${p}" || exit 1
     cargo build-sbf --tools-version ${SBF_TOOLS_VERSION} --sbf-out-dir ${WORKING_DIR}/${OUTPUT} $ARGS
 done

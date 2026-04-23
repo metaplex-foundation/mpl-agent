@@ -52,7 +52,7 @@ The programs are structurally parallel — each has one instruction (`RegisterId
 
 ### Program Structure (both programs follow this pattern)
 
-```
+```text
 programs/mpl-agent-{identity,reputation}/src/
 ├── lib.rs           # declare_id! macro
 ├── entrypoint.rs    # Routes to processor
@@ -85,11 +85,11 @@ programs/mpl-agent-{identity,reputation}/src/
 ### Client Generation Pipeline
 
 1. **Shank** (`configs/shank.cjs`) — Extracts IDL from Rust annotations → `idls/*.json`
-2. **Kinobi** (`configs/kinobi.cjs`) — Reads IDL JSON, configures PDA seeds and account defaults, renders:
-    - JS client → `clients/js/src/generated/`
-    - Rust client → `clients/rust/src/generated/`
+2. **Kinobi** — Reads IDL JSON, configures PDA seeds and account defaults, renders:
+    - JS clients → `clients/js/src/generated/{identity,reputation,validation,tools}/`
+    - Rust clients → `clients/rust-{identity,reputation,validation,tools}/src/generated/`
 
-The `configs/kinobi.cjs` file is where PDA seed definitions, program name mappings, and instruction account defaults are configured. If you add/change accounts or instructions, update this file accordingly.
+Each program has its own Kinobi config: `configs/kinobi-identity.cjs`, `configs/kinobi-reputation.cjs`, `configs/kinobi-validation.cjs`, and `configs/kinobi-tools.cjs`. These are where PDA seed definitions, program name mappings, and instruction account defaults are configured. If you add/change accounts or instructions for a given program, update its corresponding Kinobi config file.
 
 ### JS Client
 

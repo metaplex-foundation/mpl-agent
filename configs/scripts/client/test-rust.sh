@@ -1,9 +1,11 @@
 #!/bin/bash
 
+set -o pipefail
+
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 PROGRAMS_OUTPUT="./programs/.bin"
 # go to parent folder
-cd $(dirname $(dirname $(dirname $SCRIPT_DIR)))
+cd "$(dirname "$(dirname "$(dirname "${SCRIPT_DIR}")")")" || exit 1
 
 # command-line input
 ARGS=$*
@@ -18,14 +20,14 @@ RUST_CLIENTS=("rust-identity" "rust-reputation" "rust-validation" "rust-tools")
 
 for CLIENT in "${RUST_CLIENTS[@]}"; do
     echo "Testing clients/${CLIENT}..."
-    cd "${WORKING_DIR}/clients/${CLIENT}"
-    
+    cd "${WORKING_DIR}/clients/${CLIENT}" || exit 1
+
     if [ ! "$(command -v $SOLFMT)" = "" ]; then
         CARGO_TERM_COLOR=always cargo test-sbf --tools-version ${SBF_TOOLS_VERSION} --sbf-out-dir ${WORKING_DIR}/${PROGRAMS_OUTPUT} ${ARGS} 2>&1 | ${SOLFMT} -- --nocapture
     else
         cargo test-sbf --tools-version ${SBF_TOOLS_VERSION} --sbf-out-dir ${WORKING_DIR}/${PROGRAMS_OUTPUT} ${ARGS} -- --nocapture
     fi
-    
+
     if [ $? -ne 0 ]; then
         echo "Tests failed for clients/${CLIENT}"
         exit 1

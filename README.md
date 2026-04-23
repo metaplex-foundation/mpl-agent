@@ -105,8 +105,8 @@ The Rust client exposes builder-pattern instruction constructors and account des
 ### Prerequisites
 
 - pnpm 8.9.0
-- Rust 1.83.0
-- Solana CLI 2.2.1
+- Rust 1.89.0
+- Solana CLI 3.0.0 (SBF tools v1.53)
 
 ### Build
 
