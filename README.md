@@ -106,7 +106,8 @@ The Rust client exposes builder-pattern instruction constructors and account des
 
 - pnpm 8.9.0
 - Rust 1.89.0
-- Solana CLI 3.0.0 (SBF tools v1.53)
+- Solana CLI 2.3.5 (validator/toolchain, pinned in `.github/.env`)
+- `solana-program` / `solana-sdk` crate version: 3.0.0 (SBF tools v1.53)
 
 ### Build
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -o pipefail
+set -e -o pipefail
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 PROGRAMS_OUTPUT="./programs/.bin"

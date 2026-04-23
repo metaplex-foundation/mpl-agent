@@ -115,6 +115,6 @@ Each program has its own Kinobi config: `configs/kinobi-identity.cjs`, `configs/
 
 ## Environment
 
--   pnpm 8.9.0, Rust 1.89.0, Solana 3.0.0 (SBF tools v1.53)
+-   pnpm 8.9.0, Rust 1.89.0, Solana CLI 2.3.5 / `solana-program` 3.0.0 (SBF tools v1.53). CI pins `SOLANA_VERSION` in `.github/.env`.
 -   Programs build to `programs/.bin/` — external deps (mpl_core, token_metadata, spl_noop) are fetched via `configs/scripts/program/dump.sh`
 -   CI config in `.github/.env` — program list, toolchain versions
