@@ -11,7 +11,6 @@ repository = "https://github.com/metaplex-foundation/mpl-agent"
 crate-type = ["cdylib", "lib"]
 
 [features]
-anchor = []
 test-sbf = []
 serde = ["dep:serde", "dep:serde_with"]
 
