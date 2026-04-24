@@ -1,7 +1,8 @@
 use bytemuck::{Pod, Zeroable};
 use mpl_utils::assert_signer;
 use shank::ShankType;
-use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, system_program};
+use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult};
+use solana_system_interface::program as system_program;
 
 use crate::{
     error::MplAgentToolsError, instruction::accounts::RegisterExecutiveV1Accounts,

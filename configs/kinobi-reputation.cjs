@@ -7,37 +7,43 @@ const idlDir = path.join(__dirname, "..", "idls");
 
 // Instantiate Kinobi.
 const kinobi = k.createFromIdls([
-  path.join(idlDir, "mpl_agent_reputation.json"),
+    path.join(idlDir, "mpl_agent_reputation.json"),
 ]);
 
 // Update programs.
 kinobi.update(
-  new k.updateProgramsVisitor({
-    mplAgentReputationProgram: { name: "mplAgentReputation" },
-  })
+    new k.updateProgramsVisitor({
+        mplAgentReputationProgram: { name: "mplAgentReputation" },
+    }),
 );
 
 // Update accounts.
 kinobi.update(
-  new k.updateAccountsVisitor({
-    agentReputationV1: {
-      seeds: [
-        k.constantPdaSeedNodeFromString("agent_reputation"),
-        k.variablePdaSeedNode("asset", k.publicKeyTypeNode(), "The address of the asset"),
-      ],
-    },
-  })
+    new k.updateAccountsVisitor({
+        agentReputationV1: {
+            seeds: [
+                k.constantPdaSeedNodeFromString("agent_reputation"),
+                k.variablePdaSeedNode(
+                    "asset",
+                    k.publicKeyTypeNode(),
+                    "The address of the asset",
+                ),
+            ],
+        },
+    }),
 );
 
 // Update instructions.
 kinobi.update(
-  new k.updateInstructionsVisitor({
-    registerReputationV1: {
-      accounts: {
-        agentReputation: {defaultValue: k.pdaValueNode("agentReputationV1")},
-      },
-    },
-  })
+    new k.updateInstructionsVisitor({
+        registerReputationV1: {
+            accounts: {
+                agentReputation: {
+                    defaultValue: k.pdaValueNode("agentReputationV1"),
+                },
+            },
+        },
+    }),
 );
 
 // Render JavaScript.
@@ -49,8 +55,8 @@ kinobi.accept(new k.renderJavaScriptVisitor(jsDir, { prettier }));
 const crateDir = path.join(clientDir, "rust-reputation");
 const rustDir = path.join(clientDir, "rust-reputation", "src", "generated");
 kinobi.accept(
-  new k.renderRustVisitor(rustDir, {
-    formatCode: true,
-    crateFolder: crateDir,
-  })
+    new k.renderRustVisitor(rustDir, {
+        formatCode: true,
+        crateFolder: crateDir,
+    }),
 );
