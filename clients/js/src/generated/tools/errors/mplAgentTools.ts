@@ -238,6 +238,193 @@ nameToErrorMap.set(
   ExecutiveProfileMustBeInitializedError
 );
 
+/** InvalidBubblegumProgram: Invalid Bubblegum Program */
+export class InvalidBubblegumProgramError extends ProgramError {
+  override readonly name: string = 'InvalidBubblegumProgram';
+
+  readonly code: number = 0xf; // 15
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid Bubblegum Program', program, cause);
+  }
+}
+codeToErrorMap.set(0xf, InvalidBubblegumProgramError);
+nameToErrorMap.set('InvalidBubblegumProgram', InvalidBubblegumProgramError);
+
+/** ExecutiveAuthorityMismatch: Executive authority does not match the delegate record's authority */
+export class ExecutiveAuthorityMismatchError extends ProgramError {
+  override readonly name: string = 'ExecutiveAuthorityMismatch';
+
+  readonly code: number = 0x10; // 16
+
+  constructor(program: Program, cause?: Error) {
+    super(
+      "Executive authority does not match the delegate record's authority",
+      program,
+      cause
+    );
+  }
+}
+codeToErrorMap.set(0x10, ExecutiveAuthorityMismatchError);
+nameToErrorMap.set(
+  'ExecutiveAuthorityMismatch',
+  ExecutiveAuthorityMismatchError
+);
+
+/** ReceiptUriInvalid: Receipt URI must be non-empty and within size limits */
+export class ReceiptUriInvalidError extends ProgramError {
+  override readonly name: string = 'ReceiptUriInvalid';
+
+  readonly code: number = 0x11; // 17
+
+  constructor(program: Program, cause?: Error) {
+    super(
+      'Receipt URI must be non-empty and within size limits',
+      program,
+      cause
+    );
+  }
+}
+codeToErrorMap.set(0x11, ReceiptUriInvalidError);
+nameToErrorMap.set('ReceiptUriInvalid', ReceiptUriInvalidError);
+
+/** InvalidProgramConfigDerivation: Invalid Program Config PDA derivation */
+export class InvalidProgramConfigDerivationError extends ProgramError {
+  override readonly name: string = 'InvalidProgramConfigDerivation';
+
+  readonly code: number = 0x12; // 18
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid Program Config PDA derivation', program, cause);
+  }
+}
+codeToErrorMap.set(0x12, InvalidProgramConfigDerivationError);
+nameToErrorMap.set(
+  'InvalidProgramConfigDerivation',
+  InvalidProgramConfigDerivationError
+);
+
+/** ProgramConfigNotInitialized: Program Config is not initialized */
+export class ProgramConfigNotInitializedError extends ProgramError {
+  override readonly name: string = 'ProgramConfigNotInitialized';
+
+  readonly code: number = 0x13; // 19
+
+  constructor(program: Program, cause?: Error) {
+    super('Program Config is not initialized', program, cause);
+  }
+}
+codeToErrorMap.set(0x13, ProgramConfigNotInitializedError);
+nameToErrorMap.set(
+  'ProgramConfigNotInitialized',
+  ProgramConfigNotInitializedError
+);
+
+/** ProgramConfigAlreadyInitialized: Program Config is already initialized */
+export class ProgramConfigAlreadyInitializedError extends ProgramError {
+  override readonly name: string = 'ProgramConfigAlreadyInitialized';
+
+  readonly code: number = 0x14; // 20
+
+  constructor(program: Program, cause?: Error) {
+    super('Program Config is already initialized', program, cause);
+  }
+}
+codeToErrorMap.set(0x14, ProgramConfigAlreadyInitializedError);
+nameToErrorMap.set(
+  'ProgramConfigAlreadyInitialized',
+  ProgramConfigAlreadyInitializedError
+);
+
+/** InvalidReceiptsTreeDerivation: Invalid receipts tree PDA derivation */
+export class InvalidReceiptsTreeDerivationError extends ProgramError {
+  override readonly name: string = 'InvalidReceiptsTreeDerivation';
+
+  readonly code: number = 0x15; // 21
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid receipts tree PDA derivation', program, cause);
+  }
+}
+codeToErrorMap.set(0x15, InvalidReceiptsTreeDerivationError);
+nameToErrorMap.set(
+  'InvalidReceiptsTreeDerivation',
+  InvalidReceiptsTreeDerivationError
+);
+
+/** TreeIndexMismatch: Supplied tree index does not match config.next_tree_index */
+export class TreeIndexMismatchError extends ProgramError {
+  override readonly name: string = 'TreeIndexMismatch';
+
+  readonly code: number = 0x16; // 22
+
+  constructor(program: Program, cause?: Error) {
+    super(
+      'Supplied tree index does not match config.next_tree_index',
+      program,
+      cause
+    );
+  }
+}
+codeToErrorMap.set(0x16, TreeIndexMismatchError);
+nameToErrorMap.set('TreeIndexMismatch', TreeIndexMismatchError);
+
+/** InvalidReceiptsCollection: Supplied collection does not match the program config's canonical receipts collection */
+export class InvalidReceiptsCollectionError extends ProgramError {
+  override readonly name: string = 'InvalidReceiptsCollection';
+
+  readonly code: number = 0x17; // 23
+
+  constructor(program: Program, cause?: Error) {
+    super(
+      "Supplied collection does not match the program config's canonical receipts collection",
+      program,
+      cause
+    );
+  }
+}
+codeToErrorMap.set(0x17, InvalidReceiptsCollectionError);
+nameToErrorMap.set('InvalidReceiptsCollection', InvalidReceiptsCollectionError);
+
+/** InvalidCompressionProgram: Invalid MPL Account Compression Program */
+export class InvalidCompressionProgramError extends ProgramError {
+  override readonly name: string = 'InvalidCompressionProgram';
+
+  readonly code: number = 0x18; // 24
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid MPL Account Compression Program', program, cause);
+  }
+}
+codeToErrorMap.set(0x18, InvalidCompressionProgramError);
+nameToErrorMap.set('InvalidCompressionProgram', InvalidCompressionProgramError);
+
+/** InvalidLogWrapperProgram: Invalid log wrapper program */
+export class InvalidLogWrapperProgramError extends ProgramError {
+  override readonly name: string = 'InvalidLogWrapperProgram';
+
+  readonly code: number = 0x19; // 25
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid log wrapper program', program, cause);
+  }
+}
+codeToErrorMap.set(0x19, InvalidLogWrapperProgramError);
+nameToErrorMap.set('InvalidLogWrapperProgram', InvalidLogWrapperProgramError);
+
+/** UnauthorizedAdmin: Signer is not the program config admin */
+export class UnauthorizedAdminError extends ProgramError {
+  override readonly name: string = 'UnauthorizedAdmin';
+
+  readonly code: number = 0x1a; // 26
+
+  constructor(program: Program, cause?: Error) {
+    super('Signer is not the program config admin', program, cause);
+  }
+}
+codeToErrorMap.set(0x1a, UnauthorizedAdminError);
+nameToErrorMap.set('UnauthorizedAdmin', UnauthorizedAdminError);
+
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors

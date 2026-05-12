@@ -6,4 +6,9 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
+export * from './depositSubsidyV1';
+export * from './initializeReviewsConfigV1';
+export * from './leaveReviewV1';
 export * from './registerReputationV1';
+export * from './registerReviewsTreeV1';
+export * from './withdrawSubsidyV1';

@@ -96,6 +96,261 @@ nameToErrorMap.set(
   AgentReputationAlreadyRegisteredError
 );
 
+/** InvalidReviewRating: Invalid review rating (must be 1..=5) */
+export class InvalidReviewRatingError extends ProgramError {
+  override readonly name: string = 'InvalidReviewRating';
+
+  readonly code: number = 0x6; // 6
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid review rating (must be 1..=5)', program, cause);
+  }
+}
+codeToErrorMap.set(0x6, InvalidReviewRatingError);
+nameToErrorMap.set('InvalidReviewRating', InvalidReviewRatingError);
+
+/** FeedbackUriInvalid: Feedback URI must be non-empty and within size limits */
+export class FeedbackUriInvalidError extends ProgramError {
+  override readonly name: string = 'FeedbackUriInvalid';
+
+  readonly code: number = 0x7; // 7
+
+  constructor(program: Program, cause?: Error) {
+    super(
+      'Feedback URI must be non-empty and within size limits',
+      program,
+      cause
+    );
+  }
+}
+codeToErrorMap.set(0x7, FeedbackUriInvalidError);
+nameToErrorMap.set('FeedbackUriInvalid', FeedbackUriInvalidError);
+
+/** LeafOwnerMismatch: Leaf owner does not match the reviewed asset owner */
+export class LeafOwnerMismatchError extends ProgramError {
+  override readonly name: string = 'LeafOwnerMismatch';
+
+  readonly code: number = 0x8; // 8
+
+  constructor(program: Program, cause?: Error) {
+    super('Leaf owner does not match the reviewed asset owner', program, cause);
+  }
+}
+codeToErrorMap.set(0x8, LeafOwnerMismatchError);
+nameToErrorMap.set('LeafOwnerMismatch', LeafOwnerMismatchError);
+
+/** InvalidBubblegumProgram: Invalid Bubblegum Program */
+export class InvalidBubblegumProgramError extends ProgramError {
+  override readonly name: string = 'InvalidBubblegumProgram';
+
+  readonly code: number = 0x9; // 9
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid Bubblegum Program', program, cause);
+  }
+}
+codeToErrorMap.set(0x9, InvalidBubblegumProgramError);
+nameToErrorMap.set('InvalidBubblegumProgram', InvalidBubblegumProgramError);
+
+/** InvalidCompressionProgram: Invalid Compression Program */
+export class InvalidCompressionProgramError extends ProgramError {
+  override readonly name: string = 'InvalidCompressionProgram';
+
+  readonly code: number = 0xa; // 10
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid Compression Program', program, cause);
+  }
+}
+codeToErrorMap.set(0xa, InvalidCompressionProgramError);
+nameToErrorMap.set('InvalidCompressionProgram', InvalidCompressionProgramError);
+
+/** ReviewAlreadyExists: A review already exists for this work receipt */
+export class ReviewAlreadyExistsError extends ProgramError {
+  override readonly name: string = 'ReviewAlreadyExists';
+
+  readonly code: number = 0xb; // 11
+
+  constructor(program: Program, cause?: Error) {
+    super('A review already exists for this work receipt', program, cause);
+  }
+}
+codeToErrorMap.set(0xb, ReviewAlreadyExistsError);
+nameToErrorMap.set('ReviewAlreadyExists', ReviewAlreadyExistsError);
+
+/** SubsidyPoolAlreadyInitialized: Subsidy pool already initialized for this agent */
+export class SubsidyPoolAlreadyInitializedError extends ProgramError {
+  override readonly name: string = 'SubsidyPoolAlreadyInitialized';
+
+  readonly code: number = 0xc; // 12
+
+  constructor(program: Program, cause?: Error) {
+    super('Subsidy pool already initialized for this agent', program, cause);
+  }
+}
+codeToErrorMap.set(0xc, SubsidyPoolAlreadyInitializedError);
+nameToErrorMap.set(
+  'SubsidyPoolAlreadyInitialized',
+  SubsidyPoolAlreadyInitializedError
+);
+
+/** UnauthorizedSubsidyWithdrawal: Subsidy withdrawal requires the pool's withdraw authority signature */
+export class UnauthorizedSubsidyWithdrawalError extends ProgramError {
+  override readonly name: string = 'UnauthorizedSubsidyWithdrawal';
+
+  readonly code: number = 0xd; // 13
+
+  constructor(program: Program, cause?: Error) {
+    super(
+      "Subsidy withdrawal requires the pool's withdraw authority signature",
+      program,
+      cause
+    );
+  }
+}
+codeToErrorMap.set(0xd, UnauthorizedSubsidyWithdrawalError);
+nameToErrorMap.set(
+  'UnauthorizedSubsidyWithdrawal',
+  UnauthorizedSubsidyWithdrawalError
+);
+
+/** SubsidyPoolNotInitialized: Subsidy pool not initialized for this agent */
+export class SubsidyPoolNotInitializedError extends ProgramError {
+  override readonly name: string = 'SubsidyPoolNotInitialized';
+
+  readonly code: number = 0xe; // 14
+
+  constructor(program: Program, cause?: Error) {
+    super('Subsidy pool not initialized for this agent', program, cause);
+  }
+}
+codeToErrorMap.set(0xe, SubsidyPoolNotInitializedError);
+nameToErrorMap.set('SubsidyPoolNotInitialized', SubsidyPoolNotInitializedError);
+
+/** InvalidProgramConfigDerivation: Invalid Program Config PDA derivation */
+export class InvalidProgramConfigDerivationError extends ProgramError {
+  override readonly name: string = 'InvalidProgramConfigDerivation';
+
+  readonly code: number = 0xf; // 15
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid Program Config PDA derivation', program, cause);
+  }
+}
+codeToErrorMap.set(0xf, InvalidProgramConfigDerivationError);
+nameToErrorMap.set(
+  'InvalidProgramConfigDerivation',
+  InvalidProgramConfigDerivationError
+);
+
+/** ProgramConfigNotInitialized: Program Config not initialized */
+export class ProgramConfigNotInitializedError extends ProgramError {
+  override readonly name: string = 'ProgramConfigNotInitialized';
+
+  readonly code: number = 0x10; // 16
+
+  constructor(program: Program, cause?: Error) {
+    super('Program Config not initialized', program, cause);
+  }
+}
+codeToErrorMap.set(0x10, ProgramConfigNotInitializedError);
+nameToErrorMap.set(
+  'ProgramConfigNotInitialized',
+  ProgramConfigNotInitializedError
+);
+
+/** ProgramConfigAlreadyInitialized: Program Config already initialized */
+export class ProgramConfigAlreadyInitializedError extends ProgramError {
+  override readonly name: string = 'ProgramConfigAlreadyInitialized';
+
+  readonly code: number = 0x11; // 17
+
+  constructor(program: Program, cause?: Error) {
+    super('Program Config already initialized', program, cause);
+  }
+}
+codeToErrorMap.set(0x11, ProgramConfigAlreadyInitializedError);
+nameToErrorMap.set(
+  'ProgramConfigAlreadyInitialized',
+  ProgramConfigAlreadyInitializedError
+);
+
+/** InvalidReviewsTreeDerivation: Invalid reviews tree PDA derivation */
+export class InvalidReviewsTreeDerivationError extends ProgramError {
+  override readonly name: string = 'InvalidReviewsTreeDerivation';
+
+  readonly code: number = 0x12; // 18
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid reviews tree PDA derivation', program, cause);
+  }
+}
+codeToErrorMap.set(0x12, InvalidReviewsTreeDerivationError);
+nameToErrorMap.set(
+  'InvalidReviewsTreeDerivation',
+  InvalidReviewsTreeDerivationError
+);
+
+/** InvalidReviewsCollection: Supplied reviews collection does not match config.reviews_collection */
+export class InvalidReviewsCollectionError extends ProgramError {
+  override readonly name: string = 'InvalidReviewsCollection';
+
+  readonly code: number = 0x13; // 19
+
+  constructor(program: Program, cause?: Error) {
+    super(
+      'Supplied reviews collection does not match config.reviews_collection',
+      program,
+      cause
+    );
+  }
+}
+codeToErrorMap.set(0x13, InvalidReviewsCollectionError);
+nameToErrorMap.set('InvalidReviewsCollection', InvalidReviewsCollectionError);
+
+/** InvalidReceiptsCollection: Supplied receipts collection does not match config.receipts_collection */
+export class InvalidReceiptsCollectionError extends ProgramError {
+  override readonly name: string = 'InvalidReceiptsCollection';
+
+  readonly code: number = 0x14; // 20
+
+  constructor(program: Program, cause?: Error) {
+    super(
+      'Supplied receipts collection does not match config.receipts_collection',
+      program,
+      cause
+    );
+  }
+}
+codeToErrorMap.set(0x14, InvalidReceiptsCollectionError);
+nameToErrorMap.set('InvalidReceiptsCollection', InvalidReceiptsCollectionError);
+
+/** UnauthorizedAdmin: Signer is not the program config admin */
+export class UnauthorizedAdminError extends ProgramError {
+  override readonly name: string = 'UnauthorizedAdmin';
+
+  readonly code: number = 0x15; // 21
+
+  constructor(program: Program, cause?: Error) {
+    super('Signer is not the program config admin', program, cause);
+  }
+}
+codeToErrorMap.set(0x15, UnauthorizedAdminError);
+nameToErrorMap.set('UnauthorizedAdmin', UnauthorizedAdminError);
+
+/** InvalidLogWrapperProgram: Invalid log wrapper program */
+export class InvalidLogWrapperProgramError extends ProgramError {
+  override readonly name: string = 'InvalidLogWrapperProgram';
+
+  readonly code: number = 0x16; // 22
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid log wrapper program', program, cause);
+  }
+}
+codeToErrorMap.set(0x16, InvalidLogWrapperProgramError);
+nameToErrorMap.set('InvalidLogWrapperProgram', InvalidLogWrapperProgramError);
+
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors

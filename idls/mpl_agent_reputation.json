@@ -76,6 +76,421 @@
         "type": "u8",
         "value": 0
       }
+    },
+    {
+      "name": "LeaveReviewV1",
+      "accounts": [
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Pays for the review cNFT mint and the review record PDA"
+          ]
+        },
+        {
+          "name": "reviewer",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "The wallet leaving the review; must own the work receipt"
+          ]
+        },
+        {
+          "name": "asset",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The Core asset being reviewed (the agent)"
+          ]
+        },
+        {
+          "name": "leafOwner",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The owner of the new review cNFT leaf - must equal asset.owner"
+          ]
+        },
+        {
+          "name": "programConfig",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Singleton ProgramConfigV1 PDA. Signs the Bubblegum CPI as tree creator/delegate via invoke_signed"
+          ]
+        },
+        {
+          "name": "treeConfig",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Bubblegum tree config PDA for the reviews tree"
+          ]
+        },
+        {
+          "name": "merkleTree",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Reviews merkle tree at PDA [\"reviews_tree\", reviews_tree_index_le]"
+          ]
+        },
+        {
+          "name": "coreCollection",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Reviews collection (must equal program_config.reviews_collection)"
+          ]
+        },
+        {
+          "name": "mplCoreCpiSigner",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Bubblegum's mpl-core CPI signer PDA"
+          ]
+        },
+        {
+          "name": "logWrapper",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "MPL Noop / log wrapper program"
+          ]
+        },
+        {
+          "name": "compressionProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "MPL Account Compression program (used for both Bubblegum mint and verify_leaf CPI)"
+          ]
+        },
+        {
+          "name": "mplCoreProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The MPL Core program"
+          ]
+        },
+        {
+          "name": "bubblegumProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The MPL Bubblegum program"
+          ]
+        },
+        {
+          "name": "receiptsMerkleTree",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Receipts Bubblegum merkle tree holding the receipt being referenced"
+          ]
+        },
+        {
+          "name": "receiptsCollection",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Receipts collection (must equal program_config.receipts_collection)"
+          ]
+        },
+        {
+          "name": "reviewRecord",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "ReviewRecordV1 PDA seeded with the receipt's bubblegum asset id - idempotency gate"
+          ]
+        },
+        {
+          "name": "subsidyPool",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Optional ReviewSubsidyPoolV1 PDA for this agent; if present, the review record's rent is refunded to payer from the pool"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The system program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "leaveReviewV1Args",
+          "type": {
+            "defined": "LeaveReviewV1Args"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 1
+      }
+    },
+    {
+      "name": "DepositSubsidyV1",
+      "accounts": [
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Funds the deposit (and pool rent on first init)"
+          ]
+        },
+        {
+          "name": "agentAsset",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The Core asset representing the agent"
+          ]
+        },
+        {
+          "name": "subsidyPool",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "ReviewSubsidyPoolV1 PDA"
+          ]
+        },
+        {
+          "name": "withdrawAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Captured as the pool's withdraw authority on first init (defaults to payer)"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The system program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "depositSubsidyV1Args",
+          "type": {
+            "defined": "DepositSubsidyV1Args"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 2
+      }
+    },
+    {
+      "name": "WithdrawSubsidyV1",
+      "accounts": [
+        {
+          "name": "withdrawAuthority",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Must match the pool's withdraw_authority"
+          ]
+        },
+        {
+          "name": "agentAsset",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The Core asset representing the agent"
+          ]
+        },
+        {
+          "name": "subsidyPool",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "ReviewSubsidyPoolV1 PDA"
+          ]
+        },
+        {
+          "name": "destination",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Where to send the withdrawn lamports"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "withdrawSubsidyV1Args",
+          "type": {
+            "defined": "WithdrawSubsidyV1Args"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 3
+      }
+    },
+    {
+      "name": "InitializeReviewsConfigV1",
+      "accounts": [
+        {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Bootstrapping admin; captured as the config authority"
+          ]
+        },
+        {
+          "name": "programConfig",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "ProgramConfigV1 PDA at [\"program_config\"]"
+          ]
+        },
+        {
+          "name": "reviewsCollection",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Reviews collection PDA at [\"reviews_collection\"]"
+          ]
+        },
+        {
+          "name": "receiptsCollection",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The canonical receipts collection from agent-tools (recorded in config for later validation)"
+          ]
+        },
+        {
+          "name": "mplCoreProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The MPL Core program"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The system program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "initializeReviewsConfigV1Args",
+          "type": {
+            "defined": "InitializeReviewsConfigV1Args"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 4
+      }
+    },
+    {
+      "name": "RegisterReviewsTreeV1",
+      "accounts": [
+        {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Must match program_config.admin"
+          ]
+        },
+        {
+          "name": "programConfig",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "ProgramConfigV1 PDA"
+          ]
+        },
+        {
+          "name": "merkleTree",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Reviews merkle tree PDA at [\"reviews_tree\", program_config.next_tree_index_le]"
+          ]
+        },
+        {
+          "name": "treeConfig",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Bubblegum tree config PDA (derived from merkle_tree)"
+          ]
+        },
+        {
+          "name": "logWrapper",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "MPL Noop / log wrapper program"
+          ]
+        },
+        {
+          "name": "compressionProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "MPL Account Compression program"
+          ]
+        },
+        {
+          "name": "bubblegumProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The MPL Bubblegum program"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The system program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "registerReviewsTreeV1Args",
+          "type": {
+            "defined": "RegisterReviewsTreeV1Args"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 5
+      }
     }
   ],
   "accounts": [
@@ -115,9 +530,260 @@
           }
         ]
       }
+    },
+    {
+      "name": "ReviewsConfigV1",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "key",
+            "type": {
+              "defined": "Key"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                6
+              ]
+            },
+            "attrs": [
+              "padding"
+            ]
+          },
+          {
+            "name": "admin",
+            "type": "publicKey"
+          },
+          {
+            "name": "reviewsCollection",
+            "type": "publicKey"
+          },
+          {
+            "name": "receiptsCollection",
+            "type": "publicKey"
+          },
+          {
+            "name": "nextTreeIndex",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ReviewRecordV1",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "key",
+            "type": {
+              "defined": "Key"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                6
+              ]
+            },
+            "attrs": [
+              "padding"
+            ]
+          },
+          {
+            "name": "reviewer",
+            "type": "publicKey"
+          },
+          {
+            "name": "receiptAssetId",
+            "type": "publicKey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ReviewSubsidyPoolV1",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "key",
+            "type": {
+              "defined": "Key"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                6
+              ]
+            },
+            "attrs": [
+              "padding"
+            ]
+          },
+          {
+            "name": "agentAsset",
+            "type": "publicKey"
+          },
+          {
+            "name": "withdrawAuthority",
+            "type": "publicKey"
+          }
+        ]
+      }
     }
   ],
   "types": [
+    {
+      "name": "LeaveReviewV1Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "rating",
+            "type": "u8"
+          },
+          {
+            "name": "feedbackUri",
+            "type": "string"
+          },
+          {
+            "name": "reviewsTreeIndex",
+            "type": "u64"
+          },
+          {
+            "name": "receiptNonce",
+            "type": "u64"
+          },
+          {
+            "name": "receiptIndex",
+            "type": "u32"
+          },
+          {
+            "name": "receiptRoot",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "receiptDataHash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "receiptCreatorHash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "receiptAssetDataHash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "receiptFlags",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "InitializeReviewsConfigV1Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                7
+              ]
+            },
+            "attrs": [
+              "padding"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "RegisterReviewsTreeV1Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "pad",
+            "type": {
+              "array": [
+                "u8",
+                3
+              ]
+            },
+            "attrs": [
+              "padding"
+            ]
+          },
+          {
+            "name": "maxDepth",
+            "type": "u32"
+          },
+          {
+            "name": "maxBufferSize",
+            "type": "u32"
+          },
+          {
+            "name": "canopyDepth",
+            "type": "u32"
+          }
+        ]
+      }
+    },
     {
       "name": "RegisterReputationV1Args",
       "type": {
@@ -139,6 +805,30 @@
       }
     },
     {
+      "name": "DepositSubsidyV1Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "WithdrawSubsidyV1Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
       "name": "Key",
       "type": {
         "kind": "enum",
@@ -148,6 +838,15 @@
           },
           {
             "name": "AgentReputationV1"
+          },
+          {
+            "name": "ReviewRecordV1"
+          },
+          {
+            "name": "ReviewSubsidyPoolV1"
+          },
+          {
+            "name": "ReviewsConfigV1"
           }
         ]
       }
@@ -183,6 +882,91 @@
       "code": 5,
       "name": "AgentReputationAlreadyRegistered",
       "msg": "Agent Reputation already registered"
+    },
+    {
+      "code": 6,
+      "name": "InvalidReviewRating",
+      "msg": "Invalid review rating (must be 1..=5)"
+    },
+    {
+      "code": 7,
+      "name": "FeedbackUriInvalid",
+      "msg": "Feedback URI must be non-empty and within size limits"
+    },
+    {
+      "code": 8,
+      "name": "LeafOwnerMismatch",
+      "msg": "Leaf owner does not match the reviewed asset owner"
+    },
+    {
+      "code": 9,
+      "name": "InvalidBubblegumProgram",
+      "msg": "Invalid Bubblegum Program"
+    },
+    {
+      "code": 10,
+      "name": "InvalidCompressionProgram",
+      "msg": "Invalid Compression Program"
+    },
+    {
+      "code": 11,
+      "name": "ReviewAlreadyExists",
+      "msg": "A review already exists for this work receipt"
+    },
+    {
+      "code": 12,
+      "name": "SubsidyPoolAlreadyInitialized",
+      "msg": "Subsidy pool already initialized for this agent"
+    },
+    {
+      "code": 13,
+      "name": "UnauthorizedSubsidyWithdrawal",
+      "msg": "Subsidy withdrawal requires the pool's withdraw authority signature"
+    },
+    {
+      "code": 14,
+      "name": "SubsidyPoolNotInitialized",
+      "msg": "Subsidy pool not initialized for this agent"
+    },
+    {
+      "code": 15,
+      "name": "InvalidProgramConfigDerivation",
+      "msg": "Invalid Program Config PDA derivation"
+    },
+    {
+      "code": 16,
+      "name": "ProgramConfigNotInitialized",
+      "msg": "Program Config not initialized"
+    },
+    {
+      "code": 17,
+      "name": "ProgramConfigAlreadyInitialized",
+      "msg": "Program Config already initialized"
+    },
+    {
+      "code": 18,
+      "name": "InvalidReviewsTreeDerivation",
+      "msg": "Invalid reviews tree PDA derivation"
+    },
+    {
+      "code": 19,
+      "name": "InvalidReviewsCollection",
+      "msg": "Supplied reviews collection does not match config.reviews_collection"
+    },
+    {
+      "code": 20,
+      "name": "InvalidReceiptsCollection",
+      "msg": "Supplied receipts collection does not match config.receipts_collection"
+    },
+    {
+      "code": 21,
+      "name": "UnauthorizedAdmin",
+      "msg": "Signer is not the program config admin"
+    },
+    {
+      "code": 22,
+      "name": "InvalidLogWrapperProgram",
+      "msg": "Invalid log wrapper program"
     }
   ],
   "metadata": {

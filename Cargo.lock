@@ -2594,7 +2594,9 @@ dependencies = [
 name = "mpl-agent-reputation-program"
 version = "0.1.0"
 dependencies = [
+ "borsh 1.5.7",
  "bytemuck",
+ "mpl-bubblegum",
  "mpl-core",
  "mpl-utils",
  "num-derive 0.4.1",
@@ -2630,8 +2632,10 @@ dependencies = [
 name = "mpl-agent-tools-program"
 version = "0.1.0"
 dependencies = [
+ "borsh 1.5.7",
  "bytemuck",
  "mpl-agent-identity",
+ "mpl-bubblegum",
  "mpl-core",
  "mpl-utils",
  "num-derive 0.4.1",
@@ -2677,6 +2681,21 @@ dependencies = [
  "shank",
  "solana-program",
  "thiserror 2.0.18",
+]
+
+[[package]]
+name = "mpl-bubblegum"
+version = "2.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9160048f67dd7541bc5d04cfcf62a8431e882f13e6df90ac42185b53a250f52d"
+dependencies = [
+ "borsh 0.10.3",
+ "kaigan 0.3.0",
+ "modular-bitfield",
+ "num-derive 0.3.3",
+ "num-traits",
+ "solana-program",
+ "thiserror 1.0.69",
 ]
 
 [[package]]

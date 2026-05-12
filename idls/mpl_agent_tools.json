@@ -191,6 +191,281 @@
         "type": "u8",
         "value": 2
       }
+    },
+    {
+      "name": "MintWorkReceiptV1",
+      "accounts": [
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Pays for the cNFT mint"
+          ]
+        },
+        {
+          "name": "executiveAuthority",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "Executive's signing key (must match `authority` on the execution delegate record)"
+          ]
+        },
+        {
+          "name": "executionDelegateRecord",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The delegate record proving the executive can act for this agent"
+          ]
+        },
+        {
+          "name": "agentAsset",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The Core asset representing the agent"
+          ]
+        },
+        {
+          "name": "client",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "The client receiving the receipt (co-signs the handshake)"
+          ]
+        },
+        {
+          "name": "programConfig",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Singleton program config PDA. Signs the Bubblegum CPI as tree creator/delegate via invoke_signed"
+          ]
+        },
+        {
+          "name": "treeConfig",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Bubblegum tree config PDA for the receipts tree"
+          ]
+        },
+        {
+          "name": "merkleTree",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Receipts merkle tree at PDA [\"receipts_tree\", tree_index_le]"
+          ]
+        },
+        {
+          "name": "coreCollection",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Receipts collection (must equal program_config.collection)"
+          ]
+        },
+        {
+          "name": "mplCoreCpiSigner",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Bubblegum's mpl-core CPI signer PDA"
+          ]
+        },
+        {
+          "name": "logWrapper",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "MPL Noop / log wrapper program"
+          ]
+        },
+        {
+          "name": "compressionProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "MPL Account Compression program"
+          ]
+        },
+        {
+          "name": "mplCoreProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The MPL Core program"
+          ]
+        },
+        {
+          "name": "bubblegumProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The MPL Bubblegum program"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The system program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "mintWorkReceiptV1Args",
+          "type": {
+            "defined": "MintWorkReceiptV1Args"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 3
+      }
+    },
+    {
+      "name": "InitializeToolsConfigV1",
+      "accounts": [
+        {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Bootstrapping admin; captured as the config authority for future tree registration"
+          ]
+        },
+        {
+          "name": "programConfig",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "ProgramConfigV1 PDA at [\"program_config\"]"
+          ]
+        },
+        {
+          "name": "collection",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Receipts collection PDA at [\"receipts_collection\"]"
+          ]
+        },
+        {
+          "name": "mplCoreProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The MPL Core program"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The system program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "initializeToolsConfigV1Args",
+          "type": {
+            "defined": "InitializeToolsConfigV1Args"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 4
+      }
+    },
+    {
+      "name": "RegisterReceiptsTreeV1",
+      "accounts": [
+        {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Must match program_config.admin"
+          ]
+        },
+        {
+          "name": "programConfig",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "ProgramConfigV1 PDA"
+          ]
+        },
+        {
+          "name": "merkleTree",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Receipts merkle tree PDA at [\"receipts_tree\", program_config.next_tree_index_le]"
+          ]
+        },
+        {
+          "name": "treeConfig",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Bubblegum tree config PDA (derived from merkle_tree)"
+          ]
+        },
+        {
+          "name": "logWrapper",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "MPL Noop / log wrapper program"
+          ]
+        },
+        {
+          "name": "compressionProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "MPL Account Compression program"
+          ]
+        },
+        {
+          "name": "bubblegumProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The MPL Bubblegum program"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The system program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "registerReceiptsTreeV1Args",
+          "type": {
+            "defined": "RegisterReceiptsTreeV1Args"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 5
+      }
     }
   ],
   "accounts": [
@@ -271,6 +546,51 @@
           }
         ]
       }
+    },
+    {
+      "name": "ToolsConfigV1",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "key",
+            "type": {
+              "defined": "Key"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                6
+              ]
+            },
+            "attrs": [
+              "padding"
+            ]
+          },
+          {
+            "name": "admin",
+            "type": "publicKey"
+          },
+          {
+            "name": "collection",
+            "type": "publicKey"
+          },
+          {
+            "name": "nextTreeIndex",
+            "type": "u64"
+          }
+        ]
+      }
     }
   ],
   "types": [
@@ -295,6 +615,42 @@
       }
     },
     {
+      "name": "InitializeToolsConfigV1Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                7
+              ]
+            },
+            "attrs": [
+              "padding"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "MintWorkReceiptV1Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "receiptUri",
+            "type": "string"
+          },
+          {
+            "name": "treeIndex",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
       "name": "RegisterExecutiveV1Args",
       "type": {
         "kind": "struct",
@@ -310,6 +666,38 @@
             "attrs": [
               "padding"
             ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "RegisterReceiptsTreeV1Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "pad",
+            "type": {
+              "array": [
+                "u8",
+                3
+              ]
+            },
+            "attrs": [
+              "padding"
+            ]
+          },
+          {
+            "name": "maxDepth",
+            "type": "u32"
+          },
+          {
+            "name": "maxBufferSize",
+            "type": "u32"
+          },
+          {
+            "name": "canopyDepth",
+            "type": "u32"
           }
         ]
       }
@@ -347,6 +735,9 @@
           },
           {
             "name": "ExecutionDelegateRecordV1"
+          },
+          {
+            "name": "ToolsConfigV1"
           }
         ]
       }
@@ -427,6 +818,66 @@
       "code": 14,
       "name": "ExecutiveProfileMustBeInitialized",
       "msg": "Executive Profile must be initialized"
+    },
+    {
+      "code": 15,
+      "name": "InvalidBubblegumProgram",
+      "msg": "Invalid Bubblegum Program"
+    },
+    {
+      "code": 16,
+      "name": "ExecutiveAuthorityMismatch",
+      "msg": "Executive authority does not match the delegate record's authority"
+    },
+    {
+      "code": 17,
+      "name": "ReceiptUriInvalid",
+      "msg": "Receipt URI must be non-empty and within size limits"
+    },
+    {
+      "code": 18,
+      "name": "InvalidProgramConfigDerivation",
+      "msg": "Invalid Program Config PDA derivation"
+    },
+    {
+      "code": 19,
+      "name": "ProgramConfigNotInitialized",
+      "msg": "Program Config is not initialized"
+    },
+    {
+      "code": 20,
+      "name": "ProgramConfigAlreadyInitialized",
+      "msg": "Program Config is already initialized"
+    },
+    {
+      "code": 21,
+      "name": "InvalidReceiptsTreeDerivation",
+      "msg": "Invalid receipts tree PDA derivation"
+    },
+    {
+      "code": 22,
+      "name": "TreeIndexMismatch",
+      "msg": "Supplied tree index does not match config.next_tree_index"
+    },
+    {
+      "code": 23,
+      "name": "InvalidReceiptsCollection",
+      "msg": "Supplied collection does not match the program config's canonical receipts collection"
+    },
+    {
+      "code": 24,
+      "name": "InvalidCompressionProgram",
+      "msg": "Invalid MPL Account Compression Program"
+    },
+    {
+      "code": 25,
+      "name": "InvalidLogWrapperProgram",
+      "msg": "Invalid log wrapper program"
+    },
+    {
+      "code": 26,
+      "name": "UnauthorizedAdmin",
+      "msg": "Signer is not the program config admin"
     }
   ],
   "metadata": {

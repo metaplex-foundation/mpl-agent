@@ -33,8 +33,17 @@ kinobi.update(
         k.variablePdaSeedNode("agentAsset", k.publicKeyTypeNode(), "The address of the agent asset"),
       ],
     },
+    toolsConfigV1: {
+      seeds: [k.constantPdaSeedNodeFromString("program_config")],
+    },
   })
 );
+
+// Well-known program IDs we want to default in the generated client.
+const MPL_CORE_ID = "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d";
+const BUBBLEGUM_ID = "BGUMAp9Gq7iTEuizy4pqaxsTyUCBK68MDfK752saRPUY";
+const MPL_NOOP_ID = "mnoopTCrg4p8ry25e4bcWA9XZjbNjMTfgYVGGEdRsf3";
+const COMPRESSION_ID = "mcmt6YrQEMKw8Mw43FmpRLmf7BqRnFMKmAcbxE3xkAW";
 
 // Update instructions.
 kinobi.update(
@@ -55,6 +64,29 @@ kinobi.update(
       },
     },
     revokeExecutionV1: {},
+    mintWorkReceiptV1: {
+      accounts: {
+        programConfig: { defaultValue: k.pdaValueNode("toolsConfigV1") },
+        mplCoreProgram: { defaultValue: k.publicKeyValueNode(MPL_CORE_ID, "mplCore") },
+        bubblegumProgram: { defaultValue: k.publicKeyValueNode(BUBBLEGUM_ID, "mplBubblegum") },
+        logWrapper: { defaultValue: k.publicKeyValueNode(MPL_NOOP_ID, "mplNoop") },
+        compressionProgram: { defaultValue: k.publicKeyValueNode(COMPRESSION_ID, "mplAccountCompression") },
+      },
+    },
+    initializeToolsConfigV1: {
+      accounts: {
+        programConfig: { defaultValue: k.pdaValueNode("toolsConfigV1") },
+        mplCoreProgram: { defaultValue: k.publicKeyValueNode(MPL_CORE_ID, "mplCore") },
+      },
+    },
+    registerReceiptsTreeV1: {
+      accounts: {
+        programConfig: { defaultValue: k.pdaValueNode("toolsConfigV1") },
+        bubblegumProgram: { defaultValue: k.publicKeyValueNode(BUBBLEGUM_ID, "mplBubblegum") },
+        logWrapper: { defaultValue: k.publicKeyValueNode(MPL_NOOP_ID, "mplNoop") },
+        compressionProgram: { defaultValue: k.publicKeyValueNode(COMPRESSION_ID, "mplAccountCompression") },
+      },
+    },
   })
 );
 

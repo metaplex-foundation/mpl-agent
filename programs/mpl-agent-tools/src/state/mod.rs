@@ -1,8 +1,10 @@
 mod execution_delegate_record_v1;
 mod executive_profile_v1;
+mod program_config;
 
 pub use execution_delegate_record_v1::*;
 pub use executive_profile_v1::*;
+pub use program_config::*;
 
 use shank::ShankType;
 
@@ -14,6 +16,7 @@ pub enum Key {
     Uninitialized,
     ExecutiveProfileV1,
     ExecutionDelegateRecordV1,
+    ToolsConfigV1,
 }
 
 impl From<u8> for Key {
@@ -22,6 +25,7 @@ impl From<u8> for Key {
             0 => Key::Uninitialized,
             1 => Key::ExecutiveProfileV1,
             2 => Key::ExecutionDelegateRecordV1,
+            3 => Key::ToolsConfigV1,
             _ => Key::Uninitialized,
         }
     }

@@ -29,6 +29,57 @@ pub enum MplAgentReputationError {
     /// 5 (0x5) - Agent Reputation already registered
     #[error("Agent Reputation already registered")]
     AgentReputationAlreadyRegistered,
+    /// 6 (0x6) - Invalid review rating (must be 1..=5)
+    #[error("Invalid review rating (must be 1..=5)")]
+    InvalidReviewRating,
+    /// 7 (0x7) - Feedback URI must be non-empty and within size limits
+    #[error("Feedback URI must be non-empty and within size limits")]
+    FeedbackUriInvalid,
+    /// 8 (0x8) - Leaf owner does not match the reviewed asset owner
+    #[error("Leaf owner does not match the reviewed asset owner")]
+    LeafOwnerMismatch,
+    /// 9 (0x9) - Invalid Bubblegum Program
+    #[error("Invalid Bubblegum Program")]
+    InvalidBubblegumProgram,
+    /// 10 (0xA) - Invalid Compression Program
+    #[error("Invalid Compression Program")]
+    InvalidCompressionProgram,
+    /// 11 (0xB) - A review already exists for this work receipt
+    #[error("A review already exists for this work receipt")]
+    ReviewAlreadyExists,
+    /// 12 (0xC) - Subsidy pool already initialized for this agent
+    #[error("Subsidy pool already initialized for this agent")]
+    SubsidyPoolAlreadyInitialized,
+    /// 13 (0xD) - Subsidy withdrawal requires the pool's withdraw authority signature
+    #[error("Subsidy withdrawal requires the pool's withdraw authority signature")]
+    UnauthorizedSubsidyWithdrawal,
+    /// 14 (0xE) - Subsidy pool not initialized for this agent
+    #[error("Subsidy pool not initialized for this agent")]
+    SubsidyPoolNotInitialized,
+    /// 15 (0xF) - Invalid Program Config PDA derivation
+    #[error("Invalid Program Config PDA derivation")]
+    InvalidProgramConfigDerivation,
+    /// 16 (0x10) - Program Config not initialized
+    #[error("Program Config not initialized")]
+    ProgramConfigNotInitialized,
+    /// 17 (0x11) - Program Config already initialized
+    #[error("Program Config already initialized")]
+    ProgramConfigAlreadyInitialized,
+    /// 18 (0x12) - Invalid reviews tree PDA derivation
+    #[error("Invalid reviews tree PDA derivation")]
+    InvalidReviewsTreeDerivation,
+    /// 19 (0x13) - Supplied reviews collection does not match config.reviews_collection
+    #[error("Supplied reviews collection does not match config.reviews_collection")]
+    InvalidReviewsCollection,
+    /// 20 (0x14) - Supplied receipts collection does not match config.receipts_collection
+    #[error("Supplied receipts collection does not match config.receipts_collection")]
+    InvalidReceiptsCollection,
+    /// 21 (0x15) - Signer is not the program config admin
+    #[error("Signer is not the program config admin")]
+    UnauthorizedAdmin,
+    /// 22 (0x16) - Invalid log wrapper program
+    #[error("Invalid log wrapper program")]
+    InvalidLogWrapperProgram,
 }
 
 impl From<MplAgentReputationError> for ProgramError {
@@ -47,6 +98,23 @@ impl TryFrom<u32> for MplAgentReputationError {
             3 => Ok(MplAgentReputationError::InvalidMplCoreProgram),
             4 => Ok(MplAgentReputationError::InvalidCoreAsset),
             5 => Ok(MplAgentReputationError::AgentReputationAlreadyRegistered),
+            6 => Ok(MplAgentReputationError::InvalidReviewRating),
+            7 => Ok(MplAgentReputationError::FeedbackUriInvalid),
+            8 => Ok(MplAgentReputationError::LeafOwnerMismatch),
+            9 => Ok(MplAgentReputationError::InvalidBubblegumProgram),
+            10 => Ok(MplAgentReputationError::InvalidCompressionProgram),
+            11 => Ok(MplAgentReputationError::ReviewAlreadyExists),
+            12 => Ok(MplAgentReputationError::SubsidyPoolAlreadyInitialized),
+            13 => Ok(MplAgentReputationError::UnauthorizedSubsidyWithdrawal),
+            14 => Ok(MplAgentReputationError::SubsidyPoolNotInitialized),
+            15 => Ok(MplAgentReputationError::InvalidProgramConfigDerivation),
+            16 => Ok(MplAgentReputationError::ProgramConfigNotInitialized),
+            17 => Ok(MplAgentReputationError::ProgramConfigAlreadyInitialized),
+            18 => Ok(MplAgentReputationError::InvalidReviewsTreeDerivation),
+            19 => Ok(MplAgentReputationError::InvalidReviewsCollection),
+            20 => Ok(MplAgentReputationError::InvalidReceiptsCollection),
+            21 => Ok(MplAgentReputationError::UnauthorizedAdmin),
+            22 => Ok(MplAgentReputationError::InvalidLogWrapperProgram),
             _ => Err(ProgramError::InvalidArgument),
         }
     }
@@ -63,6 +131,47 @@ impl ToStr for MplAgentReputationError {
             MplAgentReputationError::AgentReputationAlreadyRegistered => {
                 "Agent Reputation already registered"
             }
+            MplAgentReputationError::InvalidReviewRating => "Invalid review rating (must be 1..=5)",
+            MplAgentReputationError::FeedbackUriInvalid => {
+                "Feedback URI must be non-empty and within size limits"
+            }
+            MplAgentReputationError::LeafOwnerMismatch => {
+                "Leaf owner does not match the reviewed asset owner"
+            }
+            MplAgentReputationError::InvalidBubblegumProgram => "Invalid Bubblegum Program",
+            MplAgentReputationError::InvalidCompressionProgram => "Invalid Compression Program",
+            MplAgentReputationError::ReviewAlreadyExists => {
+                "A review already exists for this work receipt"
+            }
+            MplAgentReputationError::SubsidyPoolAlreadyInitialized => {
+                "Subsidy pool already initialized for this agent"
+            }
+            MplAgentReputationError::UnauthorizedSubsidyWithdrawal => {
+                "Subsidy withdrawal requires the pool's withdraw authority signature"
+            }
+            MplAgentReputationError::SubsidyPoolNotInitialized => {
+                "Subsidy pool not initialized for this agent"
+            }
+            MplAgentReputationError::InvalidProgramConfigDerivation => {
+                "Invalid Program Config PDA derivation"
+            }
+            MplAgentReputationError::ProgramConfigNotInitialized => {
+                "Program Config not initialized"
+            }
+            MplAgentReputationError::ProgramConfigAlreadyInitialized => {
+                "Program Config already initialized"
+            }
+            MplAgentReputationError::InvalidReviewsTreeDerivation => {
+                "Invalid reviews tree PDA derivation"
+            }
+            MplAgentReputationError::InvalidReviewsCollection => {
+                "Supplied reviews collection does not match config.reviews_collection"
+            }
+            MplAgentReputationError::InvalidReceiptsCollection => {
+                "Supplied receipts collection does not match config.receipts_collection"
+            }
+            MplAgentReputationError::UnauthorizedAdmin => "Signer is not the program config admin",
+            MplAgentReputationError::InvalidLogWrapperProgram => "Invalid log wrapper program",
         }
     }
 }

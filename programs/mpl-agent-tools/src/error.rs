@@ -67,6 +67,56 @@ pub enum MplAgentToolsError {
     /// 14 - Executive Profile must be initialized
     #[error("Executive Profile must be initialized")]
     ExecutiveProfileMustBeInitialized,
+
+    /// 15 - Invalid Bubblegum Program
+    #[error("Invalid Bubblegum Program")]
+    InvalidBubblegumProgram,
+
+    /// 16 - Executive authority does not match delegate record
+    #[error("Executive authority does not match the delegate record's authority")]
+    ExecutiveAuthorityMismatch,
+
+    /// 17 - Receipt URI missing or too long
+    #[error("Receipt URI must be non-empty and within size limits")]
+    ReceiptUriInvalid,
+
+    /// 18 - Invalid Program Config PDA derivation
+    #[error("Invalid Program Config PDA derivation")]
+    InvalidProgramConfigDerivation,
+
+    /// 19 - Program Config is uninitialized
+    #[error("Program Config is not initialized")]
+    ProgramConfigNotInitialized,
+
+    /// 20 - Program Config already initialized
+    #[error("Program Config is already initialized")]
+    ProgramConfigAlreadyInitialized,
+
+    /// 21 - Invalid receipts tree PDA derivation
+    #[error("Invalid receipts tree PDA derivation")]
+    InvalidReceiptsTreeDerivation,
+
+    /// 22 - Receipts tree index mismatch
+    #[error("Supplied tree index does not match config.next_tree_index")]
+    TreeIndexMismatch,
+
+    /// 23 - Invalid receipts collection
+    #[error(
+        "Supplied collection does not match the program config's canonical receipts collection"
+    )]
+    InvalidReceiptsCollection,
+
+    /// 24 - Invalid MPL Account Compression Program
+    #[error("Invalid MPL Account Compression Program")]
+    InvalidCompressionProgram,
+
+    /// 25 - Invalid MPL Noop / log wrapper Program
+    #[error("Invalid log wrapper program")]
+    InvalidLogWrapperProgram,
+
+    /// 26 - Unauthorized admin signer
+    #[error("Signer is not the program config admin")]
+    UnauthorizedAdmin,
 }
 
 impl PrintProgramError for MplAgentToolsError {
