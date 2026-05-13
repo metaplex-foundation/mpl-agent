@@ -1,9 +1,5 @@
 use num_derive::FromPrimitive;
-use solana_program::{
-    decode_error::DecodeError,
-    msg,
-    program_error::{PrintProgramError, ProgramError},
-};
+use solana_program::program_error::ProgramError;
 use thiserror::Error;
 
 #[derive(Error, Clone, Debug, Eq, PartialEq, FromPrimitive)]
@@ -69,20 +65,8 @@ pub enum MplAgentToolsError {
     ExecutiveProfileMustBeInitialized,
 }
 
-impl PrintProgramError for MplAgentToolsError {
-    fn print<E>(&self) {
-        msg!(&self.to_string());
-    }
-}
-
 impl From<MplAgentToolsError> for ProgramError {
     fn from(e: MplAgentToolsError) -> Self {
         ProgramError::Custom(e as u32)
-    }
-}
-
-impl<T> DecodeError<T> for MplAgentToolsError {
-    fn type_of() -> &'static str {
-        "Mpl Agent Tools Error"
     }
 }

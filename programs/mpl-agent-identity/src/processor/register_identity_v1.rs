@@ -9,7 +9,8 @@ use mpl_core::ExternalCheckResultBits;
 use mpl_utils::assert_signer;
 use shank::ShankType;
 use solana_program::program_error::ProgramError;
-use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, system_program};
+use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult};
+use solana_system_interface::program as system_program;
 
 use crate::{
     error::MplAgentIdentityError, instruction::accounts::RegisterIdentityV1Accounts,
@@ -165,13 +166,16 @@ pub fn register_identity_v1<'a>(
             }),
         },
     }
+    // mpl-core 0.12 changed the remaining_accounts tuple order to
+    // `(AccountInfo, is_writable, is_signer)`. The agent_identity PDA is signed for
+    // via `invoke_signed`, so is_signer = true, is_writable = false.
     .invoke_signed_with_remaining_accounts(
         &[&[
             AgentIdentityV2::PREFIX,
             ctx.accounts.asset.key.as_ref(),
             &[agent_identity_bump],
         ]],
-        &[(ctx.accounts.agent_identity, true, false)],
+        &[(ctx.accounts.agent_identity, false, true)],
     )?;
 
     Ok(())
