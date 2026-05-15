@@ -3253,7 +3253,7 @@ dependencies = [
 
 [[package]]
 name = "mpl-agent-identity"
-version = "0.2.1"
+version = "0.3.0"
 dependencies = [
  "assert_matches",
  "borsh 1.6.1",
