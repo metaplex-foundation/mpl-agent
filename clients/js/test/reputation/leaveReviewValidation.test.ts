@@ -218,12 +218,17 @@ test('leaveReviewV1 — rejects receipt replay against a different agent', async
   const agentBSetup = await setupAgentWithExecutive(umi);
 
   // Reuse AgentA's receipt proof params verbatim, but flip the reviewed
-  // asset to AgentB. With the audit fix the call must fail.
-  await t.throwsAsync(() =>
+  // asset to AgentB. The failure must come from mpl-account-compression's
+  // verify_leaf (error 0x1771 = ConcurrentMerkleTreeError) — that's the
+  // exact signal of leaf-hash mismatch. Asserting it specifically
+  // prevents this test from silently passing if some earlier check ever
+  // starts rejecting the call first.
+  await t.throwsAsync(
     leaveReviewV1(umi, {
       ...sharedArgs,
       asset: agentBSetup.agent,
-    }).sendAndConfirm(umi)
+    }).sendAndConfirm(umi),
+    { message: /0x1771/ }
   );
 
   // Quiet unused-var lint:
