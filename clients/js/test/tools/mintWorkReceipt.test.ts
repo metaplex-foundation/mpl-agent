@@ -151,3 +151,32 @@ test('mintWorkReceiptV1 — empty receipt URI fails', async (t) => {
     }).sendAndConfirm(umi)
   );
 });
+
+test('mintWorkReceiptV1 — wrong compression program fails', async (t) => {
+  const umi = (await createUmi()).use(mplBubblegum());
+  const ctx = await bootstrapReceiptsAndReviews(umi);
+  const setup = await setupAgentWithExecutive(umi);
+  const client = await fundedClient(umi);
+
+  // SPL Noop has the right shape (executable, well-known) but is not the
+  // canonical mpl-account-compression program. The on-chain guard pins
+  // the compression program id so spoofed compression backends cannot
+  // silently no-op the merkle update.
+  const splNoop = publicKey('noopb9bkMVfRPU8AsbpTUg8AQkHtKwMYZiFUjNRtMmV');
+
+  await t.throwsAsync(() =>
+    mintWorkReceiptV1(umi, {
+      executiveAuthority: setup.executive,
+      executionDelegateRecord: setup.executionDelegateRecord,
+      agentAsset: setup.agent,
+      client,
+      treeConfig: findTreeConfigPda(umi, { merkleTree: ctx.receiptsTree }),
+      merkleTree: ctx.receiptsTree,
+      coreCollection: ctx.receiptsCollection,
+      mplCoreCpiSigner: MPL_CORE_CPI_SIGNER,
+      compressionProgram: splNoop,
+      receiptUri: 'https://example.com/r.json',
+      treeIndex: ctx.receiptsTreeIndex,
+    }).sendAndConfirm(umi)
+  );
+});

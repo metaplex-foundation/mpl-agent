@@ -22,6 +22,12 @@ use crate::{
 /// Maximum length of the off-chain receipt URI, in bytes.
 pub const MAX_RECEIPT_URI_LEN: usize = 200;
 
+/// MPL Account Compression program id — owner of the merkle tree account
+/// that Bubblegum's CPI will write to. Pinned here so the outer instruction
+/// can't be tricked into passing a look-alike account.
+const MPL_ACCOUNT_COMPRESSION_ID: solana_program::pubkey::Pubkey =
+    solana_program::pubkey!("mcmt6YrQEMKw8Mw43FmpRLmf7BqRnFMKmAcbxE3xkAW");
+
 /// Arguments for the MintWorkReceiptV1 instruction.
 #[derive(Clone, Debug, PartialEq, Eq, BorshSerialize, BorshDeserialize, ShankType)]
 pub struct MintWorkReceiptV1Args {
@@ -91,12 +97,18 @@ pub fn mint_work_receipt_v1<'a>(
         return Err(MplAgentToolsError::InvalidReceiptsCollection.into());
     }
 
-    // Program program-id checks.
+    // Program program-id checks. Defence-in-depth: even though Bubblegum
+    // should reject a spoofed compression program internally, we still
+    // pin it here so the outer ix can't be tricked into passing a
+    // look-alike account that silently no-ops the merkle update.
     if *ctx.accounts.mpl_core_program.key != mpl_core::ID {
         return Err(MplAgentToolsError::InvalidMplCoreProgram.into());
     }
     if *ctx.accounts.bubblegum_program.key != BUBBLEGUM_ID {
         return Err(MplAgentToolsError::InvalidBubblegumProgram.into());
+    }
+    if *ctx.accounts.compression_program.key != MPL_ACCOUNT_COMPRESSION_ID {
+        return Err(MplAgentToolsError::InvalidCompressionProgram.into());
     }
     if *ctx.accounts.system_program.key != system_program::id() {
         return Err(MplAgentToolsError::InvalidSystemProgram.into());
