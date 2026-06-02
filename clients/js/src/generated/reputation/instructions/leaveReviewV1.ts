@@ -24,14 +24,10 @@ import {
   u64,
   u8,
 } from '@metaplex-foundation/umi/serializers';
-import {
-  findReviewSubsidyPoolV1Pda,
-  findReviewsConfigV1Pda,
-} from '../accounts';
+import { findReviewsConfigV1Pda } from '../accounts';
 import {
   ResolvedAccount,
   ResolvedAccountsWithIndices,
-  expectPublicKey,
   getAccountMetasAndSigners,
 } from '../shared';
 
@@ -45,7 +41,7 @@ export type LeaveReviewV1InstructionAccounts = {
   asset: PublicKey | Pda;
   /** The owner of the new review cNFT leaf - must equal asset.owner */
   leafOwner: PublicKey | Pda;
-  /** Singleton ProgramConfigV1 PDA. Signs the Bubblegum CPI as tree creator/delegate via invoke_signed */
+  /** Singleton ReviewsConfigV1 PDA. Signs the Bubblegum CPI as tree creator/delegate via invoke_signed */
   programConfig?: PublicKey | Pda;
   /** Bubblegum tree config PDA for the reviews tree */
   treeConfig: PublicKey | Pda;
@@ -69,8 +65,6 @@ export type LeaveReviewV1InstructionAccounts = {
   receiptsCollection: PublicKey | Pda;
   /** ReviewRecordV1 PDA seeded with the receipt's bubblegum asset id - idempotency gate */
   reviewRecord: PublicKey | Pda;
-  /** Optional ReviewSubsidyPoolV1 PDA for this agent; if present, the review record's rent is refunded to payer from the pool */
-  subsidyPool?: PublicKey | Pda;
   /** The system program */
   systemProgram?: PublicKey | Pda;
 };
@@ -234,13 +228,8 @@ export function leaveReviewV1(
       isWritable: true as boolean,
       value: input.reviewRecord ?? null,
     },
-    subsidyPool: {
-      index: 16,
-      isWritable: true as boolean,
-      value: input.subsidyPool ?? null,
-    },
     systemProgram: {
-      index: 17,
+      index: 16,
       isWritable: false as boolean,
       value: input.systemProgram ?? null,
     },
@@ -283,11 +272,6 @@ export function leaveReviewV1(
       'BGUMAp9Gq7iTEuizy4pqaxsTyUCBK68MDfK752saRPUY'
     );
     resolvedAccounts.bubblegumProgram.isWritable = false;
-  }
-  if (!resolvedAccounts.subsidyPool.value) {
-    resolvedAccounts.subsidyPool.value = findReviewSubsidyPoolV1Pda(context, {
-      agentAsset: expectPublicKey(resolvedAccounts.asset.value),
-    });
   }
   if (!resolvedAccounts.systemProgram.value) {
     resolvedAccounts.systemProgram.value = context.programs.getPublicKey(

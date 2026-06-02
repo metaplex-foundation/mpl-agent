@@ -7,10 +7,8 @@
 
 pub(crate) mod r#agent_reputation_v1;
 pub(crate) mod r#review_record_v1;
-pub(crate) mod r#review_subsidy_pool_v1;
 pub(crate) mod r#reviews_config_v1;
 
 pub use self::r#agent_reputation_v1::*;
 pub use self::r#review_record_v1::*;
-pub use self::r#review_subsidy_pool_v1::*;
 pub use self::r#reviews_config_v1::*;

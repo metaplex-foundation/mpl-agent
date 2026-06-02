@@ -11,7 +11,6 @@ import {
 } from '@metaplex-foundation/umi';
 
 import {
-  depositSubsidyV1,
   fetchReviewRecordV1,
   findReviewRecordV1Pda,
   Key as ReputationKey,
@@ -29,7 +28,7 @@ import {
 } from '../_receiptsReviews';
 import { mintWorkReceiptV1 } from '../../src/generated/tools';
 
-test('program-managed trees: full receipt → review flow with subsidy', async (t) => {
+test('program-managed trees: full receipt → review flow', async (t) => {
   const umi = (await createUmi()).use(mplBubblegum());
 
   const {
@@ -64,12 +63,6 @@ test('program-managed trees: full receipt → review flow with subsidy', async (
     mplCoreCpiSigner: MPL_CORE_CPI_SIGNER,
     receiptUri,
     treeIndex: receiptsTreeIndex,
-  }).sendAndConfirm(umi);
-
-  // Pre-fund the subsidy pool.
-  await depositSubsidyV1(umi, {
-    agentAsset: agent,
-    amount: 10_000_000n,
   }).sendAndConfirm(umi);
 
   const [receiptAssetId] = findLeafAssetIdPda(umi, {

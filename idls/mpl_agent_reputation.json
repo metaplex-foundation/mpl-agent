@@ -117,7 +117,7 @@
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Singleton ProgramConfigV1 PDA. Signs the Bubblegum CPI as tree creator/delegate via invoke_signed"
+            "Singleton ReviewsConfigV1 PDA. Signs the Bubblegum CPI as tree creator/delegate via invoke_signed"
           ]
         },
         {
@@ -209,15 +209,6 @@
           ]
         },
         {
-          "name": "subsidyPool",
-          "isMut": true,
-          "isSigner": false,
-          "isOptional": true,
-          "docs": [
-            "Optional ReviewSubsidyPoolV1 PDA for this agent; if present, the review record's rent is refunded to payer from the pool"
-          ]
-        },
-        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false,
@@ -240,113 +231,6 @@
       }
     },
     {
-      "name": "DepositSubsidyV1",
-      "accounts": [
-        {
-          "name": "payer",
-          "isMut": true,
-          "isSigner": true,
-          "docs": [
-            "Funds the deposit (and pool rent on first init)"
-          ]
-        },
-        {
-          "name": "agentAsset",
-          "isMut": false,
-          "isSigner": false,
-          "docs": [
-            "The Core asset representing the agent"
-          ]
-        },
-        {
-          "name": "subsidyPool",
-          "isMut": true,
-          "isSigner": false,
-          "docs": [
-            "ReviewSubsidyPoolV1 PDA"
-          ]
-        },
-        {
-          "name": "withdrawAuthority",
-          "isMut": false,
-          "isSigner": false,
-          "isOptional": true,
-          "docs": [
-            "Captured as the pool's withdraw authority on first init (defaults to payer)"
-          ]
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false,
-          "docs": [
-            "The system program"
-          ]
-        }
-      ],
-      "args": [
-        {
-          "name": "depositSubsidyV1Args",
-          "type": {
-            "defined": "DepositSubsidyV1Args"
-          }
-        }
-      ],
-      "discriminant": {
-        "type": "u8",
-        "value": 2
-      }
-    },
-    {
-      "name": "WithdrawSubsidyV1",
-      "accounts": [
-        {
-          "name": "withdrawAuthority",
-          "isMut": true,
-          "isSigner": true,
-          "docs": [
-            "Must match the pool's withdraw_authority"
-          ]
-        },
-        {
-          "name": "agentAsset",
-          "isMut": false,
-          "isSigner": false,
-          "docs": [
-            "The Core asset representing the agent"
-          ]
-        },
-        {
-          "name": "subsidyPool",
-          "isMut": true,
-          "isSigner": false,
-          "docs": [
-            "ReviewSubsidyPoolV1 PDA"
-          ]
-        },
-        {
-          "name": "destination",
-          "isMut": true,
-          "isSigner": false,
-          "docs": [
-            "Where to send the withdrawn lamports"
-          ]
-        }
-      ],
-      "args": [
-        {
-          "name": "withdrawSubsidyV1Args",
-          "type": {
-            "defined": "WithdrawSubsidyV1Args"
-          }
-        }
-      ],
-      "discriminant": {
-        "type": "u8",
-        "value": 3
-      }
-    },
-    {
       "name": "InitializeReviewsConfigV1",
       "accounts": [
         {
@@ -362,7 +246,7 @@
           "isMut": true,
           "isSigner": false,
           "docs": [
-            "ProgramConfigV1 PDA at [\"program_config\"]"
+            "ReviewsConfigV1 PDA at [\"program_config\"]"
           ]
         },
         {
@@ -408,7 +292,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 4
+        "value": 2
       }
     },
     {
@@ -427,7 +311,7 @@
           "isMut": true,
           "isSigner": false,
           "docs": [
-            "ProgramConfigV1 PDA"
+            "ReviewsConfigV1 PDA"
           ]
         },
         {
@@ -489,7 +373,7 @@
       ],
       "discriminant": {
         "type": "u8",
-        "value": 5
+        "value": 3
       }
     }
   ],
@@ -616,47 +500,6 @@
           },
           {
             "name": "receiptAssetId",
-            "type": "publicKey"
-          }
-        ]
-      }
-    },
-    {
-      "name": "ReviewSubsidyPoolV1",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "key",
-            "type": {
-              "defined": "Key"
-            },
-            "attrs": [
-              "idl-type"
-            ]
-          },
-          {
-            "name": "bump",
-            "type": "u8"
-          },
-          {
-            "name": "padding",
-            "type": {
-              "array": [
-                "u8",
-                6
-              ]
-            },
-            "attrs": [
-              "padding"
-            ]
-          },
-          {
-            "name": "agentAsset",
-            "type": "publicKey"
-          },
-          {
-            "name": "withdrawAuthority",
             "type": "publicKey"
           }
         ]
@@ -805,30 +648,6 @@
       }
     },
     {
-      "name": "DepositSubsidyV1Args",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "amount",
-            "type": "u64"
-          }
-        ]
-      }
-    },
-    {
-      "name": "WithdrawSubsidyV1Args",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "amount",
-            "type": "u64"
-          }
-        ]
-      }
-    },
-    {
       "name": "Key",
       "type": {
         "kind": "enum",
@@ -841,9 +660,6 @@
           },
           {
             "name": "ReviewRecordV1"
-          },
-          {
-            "name": "ReviewSubsidyPoolV1"
           },
           {
             "name": "ReviewsConfigV1"
@@ -915,56 +731,41 @@
     },
     {
       "code": 12,
-      "name": "SubsidyPoolAlreadyInitialized",
-      "msg": "Subsidy pool already initialized for this agent"
-    },
-    {
-      "code": 13,
-      "name": "UnauthorizedSubsidyWithdrawal",
-      "msg": "Subsidy withdrawal requires the pool's withdraw authority signature"
-    },
-    {
-      "code": 14,
-      "name": "SubsidyPoolNotInitialized",
-      "msg": "Subsidy pool not initialized for this agent"
-    },
-    {
-      "code": 15,
       "name": "InvalidProgramConfigDerivation",
       "msg": "Invalid Program Config PDA derivation"
     },
     {
-      "code": 16,
+      "code": 13,
       "name": "ProgramConfigNotInitialized",
       "msg": "Program Config not initialized"
     },
     {
-      "code": 17,
+      "code": 14,
       "name": "ProgramConfigAlreadyInitialized",
       "msg": "Program Config already initialized"
     },
     {
-      "code": 18,
+      "code": 15,
       "name": "InvalidReviewsTreeDerivation",
       "msg": "Invalid reviews tree PDA derivation"
     },
     {
-      "code": 19,
+      "code": 16,
       "name": "InvalidReviewsCollection",
       "msg": "Supplied reviews collection does not match config.reviews_collection"
     },
     {
-      "code": 20,
+      "code": 17,
       "name": "InvalidReceiptsCollection",
       "msg": "Supplied receipts collection does not match config.receipts_collection"
     },
     {
-      "code": 21,
+      "code": 18,
       "name": "UnauthorizedAdmin",
       "msg": "Signer is not the program config admin"
     },
     {
-      "code": 22,
+      "code": 19,
       "name": "InvalidLogWrapperProgram",
       "msg": "Invalid log wrapper program"
     }

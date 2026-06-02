@@ -20,7 +20,7 @@ pub struct LeaveReviewV1 {
     pub asset: solana_program::pubkey::Pubkey,
     /// The owner of the new review cNFT leaf - must equal asset.owner
     pub leaf_owner: solana_program::pubkey::Pubkey,
-    /// Singleton ProgramConfigV1 PDA. Signs the Bubblegum CPI as tree creator/delegate via invoke_signed
+    /// Singleton ReviewsConfigV1 PDA. Signs the Bubblegum CPI as tree creator/delegate via invoke_signed
     pub program_config: solana_program::pubkey::Pubkey,
     /// Bubblegum tree config PDA for the reviews tree
     pub tree_config: solana_program::pubkey::Pubkey,
@@ -44,8 +44,6 @@ pub struct LeaveReviewV1 {
     pub receipts_collection: solana_program::pubkey::Pubkey,
     /// ReviewRecordV1 PDA seeded with the receipt's bubblegum asset id - idempotency gate
     pub review_record: solana_program::pubkey::Pubkey,
-    /// Optional ReviewSubsidyPoolV1 PDA for this agent; if present, the review record's rent is refunded to payer from the pool
-    pub subsidy_pool: Option<solana_program::pubkey::Pubkey>,
     /// The system program
     pub system_program: solana_program::pubkey::Pubkey,
 }
@@ -63,7 +61,7 @@ impl LeaveReviewV1 {
         args: LeaveReviewV1InstructionArgs,
         remaining_accounts: &[solana_program::instruction::AccountMeta],
     ) -> solana_program::instruction::Instruction {
-        let mut accounts = Vec::with_capacity(18 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(17 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new(
             self.payer, true,
         ));
@@ -126,17 +124,6 @@ impl LeaveReviewV1 {
             self.review_record,
             false,
         ));
-        if let Some(subsidy_pool) = self.subsidy_pool {
-            accounts.push(solana_program::instruction::AccountMeta::new(
-                subsidy_pool,
-                false,
-            ));
-        } else {
-            accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-                crate::MPL_AGENT_REPUTATION_ID,
-                false,
-            ));
-        }
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
             self.system_program,
             false,
@@ -203,8 +190,7 @@ pub struct LeaveReviewV1InstructionArgs {
 ///   13. `[]` receipts_merkle_tree
 ///   14. `[]` receipts_collection
 ///   15. `[writable]` review_record
-///   16. `[writable, optional]` subsidy_pool
-///   17. `[optional]` system_program (default to `11111111111111111111111111111111`)
+///   16. `[optional]` system_program (default to `11111111111111111111111111111111`)
 #[derive(Default)]
 pub struct LeaveReviewV1Builder {
     payer: Option<solana_program::pubkey::Pubkey>,
@@ -223,7 +209,6 @@ pub struct LeaveReviewV1Builder {
     receipts_merkle_tree: Option<solana_program::pubkey::Pubkey>,
     receipts_collection: Option<solana_program::pubkey::Pubkey>,
     review_record: Option<solana_program::pubkey::Pubkey>,
-    subsidy_pool: Option<solana_program::pubkey::Pubkey>,
     system_program: Option<solana_program::pubkey::Pubkey>,
     rating: Option<u8>,
     feedback_uri: Option<String>,
@@ -266,7 +251,7 @@ impl LeaveReviewV1Builder {
         self.leaf_owner = Some(leaf_owner);
         self
     }
-    /// Singleton ProgramConfigV1 PDA. Signs the Bubblegum CPI as tree creator/delegate via invoke_signed
+    /// Singleton ReviewsConfigV1 PDA. Signs the Bubblegum CPI as tree creator/delegate via invoke_signed
     #[inline(always)]
     pub fn program_config(&mut self, program_config: solana_program::pubkey::Pubkey) -> &mut Self {
         self.program_config = Some(program_config);
@@ -361,16 +346,6 @@ impl LeaveReviewV1Builder {
     #[inline(always)]
     pub fn review_record(&mut self, review_record: solana_program::pubkey::Pubkey) -> &mut Self {
         self.review_record = Some(review_record);
-        self
-    }
-    /// `[optional account]`
-    /// Optional ReviewSubsidyPoolV1 PDA for this agent; if present, the review record's rent is refunded to payer from the pool
-    #[inline(always)]
-    pub fn subsidy_pool(
-        &mut self,
-        subsidy_pool: Option<solana_program::pubkey::Pubkey>,
-    ) -> &mut Self {
-        self.subsidy_pool = subsidy_pool;
         self
     }
     /// `[optional account, default to '11111111111111111111111111111111']`
@@ -481,7 +456,6 @@ impl LeaveReviewV1Builder {
                 .receipts_collection
                 .expect("receipts_collection is not set"),
             review_record: self.review_record.expect("review_record is not set"),
-            subsidy_pool: self.subsidy_pool,
             system_program: self
                 .system_program
                 .unwrap_or(solana_program::pubkey!("11111111111111111111111111111111")),
@@ -534,7 +508,7 @@ pub struct LeaveReviewV1CpiAccounts<'a, 'b> {
     pub asset: &'b solana_program::account_info::AccountInfo<'a>,
     /// The owner of the new review cNFT leaf - must equal asset.owner
     pub leaf_owner: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Singleton ProgramConfigV1 PDA. Signs the Bubblegum CPI as tree creator/delegate via invoke_signed
+    /// Singleton ReviewsConfigV1 PDA. Signs the Bubblegum CPI as tree creator/delegate via invoke_signed
     pub program_config: &'b solana_program::account_info::AccountInfo<'a>,
     /// Bubblegum tree config PDA for the reviews tree
     pub tree_config: &'b solana_program::account_info::AccountInfo<'a>,
@@ -558,8 +532,6 @@ pub struct LeaveReviewV1CpiAccounts<'a, 'b> {
     pub receipts_collection: &'b solana_program::account_info::AccountInfo<'a>,
     /// ReviewRecordV1 PDA seeded with the receipt's bubblegum asset id - idempotency gate
     pub review_record: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Optional ReviewSubsidyPoolV1 PDA for this agent; if present, the review record's rent is refunded to payer from the pool
-    pub subsidy_pool: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     /// The system program
     pub system_program: &'b solana_program::account_info::AccountInfo<'a>,
 }
@@ -576,7 +548,7 @@ pub struct LeaveReviewV1Cpi<'a, 'b> {
     pub asset: &'b solana_program::account_info::AccountInfo<'a>,
     /// The owner of the new review cNFT leaf - must equal asset.owner
     pub leaf_owner: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Singleton ProgramConfigV1 PDA. Signs the Bubblegum CPI as tree creator/delegate via invoke_signed
+    /// Singleton ReviewsConfigV1 PDA. Signs the Bubblegum CPI as tree creator/delegate via invoke_signed
     pub program_config: &'b solana_program::account_info::AccountInfo<'a>,
     /// Bubblegum tree config PDA for the reviews tree
     pub tree_config: &'b solana_program::account_info::AccountInfo<'a>,
@@ -600,8 +572,6 @@ pub struct LeaveReviewV1Cpi<'a, 'b> {
     pub receipts_collection: &'b solana_program::account_info::AccountInfo<'a>,
     /// ReviewRecordV1 PDA seeded with the receipt's bubblegum asset id - idempotency gate
     pub review_record: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Optional ReviewSubsidyPoolV1 PDA for this agent; if present, the review record's rent is refunded to payer from the pool
-    pub subsidy_pool: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     /// The system program
     pub system_program: &'b solana_program::account_info::AccountInfo<'a>,
     /// The arguments for the instruction.
@@ -632,7 +602,6 @@ impl<'a, 'b> LeaveReviewV1Cpi<'a, 'b> {
             receipts_merkle_tree: accounts.receipts_merkle_tree,
             receipts_collection: accounts.receipts_collection,
             review_record: accounts.review_record,
-            subsidy_pool: accounts.subsidy_pool,
             system_program: accounts.system_program,
             __args: args,
         }
@@ -670,7 +639,7 @@ impl<'a, 'b> LeaveReviewV1Cpi<'a, 'b> {
             bool,
         )],
     ) -> solana_program::entrypoint::ProgramResult {
-        let mut accounts = Vec::with_capacity(18 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(17 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new(
             *self.payer.key,
             true,
@@ -735,17 +704,6 @@ impl<'a, 'b> LeaveReviewV1Cpi<'a, 'b> {
             *self.review_record.key,
             false,
         ));
-        if let Some(subsidy_pool) = self.subsidy_pool {
-            accounts.push(solana_program::instruction::AccountMeta::new(
-                *subsidy_pool.key,
-                false,
-            ));
-        } else {
-            accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-                crate::MPL_AGENT_REPUTATION_ID,
-                false,
-            ));
-        }
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
             *self.system_program.key,
             false,
@@ -766,7 +724,7 @@ impl<'a, 'b> LeaveReviewV1Cpi<'a, 'b> {
             accounts,
             data,
         };
-        let mut account_infos = Vec::with_capacity(18 + 1 + remaining_accounts.len());
+        let mut account_infos = Vec::with_capacity(17 + 1 + remaining_accounts.len());
         account_infos.push(self.__program.clone());
         account_infos.push(self.payer.clone());
         account_infos.push(self.reviewer.clone());
@@ -784,9 +742,6 @@ impl<'a, 'b> LeaveReviewV1Cpi<'a, 'b> {
         account_infos.push(self.receipts_merkle_tree.clone());
         account_infos.push(self.receipts_collection.clone());
         account_infos.push(self.review_record.clone());
-        if let Some(subsidy_pool) = self.subsidy_pool {
-            account_infos.push(subsidy_pool.clone());
-        }
         account_infos.push(self.system_program.clone());
         remaining_accounts
             .iter()
@@ -820,8 +775,7 @@ impl<'a, 'b> LeaveReviewV1Cpi<'a, 'b> {
 ///   13. `[]` receipts_merkle_tree
 ///   14. `[]` receipts_collection
 ///   15. `[writable]` review_record
-///   16. `[writable, optional]` subsidy_pool
-///   17. `[]` system_program
+///   16. `[]` system_program
 pub struct LeaveReviewV1CpiBuilder<'a, 'b> {
     instruction: Box<LeaveReviewV1CpiBuilderInstruction<'a, 'b>>,
 }
@@ -846,7 +800,6 @@ impl<'a, 'b> LeaveReviewV1CpiBuilder<'a, 'b> {
             receipts_merkle_tree: None,
             receipts_collection: None,
             review_record: None,
-            subsidy_pool: None,
             system_program: None,
             rating: None,
             feedback_uri: None,
@@ -892,7 +845,7 @@ impl<'a, 'b> LeaveReviewV1CpiBuilder<'a, 'b> {
         self.instruction.leaf_owner = Some(leaf_owner);
         self
     }
-    /// Singleton ProgramConfigV1 PDA. Signs the Bubblegum CPI as tree creator/delegate via invoke_signed
+    /// Singleton ReviewsConfigV1 PDA. Signs the Bubblegum CPI as tree creator/delegate via invoke_signed
     #[inline(always)]
     pub fn program_config(
         &mut self,
@@ -998,16 +951,6 @@ impl<'a, 'b> LeaveReviewV1CpiBuilder<'a, 'b> {
         review_record: &'b solana_program::account_info::AccountInfo<'a>,
     ) -> &mut Self {
         self.instruction.review_record = Some(review_record);
-        self
-    }
-    /// `[optional account]`
-    /// Optional ReviewSubsidyPoolV1 PDA for this agent; if present, the review record's rent is refunded to payer from the pool
-    #[inline(always)]
-    pub fn subsidy_pool(
-        &mut self,
-        subsidy_pool: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    ) -> &mut Self {
-        self.instruction.subsidy_pool = subsidy_pool;
         self
     }
     /// The system program
@@ -1229,8 +1172,6 @@ impl<'a, 'b> LeaveReviewV1CpiBuilder<'a, 'b> {
                 .review_record
                 .expect("review_record is not set"),
 
-            subsidy_pool: self.instruction.subsidy_pool,
-
             system_program: self
                 .instruction
                 .system_program
@@ -1262,7 +1203,6 @@ struct LeaveReviewV1CpiBuilderInstruction<'a, 'b> {
     receipts_merkle_tree: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     receipts_collection: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     review_record: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    subsidy_pool: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     system_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     rating: Option<u8>,
     feedback_uri: Option<String>,

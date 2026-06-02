@@ -10,13 +10,13 @@ use mpl_utils::assert_signer;
 use shank::ShankType;
 use solana_program::{
     account_info::AccountInfo, entrypoint::ProgramResult, keccak, msg, program::invoke,
-    program_error::ProgramError, pubkey::Pubkey, rent::Rent, system_program, sysvar::Sysvar,
+    program_error::ProgramError, pubkey::Pubkey, system_program,
 };
 
 use crate::{
     error::MplAgentReputationError,
     instruction::accounts::LeaveReviewV1Accounts,
-    state::{check_reviews_tree_pda, ReviewRecordV1, ReviewSubsidyPoolV1, ReviewsConfigV1},
+    state::{check_reviews_tree_pda, ReviewRecordV1, ReviewsConfigV1},
 };
 
 /// Program ID of MPL Account Compression — the deployed compression program
@@ -32,7 +32,7 @@ const VERIFY_LEAF_DISCRIMINATOR: [u8; 8] = [124, 220, 22, 223, 104, 10, 250, 224
 /// Number of named accounts in `LeaveReviewV1` (everything before the
 /// merkle proof remaining accounts). Must stay in sync with the
 /// `#[account]` list in `instruction.rs`.
-const LEAVE_REVIEW_NAMED_ACCOUNTS: usize = 18;
+const LEAVE_REVIEW_NAMED_ACCOUNTS: usize = 17;
 
 /// Maximum length of the off-chain review JSON URI, in bytes.
 pub const MAX_FEEDBACK_URI_LEN: usize = 200;
@@ -285,49 +285,6 @@ pub fn leave_review_v1<'a>(
         .system_program(ctx.accounts.system_program)
         .metadata(metadata)
         .invoke_signed(&[config_signer_seeds])?;
-
-    /****************************************************/
-    /************ Subsidy: refund the payer *************/
-    /****************************************************/
-    //
-    // Run AFTER all CPIs so the lamport transfer doesn't interfere with
-    // downstream account accounting. The pool is program-owned, so
-    // direct lamport mutation is permitted; we decrement pool and
-    // credit the payer for the review record's rent cost.
-
-    if let Some(pool) = ctx.accounts.subsidy_pool {
-        if pool.owner == &crate::ID
-            && pool.data_len() >= core::mem::size_of::<ReviewSubsidyPoolV1>()
-        {
-            let matches = {
-                let pool_data = pool.try_borrow_data()?;
-                let pool_state: &ReviewSubsidyPoolV1 =
-                    bytemuck::from_bytes(&pool_data[..core::mem::size_of::<ReviewSubsidyPoolV1>()]);
-                pool_state.agent_asset == *ctx.accounts.asset.key
-            };
-
-            if matches {
-                let rent = Rent::get()?.minimum_balance(core::mem::size_of::<ReviewRecordV1>());
-                let spendable = pool.lamports().saturating_sub(
-                    Rent::get()?.minimum_balance(core::mem::size_of::<ReviewSubsidyPoolV1>()),
-                );
-                let payout = rent.min(spendable);
-                if payout > 0 {
-                    **pool.try_borrow_mut_lamports()? = pool
-                        .lamports()
-                        .checked_sub(payout)
-                        .ok_or(ProgramError::ArithmeticOverflow)?;
-                    **ctx.accounts.payer.try_borrow_mut_lamports()? = ctx
-                        .accounts
-                        .payer
-                        .lamports()
-                        .checked_add(payout)
-                        .ok_or(ProgramError::ArithmeticOverflow)?;
-                    msg!("Subsidy paid {} lamports from pool", payout);
-                }
-            }
-        }
-    }
 
     Ok(())
 }

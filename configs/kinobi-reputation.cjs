@@ -32,12 +32,6 @@ kinobi.update(
         k.variablePdaSeedNode("receiptAssetId", k.publicKeyTypeNode(), "Bubblegum asset id of the work receipt"),
       ],
     },
-    reviewSubsidyPoolV1: {
-      seeds: [
-        k.constantPdaSeedNodeFromString("review_subsidy_pool"),
-        k.variablePdaSeedNode("agentAsset", k.publicKeyTypeNode(), "The agent's Core asset"),
-      ],
-    },
     reviewsConfigV1: {
       seeds: [k.constantPdaSeedNodeFromString("program_config")],
     },
@@ -61,26 +55,10 @@ kinobi.update(
     leaveReviewV1: {
       accounts: {
         programConfig: { defaultValue: k.pdaValueNode("reviewsConfigV1") },
-        // Auto-derive subsidy pool from the agent being reviewed.
-        subsidyPool: {
-          defaultValue: k.pdaValueNode("reviewSubsidyPoolV1", [
-            k.pdaSeedValueNode("agentAsset", k.accountValueNode("asset")),
-          ]),
-        },
         mplCoreProgram: { defaultValue: k.publicKeyValueNode(MPL_CORE_ID, "mplCore") },
         bubblegumProgram: { defaultValue: k.publicKeyValueNode(BUBBLEGUM_ID, "mplBubblegum") },
         logWrapper: { defaultValue: k.publicKeyValueNode(MPL_NOOP_ID, "mplNoop") },
         compressionProgram: { defaultValue: k.publicKeyValueNode(COMPRESSION_ID, "mplAccountCompression") },
-      },
-    },
-    depositSubsidyV1: {
-      accounts: {
-        subsidyPool: { defaultValue: k.pdaValueNode("reviewSubsidyPoolV1") },
-      },
-    },
-    withdrawSubsidyV1: {
-      accounts: {
-        subsidyPool: { defaultValue: k.pdaValueNode("reviewSubsidyPoolV1") },
       },
     },
     initializeReviewsConfigV1: {

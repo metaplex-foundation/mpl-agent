@@ -178,66 +178,17 @@ export class ReviewAlreadyExistsError extends ProgramError {
 codeToErrorMap.set(0xb, ReviewAlreadyExistsError);
 nameToErrorMap.set('ReviewAlreadyExists', ReviewAlreadyExistsError);
 
-/** SubsidyPoolAlreadyInitialized: Subsidy pool already initialized for this agent */
-export class SubsidyPoolAlreadyInitializedError extends ProgramError {
-  override readonly name: string = 'SubsidyPoolAlreadyInitialized';
-
-  readonly code: number = 0xc; // 12
-
-  constructor(program: Program, cause?: Error) {
-    super('Subsidy pool already initialized for this agent', program, cause);
-  }
-}
-codeToErrorMap.set(0xc, SubsidyPoolAlreadyInitializedError);
-nameToErrorMap.set(
-  'SubsidyPoolAlreadyInitialized',
-  SubsidyPoolAlreadyInitializedError
-);
-
-/** UnauthorizedSubsidyWithdrawal: Subsidy withdrawal requires the pool's withdraw authority signature */
-export class UnauthorizedSubsidyWithdrawalError extends ProgramError {
-  override readonly name: string = 'UnauthorizedSubsidyWithdrawal';
-
-  readonly code: number = 0xd; // 13
-
-  constructor(program: Program, cause?: Error) {
-    super(
-      "Subsidy withdrawal requires the pool's withdraw authority signature",
-      program,
-      cause
-    );
-  }
-}
-codeToErrorMap.set(0xd, UnauthorizedSubsidyWithdrawalError);
-nameToErrorMap.set(
-  'UnauthorizedSubsidyWithdrawal',
-  UnauthorizedSubsidyWithdrawalError
-);
-
-/** SubsidyPoolNotInitialized: Subsidy pool not initialized for this agent */
-export class SubsidyPoolNotInitializedError extends ProgramError {
-  override readonly name: string = 'SubsidyPoolNotInitialized';
-
-  readonly code: number = 0xe; // 14
-
-  constructor(program: Program, cause?: Error) {
-    super('Subsidy pool not initialized for this agent', program, cause);
-  }
-}
-codeToErrorMap.set(0xe, SubsidyPoolNotInitializedError);
-nameToErrorMap.set('SubsidyPoolNotInitialized', SubsidyPoolNotInitializedError);
-
 /** InvalidProgramConfigDerivation: Invalid Program Config PDA derivation */
 export class InvalidProgramConfigDerivationError extends ProgramError {
   override readonly name: string = 'InvalidProgramConfigDerivation';
 
-  readonly code: number = 0xf; // 15
+  readonly code: number = 0xc; // 12
 
   constructor(program: Program, cause?: Error) {
     super('Invalid Program Config PDA derivation', program, cause);
   }
 }
-codeToErrorMap.set(0xf, InvalidProgramConfigDerivationError);
+codeToErrorMap.set(0xc, InvalidProgramConfigDerivationError);
 nameToErrorMap.set(
   'InvalidProgramConfigDerivation',
   InvalidProgramConfigDerivationError
@@ -247,13 +198,13 @@ nameToErrorMap.set(
 export class ProgramConfigNotInitializedError extends ProgramError {
   override readonly name: string = 'ProgramConfigNotInitialized';
 
-  readonly code: number = 0x10; // 16
+  readonly code: number = 0xd; // 13
 
   constructor(program: Program, cause?: Error) {
     super('Program Config not initialized', program, cause);
   }
 }
-codeToErrorMap.set(0x10, ProgramConfigNotInitializedError);
+codeToErrorMap.set(0xd, ProgramConfigNotInitializedError);
 nameToErrorMap.set(
   'ProgramConfigNotInitialized',
   ProgramConfigNotInitializedError
@@ -263,13 +214,13 @@ nameToErrorMap.set(
 export class ProgramConfigAlreadyInitializedError extends ProgramError {
   override readonly name: string = 'ProgramConfigAlreadyInitialized';
 
-  readonly code: number = 0x11; // 17
+  readonly code: number = 0xe; // 14
 
   constructor(program: Program, cause?: Error) {
     super('Program Config already initialized', program, cause);
   }
 }
-codeToErrorMap.set(0x11, ProgramConfigAlreadyInitializedError);
+codeToErrorMap.set(0xe, ProgramConfigAlreadyInitializedError);
 nameToErrorMap.set(
   'ProgramConfigAlreadyInitialized',
   ProgramConfigAlreadyInitializedError
@@ -279,13 +230,13 @@ nameToErrorMap.set(
 export class InvalidReviewsTreeDerivationError extends ProgramError {
   override readonly name: string = 'InvalidReviewsTreeDerivation';
 
-  readonly code: number = 0x12; // 18
+  readonly code: number = 0xf; // 15
 
   constructor(program: Program, cause?: Error) {
     super('Invalid reviews tree PDA derivation', program, cause);
   }
 }
-codeToErrorMap.set(0x12, InvalidReviewsTreeDerivationError);
+codeToErrorMap.set(0xf, InvalidReviewsTreeDerivationError);
 nameToErrorMap.set(
   'InvalidReviewsTreeDerivation',
   InvalidReviewsTreeDerivationError
@@ -295,7 +246,7 @@ nameToErrorMap.set(
 export class InvalidReviewsCollectionError extends ProgramError {
   override readonly name: string = 'InvalidReviewsCollection';
 
-  readonly code: number = 0x13; // 19
+  readonly code: number = 0x10; // 16
 
   constructor(program: Program, cause?: Error) {
     super(
@@ -305,14 +256,14 @@ export class InvalidReviewsCollectionError extends ProgramError {
     );
   }
 }
-codeToErrorMap.set(0x13, InvalidReviewsCollectionError);
+codeToErrorMap.set(0x10, InvalidReviewsCollectionError);
 nameToErrorMap.set('InvalidReviewsCollection', InvalidReviewsCollectionError);
 
 /** InvalidReceiptsCollection: Supplied receipts collection does not match config.receipts_collection */
 export class InvalidReceiptsCollectionError extends ProgramError {
   override readonly name: string = 'InvalidReceiptsCollection';
 
-  readonly code: number = 0x14; // 20
+  readonly code: number = 0x11; // 17
 
   constructor(program: Program, cause?: Error) {
     super(
@@ -322,33 +273,33 @@ export class InvalidReceiptsCollectionError extends ProgramError {
     );
   }
 }
-codeToErrorMap.set(0x14, InvalidReceiptsCollectionError);
+codeToErrorMap.set(0x11, InvalidReceiptsCollectionError);
 nameToErrorMap.set('InvalidReceiptsCollection', InvalidReceiptsCollectionError);
 
 /** UnauthorizedAdmin: Signer is not the program config admin */
 export class UnauthorizedAdminError extends ProgramError {
   override readonly name: string = 'UnauthorizedAdmin';
 
-  readonly code: number = 0x15; // 21
+  readonly code: number = 0x12; // 18
 
   constructor(program: Program, cause?: Error) {
     super('Signer is not the program config admin', program, cause);
   }
 }
-codeToErrorMap.set(0x15, UnauthorizedAdminError);
+codeToErrorMap.set(0x12, UnauthorizedAdminError);
 nameToErrorMap.set('UnauthorizedAdmin', UnauthorizedAdminError);
 
 /** InvalidLogWrapperProgram: Invalid log wrapper program */
 export class InvalidLogWrapperProgramError extends ProgramError {
   override readonly name: string = 'InvalidLogWrapperProgram';
 
-  readonly code: number = 0x16; // 22
+  readonly code: number = 0x13; // 19
 
   constructor(program: Program, cause?: Error) {
     super('Invalid log wrapper program', program, cause);
   }
 }
-codeToErrorMap.set(0x16, InvalidLogWrapperProgramError);
+codeToErrorMap.set(0x13, InvalidLogWrapperProgramError);
 nameToErrorMap.set('InvalidLogWrapperProgram', InvalidLogWrapperProgramError);
 
 /**

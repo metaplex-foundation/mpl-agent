@@ -1,12 +1,10 @@
 mod agent_reputation;
 mod program_config;
 mod review_record;
-mod review_subsidy_pool;
 
 pub use agent_reputation::*;
 pub use program_config::*;
 pub use review_record::*;
-pub use review_subsidy_pool::*;
 
 use shank::ShankType;
 
@@ -18,7 +16,6 @@ pub enum Key {
     Uninitialized,
     AgentReputationV1,
     ReviewRecordV1,
-    ReviewSubsidyPoolV1,
     ReviewsConfigV1,
 }
 
@@ -28,8 +25,7 @@ impl From<u8> for Key {
             0 => Key::Uninitialized,
             1 => Key::AgentReputationV1,
             2 => Key::ReviewRecordV1,
-            3 => Key::ReviewSubsidyPoolV1,
-            4 => Key::ReviewsConfigV1,
+            3 => Key::ReviewsConfigV1,
             _ => Key::Uninitialized,
         }
     }

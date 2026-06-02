@@ -14,7 +14,7 @@ use borsh::{BorshDeserialize, BorshSerialize};
 pub struct RegisterReviewsTreeV1 {
     /// Must match program_config.admin
     pub admin: solana_program::pubkey::Pubkey,
-    /// ProgramConfigV1 PDA
+    /// ReviewsConfigV1 PDA
     pub program_config: solana_program::pubkey::Pubkey,
     /// Reviews merkle tree PDA at ["reviews_tree", program_config.next_tree_index_le]
     pub merkle_tree: solana_program::pubkey::Pubkey,
@@ -98,7 +98,7 @@ pub struct RegisterReviewsTreeV1InstructionData {
 impl RegisterReviewsTreeV1InstructionData {
     pub fn new() -> Self {
         Self {
-            discriminator: 5,
+            discriminator: 3,
             pad: [0, 0, 0],
         }
     }
@@ -152,7 +152,7 @@ impl RegisterReviewsTreeV1Builder {
         self.admin = Some(admin);
         self
     }
-    /// ProgramConfigV1 PDA
+    /// ReviewsConfigV1 PDA
     #[inline(always)]
     pub fn program_config(&mut self, program_config: solana_program::pubkey::Pubkey) -> &mut Self {
         self.program_config = Some(program_config);
@@ -274,7 +274,7 @@ impl RegisterReviewsTreeV1Builder {
 pub struct RegisterReviewsTreeV1CpiAccounts<'a, 'b> {
     /// Must match program_config.admin
     pub admin: &'b solana_program::account_info::AccountInfo<'a>,
-    /// ProgramConfigV1 PDA
+    /// ReviewsConfigV1 PDA
     pub program_config: &'b solana_program::account_info::AccountInfo<'a>,
     /// Reviews merkle tree PDA at ["reviews_tree", program_config.next_tree_index_le]
     pub merkle_tree: &'b solana_program::account_info::AccountInfo<'a>,
@@ -296,7 +296,7 @@ pub struct RegisterReviewsTreeV1Cpi<'a, 'b> {
     pub __program: &'b solana_program::account_info::AccountInfo<'a>,
     /// Must match program_config.admin
     pub admin: &'b solana_program::account_info::AccountInfo<'a>,
-    /// ProgramConfigV1 PDA
+    /// ReviewsConfigV1 PDA
     pub program_config: &'b solana_program::account_info::AccountInfo<'a>,
     /// Reviews merkle tree PDA at ["reviews_tree", program_config.next_tree_index_le]
     pub merkle_tree: &'b solana_program::account_info::AccountInfo<'a>,
@@ -478,7 +478,7 @@ impl<'a, 'b> RegisterReviewsTreeV1CpiBuilder<'a, 'b> {
         self.instruction.admin = Some(admin);
         self
     }
-    /// ProgramConfigV1 PDA
+    /// ReviewsConfigV1 PDA
     #[inline(always)]
     pub fn program_config(
         &mut self,

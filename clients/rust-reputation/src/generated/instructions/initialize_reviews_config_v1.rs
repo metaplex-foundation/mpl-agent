@@ -14,7 +14,7 @@ use borsh::{BorshDeserialize, BorshSerialize};
 pub struct InitializeReviewsConfigV1 {
     /// Bootstrapping admin; captured as the config authority
     pub admin: solana_program::pubkey::Pubkey,
-    /// ProgramConfigV1 PDA at ["program_config"]
+    /// ReviewsConfigV1 PDA at ["program_config"]
     pub program_config: solana_program::pubkey::Pubkey,
     /// Reviews collection PDA at ["reviews_collection"]
     pub reviews_collection: solana_program::pubkey::Pubkey,
@@ -80,7 +80,7 @@ pub struct InitializeReviewsConfigV1InstructionData {
 impl InitializeReviewsConfigV1InstructionData {
     pub fn new() -> Self {
         Self {
-            discriminator: 4,
+            discriminator: 2,
             padding: [0, 0, 0, 0, 0, 0, 0],
         }
     }
@@ -117,7 +117,7 @@ impl InitializeReviewsConfigV1Builder {
         self.admin = Some(admin);
         self
     }
-    /// ProgramConfigV1 PDA at ["program_config"]
+    /// ReviewsConfigV1 PDA at ["program_config"]
     #[inline(always)]
     pub fn program_config(&mut self, program_config: solana_program::pubkey::Pubkey) -> &mut Self {
         self.program_config = Some(program_config);
@@ -203,7 +203,7 @@ impl InitializeReviewsConfigV1Builder {
 pub struct InitializeReviewsConfigV1CpiAccounts<'a, 'b> {
     /// Bootstrapping admin; captured as the config authority
     pub admin: &'b solana_program::account_info::AccountInfo<'a>,
-    /// ProgramConfigV1 PDA at ["program_config"]
+    /// ReviewsConfigV1 PDA at ["program_config"]
     pub program_config: &'b solana_program::account_info::AccountInfo<'a>,
     /// Reviews collection PDA at ["reviews_collection"]
     pub reviews_collection: &'b solana_program::account_info::AccountInfo<'a>,
@@ -221,7 +221,7 @@ pub struct InitializeReviewsConfigV1Cpi<'a, 'b> {
     pub __program: &'b solana_program::account_info::AccountInfo<'a>,
     /// Bootstrapping admin; captured as the config authority
     pub admin: &'b solana_program::account_info::AccountInfo<'a>,
-    /// ProgramConfigV1 PDA at ["program_config"]
+    /// ReviewsConfigV1 PDA at ["program_config"]
     pub program_config: &'b solana_program::account_info::AccountInfo<'a>,
     /// Reviews collection PDA at ["reviews_collection"]
     pub reviews_collection: &'b solana_program::account_info::AccountInfo<'a>,
@@ -374,7 +374,7 @@ impl<'a, 'b> InitializeReviewsConfigV1CpiBuilder<'a, 'b> {
         self.instruction.admin = Some(admin);
         self
     }
-    /// ProgramConfigV1 PDA at ["program_config"]
+    /// ReviewsConfigV1 PDA at ["program_config"]
     #[inline(always)]
     pub fn program_config(
         &mut self,

@@ -33,7 +33,7 @@ import {
 export type RegisterReviewsTreeV1InstructionAccounts = {
   /** Must match program_config.admin */
   admin: Signer;
-  /** ProgramConfigV1 PDA */
+  /** ReviewsConfigV1 PDA */
   programConfig?: PublicKey | Pda;
   /** Reviews merkle tree PDA at ["reviews_tree", program_config.next_tree_index_le] */
   merkleTree: PublicKey | Pda;
@@ -83,7 +83,7 @@ export function getRegisterReviewsTreeV1InstructionDataSerializer(): Serializer<
       ],
       { description: 'RegisterReviewsTreeV1InstructionData' }
     ),
-    (value) => ({ ...value, discriminator: 5, pad: [0, 0, 0] })
+    (value) => ({ ...value, discriminator: 3, pad: [0, 0, 0] })
   ) as Serializer<
     RegisterReviewsTreeV1InstructionDataArgs,
     RegisterReviewsTreeV1InstructionData
@@ -95,7 +95,7 @@ export type RegisterReviewsTreeV1InstructionArgs =
   RegisterReviewsTreeV1InstructionDataArgs;
 
 // Instruction discriminator.
-export const registerReviewsTreeV1InstructionDiscriminator = 5;
+export const registerReviewsTreeV1InstructionDiscriminator = 3;
 
 // Instruction.
 export function registerReviewsTreeV1(

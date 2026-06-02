@@ -32,7 +32,7 @@ import {
 export type InitializeReviewsConfigV1InstructionAccounts = {
   /** Bootstrapping admin; captured as the config authority */
   admin: Signer;
-  /** ProgramConfigV1 PDA at ["program_config"] */
+  /** ReviewsConfigV1 PDA at ["program_config"] */
   programConfig?: PublicKey | Pda;
   /** Reviews collection PDA at ["reviews_collection"] */
   reviewsCollection: PublicKey | Pda;
@@ -68,7 +68,7 @@ export function getInitializeReviewsConfigV1InstructionDataSerializer(): Seriali
       ],
       { description: 'InitializeReviewsConfigV1InstructionData' }
     ),
-    (value) => ({ ...value, discriminator: 4, padding: [0, 0, 0, 0, 0, 0, 0] })
+    (value) => ({ ...value, discriminator: 2, padding: [0, 0, 0, 0, 0, 0, 0] })
   ) as Serializer<
     InitializeReviewsConfigV1InstructionDataArgs,
     InitializeReviewsConfigV1InstructionData
@@ -76,7 +76,7 @@ export function getInitializeReviewsConfigV1InstructionDataSerializer(): Seriali
 }
 
 // Instruction discriminator.
-export const initializeReviewsConfigV1InstructionDiscriminator = 4;
+export const initializeReviewsConfigV1InstructionDiscriminator = 2;
 
 // Instruction.
 export function initializeReviewsConfigV1(

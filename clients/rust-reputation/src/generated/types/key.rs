@@ -19,6 +19,5 @@ pub enum Key {
     Uninitialized,
     AgentReputationV1,
     ReviewRecordV1,
-    ReviewSubsidyPoolV1,
     ReviewsConfigV1,
 }

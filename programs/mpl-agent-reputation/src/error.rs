@@ -56,43 +56,31 @@ pub enum MplAgentReputationError {
     #[error("A review already exists for this work receipt")]
     ReviewAlreadyExists,
 
-    /// 12 - Subsidy pool already initialized
-    #[error("Subsidy pool already initialized for this agent")]
-    SubsidyPoolAlreadyInitialized,
-
-    /// 13 - Unauthorized subsidy withdrawal
-    #[error("Subsidy withdrawal requires the pool's withdraw authority signature")]
-    UnauthorizedSubsidyWithdrawal,
-
-    /// 14 - Subsidy pool not initialized
-    #[error("Subsidy pool not initialized for this agent")]
-    SubsidyPoolNotInitialized,
-
-    /// 15 - Invalid Program Config PDA derivation
+    /// 12 - Invalid Program Config PDA derivation
     #[error("Invalid Program Config PDA derivation")]
     InvalidProgramConfigDerivation,
 
-    /// 16 - Program Config not initialized
+    /// 13 - Program Config not initialized
     #[error("Program Config not initialized")]
     ProgramConfigNotInitialized,
 
-    /// 17 - Program Config already initialized
+    /// 14 - Program Config already initialized
     #[error("Program Config already initialized")]
     ProgramConfigAlreadyInitialized,
 
-    /// 18 - Invalid reviews tree PDA derivation
+    /// 15 - Invalid reviews tree PDA derivation
     #[error("Invalid reviews tree PDA derivation")]
     InvalidReviewsTreeDerivation,
 
-    /// 19 - Reviews collection mismatch
+    /// 16 - Reviews collection mismatch
     #[error("Supplied reviews collection does not match config.reviews_collection")]
     InvalidReviewsCollection,
 
-    /// 20 - Receipts collection mismatch
+    /// 17 - Receipts collection mismatch
     #[error("Supplied receipts collection does not match config.receipts_collection")]
     InvalidReceiptsCollection,
 
-    /// 21 - Unauthorized admin
+    /// 18 - Unauthorized admin
     #[error("Signer is not the program config admin")]
     UnauthorizedAdmin,
 
