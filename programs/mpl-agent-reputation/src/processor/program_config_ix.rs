@@ -8,9 +8,9 @@ use mpl_utils::{assert_derivation, assert_signer};
 use shank::ShankType;
 use solana_program::{
     account_info::AccountInfo, entrypoint::ProgramResult, msg, program::invoke_signed,
-    program_error::ProgramError, pubkey::Pubkey, rent::Rent, system_instruction, system_program,
-    sysvar::Sysvar,
+    program_error::ProgramError, pubkey::Pubkey, rent::Rent, sysvar::Sysvar,
 };
+use solana_system_interface::{instruction as system_instruction, program as system_program};
 
 use crate::{
     error::MplAgentReputationError,

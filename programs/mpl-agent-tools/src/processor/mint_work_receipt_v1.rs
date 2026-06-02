@@ -10,8 +10,8 @@ use mpl_utils::assert_signer;
 use shank::ShankType;
 use solana_program::{
     account_info::AccountInfo, entrypoint::ProgramResult, msg, program_error::ProgramError,
-    system_program,
 };
+use solana_system_interface::program as system_program;
 
 use crate::{
     error::MplAgentToolsError,

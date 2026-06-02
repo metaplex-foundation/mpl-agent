@@ -7,8 +7,9 @@ use mpl_utils::{assert_derivation, assert_signer};
 use shank::ShankType;
 use solana_program::{
     account_info::AccountInfo, entrypoint::ProgramResult, program_error::ProgramError,
-    pubkey::Pubkey, system_program,
+    pubkey::Pubkey,
 };
+use solana_system_interface::program as system_program;
 
 use crate::{
     error::MplAgentToolsError, instruction::accounts::InitializeToolsConfigV1Accounts,

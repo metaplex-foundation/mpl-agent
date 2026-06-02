@@ -2,8 +2,8 @@ use bytemuck::{Pod, Zeroable};
 use mpl_utils::{assert_derivation, create_or_allocate_account_raw};
 use shank::ShankAccount;
 use solana_program::{
-    account_info::AccountInfo, entrypoint::ProgramResult, program::invoke,
-    program_error::ProgramError, pubkey::Pubkey, rent::Rent, system_instruction, sysvar::Sysvar,
+    account_info::AccountInfo, entrypoint::ProgramResult, program_error::ProgramError,
+    pubkey::Pubkey,
 };
 
 use crate::{

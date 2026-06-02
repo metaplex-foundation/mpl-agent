@@ -10,8 +10,9 @@ use mpl_utils::assert_signer;
 use shank::ShankType;
 use solana_program::{
     account_info::AccountInfo, entrypoint::ProgramResult, keccak, msg, program::invoke,
-    program_error::ProgramError, pubkey::Pubkey, system_program,
+    program_error::ProgramError, pubkey::Pubkey,
 };
+use solana_system_interface::program as system_program;
 
 use crate::{
     error::MplAgentReputationError,

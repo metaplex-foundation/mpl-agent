@@ -6,7 +6,8 @@ use podded::pod::{Nullable, OptionalPubkey};
 use shank::ShankType;
 use solana_program::program_error::ProgramError;
 use solana_program::pubkey::Pubkey;
-use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, system_program};
+use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult};
+use solana_system_interface::program as system_program;
 
 use crate::instruction::accounts::SetAgentTokenV1Accounts;
 use crate::state::Key;
