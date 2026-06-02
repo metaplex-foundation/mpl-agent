@@ -24,7 +24,6 @@ import {
   DEFAULT_ASSET_DATA_HASH,
   getCurrentTreeRoot,
   MPL_CORE_CPI_SIGNER,
-  receiptCreatorHash,
   receiptDataHash,
   setupAgentWithExecutive,
 } from '../_receiptsReviews';
@@ -90,7 +89,6 @@ async function setupContext(umi: Awaited<ReturnType<typeof createUmi>>) {
       agent: agentSetup.agent,
       receiptsCollection: ctx.receiptsCollection,
     }),
-    receiptCreatorHash: receiptCreatorHash(agentSetup.agent),
     receiptAssetDataHash: DEFAULT_ASSET_DATA_HASH,
     receiptFlags: 0,
     rating: 5,
@@ -205,4 +203,29 @@ test('leaveReviewV1 — rejects bogus receipt data_hash (verify_leaf fails)', as
       receiptDataHash: bogus,
     }).sendAndConfirm(umi)
   );
+});
+
+test('leaveReviewV1 — rejects receipt replay against a different agent', async (t) => {
+  // A receipt minted for AgentA must not be usable to fake a review for
+  // AgentB. The on-chain code computes the expected creator_hash from
+  // `ctx.accounts.asset.key`, so the reconstructed leaf hash differs
+  // from the real leaf in the receipts tree → verify_leaf rejects.
+  const umi = (await createUmi()).use(mplBubblegum());
+  const { sharedArgs, agentSetup: agentASetup } = await setupContext(umi);
+
+  // Stand up a second, unrelated agent (different asset, different
+  // executive, different delegate record). Nothing was minted for them.
+  const agentBSetup = await setupAgentWithExecutive(umi);
+
+  // Reuse AgentA's receipt proof params verbatim, but flip the reviewed
+  // asset to AgentB. With the audit fix the call must fail.
+  await t.throwsAsync(() =>
+    leaveReviewV1(umi, {
+      ...sharedArgs,
+      asset: agentBSetup.agent,
+    }).sendAndConfirm(umi)
+  );
+
+  // Quiet unused-var lint:
+  void agentASetup;
 });

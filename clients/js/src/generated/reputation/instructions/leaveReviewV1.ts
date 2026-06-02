@@ -79,7 +79,6 @@ export type LeaveReviewV1InstructionData = {
   receiptIndex: number;
   receiptRoot: Uint8Array;
   receiptDataHash: Uint8Array;
-  receiptCreatorHash: Uint8Array;
   receiptAssetDataHash: Uint8Array;
   receiptFlags: number;
 };
@@ -92,7 +91,6 @@ export type LeaveReviewV1InstructionDataArgs = {
   receiptIndex: number;
   receiptRoot: Uint8Array;
   receiptDataHash: Uint8Array;
-  receiptCreatorHash: Uint8Array;
   receiptAssetDataHash: Uint8Array;
   receiptFlags: number;
 };
@@ -116,7 +114,6 @@ export function getLeaveReviewV1InstructionDataSerializer(): Serializer<
         ['receiptIndex', u32()],
         ['receiptRoot', bytes({ size: 32 })],
         ['receiptDataHash', bytes({ size: 32 })],
-        ['receiptCreatorHash', bytes({ size: 32 })],
         ['receiptAssetDataHash', bytes({ size: 32 })],
         ['receiptFlags', u8()],
       ],

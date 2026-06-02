@@ -22,7 +22,6 @@ import {
   DEFAULT_ASSET_DATA_HASH,
   getCurrentTreeRoot,
   MPL_CORE_CPI_SIGNER,
-  receiptCreatorHash,
   receiptDataHash,
   setupAgentWithExecutive,
 } from '../_receiptsReviews';
@@ -96,7 +95,6 @@ test('program-managed trees: full receipt → review flow', async (t) => {
       agent,
       receiptsCollection,
     }),
-    receiptCreatorHash: receiptCreatorHash(agent),
     receiptAssetDataHash: DEFAULT_ASSET_DATA_HASH,
     receiptFlags: 0,
   } as const;

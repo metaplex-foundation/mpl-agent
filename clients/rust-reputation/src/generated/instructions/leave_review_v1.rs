@@ -165,7 +165,6 @@ pub struct LeaveReviewV1InstructionArgs {
     pub receipt_index: u32,
     pub receipt_root: [u8; 32],
     pub receipt_data_hash: [u8; 32],
-    pub receipt_creator_hash: [u8; 32],
     pub receipt_asset_data_hash: [u8; 32],
     pub receipt_flags: u8,
 }
@@ -217,7 +216,6 @@ pub struct LeaveReviewV1Builder {
     receipt_index: Option<u32>,
     receipt_root: Option<[u8; 32]>,
     receipt_data_hash: Option<[u8; 32]>,
-    receipt_creator_hash: Option<[u8; 32]>,
     receipt_asset_data_hash: Option<[u8; 32]>,
     receipt_flags: Option<u8>,
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
@@ -391,11 +389,6 @@ impl LeaveReviewV1Builder {
         self
     }
     #[inline(always)]
-    pub fn receipt_creator_hash(&mut self, receipt_creator_hash: [u8; 32]) -> &mut Self {
-        self.receipt_creator_hash = Some(receipt_creator_hash);
-        self
-    }
-    #[inline(always)]
     pub fn receipt_asset_data_hash(&mut self, receipt_asset_data_hash: [u8; 32]) -> &mut Self {
         self.receipt_asset_data_hash = Some(receipt_asset_data_hash);
         self
@@ -480,10 +473,6 @@ impl LeaveReviewV1Builder {
                 .receipt_data_hash
                 .clone()
                 .expect("receipt_data_hash is not set"),
-            receipt_creator_hash: self
-                .receipt_creator_hash
-                .clone()
-                .expect("receipt_creator_hash is not set"),
             receipt_asset_data_hash: self
                 .receipt_asset_data_hash
                 .clone()
@@ -808,7 +797,6 @@ impl<'a, 'b> LeaveReviewV1CpiBuilder<'a, 'b> {
             receipt_index: None,
             receipt_root: None,
             receipt_data_hash: None,
-            receipt_creator_hash: None,
             receipt_asset_data_hash: None,
             receipt_flags: None,
             __remaining_accounts: Vec::new(),
@@ -998,11 +986,6 @@ impl<'a, 'b> LeaveReviewV1CpiBuilder<'a, 'b> {
         self
     }
     #[inline(always)]
-    pub fn receipt_creator_hash(&mut self, receipt_creator_hash: [u8; 32]) -> &mut Self {
-        self.instruction.receipt_creator_hash = Some(receipt_creator_hash);
-        self
-    }
-    #[inline(always)]
     pub fn receipt_asset_data_hash(&mut self, receipt_asset_data_hash: [u8; 32]) -> &mut Self {
         self.instruction.receipt_asset_data_hash = Some(receipt_asset_data_hash);
         self
@@ -1085,11 +1068,6 @@ impl<'a, 'b> LeaveReviewV1CpiBuilder<'a, 'b> {
                 .receipt_data_hash
                 .clone()
                 .expect("receipt_data_hash is not set"),
-            receipt_creator_hash: self
-                .instruction
-                .receipt_creator_hash
-                .clone()
-                .expect("receipt_creator_hash is not set"),
             receipt_asset_data_hash: self
                 .instruction
                 .receipt_asset_data_hash
@@ -1211,7 +1189,6 @@ struct LeaveReviewV1CpiBuilderInstruction<'a, 'b> {
     receipt_index: Option<u32>,
     receipt_root: Option<[u8; 32]>,
     receipt_data_hash: Option<[u8; 32]>,
-    receipt_creator_hash: Option<[u8; 32]>,
     receipt_asset_data_hash: Option<[u8; 32]>,
     receipt_flags: Option<u8>,
     /// Additional instruction accounts `(AccountInfo, is_writable, is_signer)`.

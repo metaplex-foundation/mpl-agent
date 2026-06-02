@@ -62,8 +62,6 @@ pub struct LeaveReviewV1Args {
     pub receipt_root: [u8; 32],
     /// Hash of the receipt's MetadataArgsV2 + seller_fee_basis_points.
     pub receipt_data_hash: [u8; 32],
-    /// Hash of the receipt's creators vec.
-    pub receipt_creator_hash: [u8; 32],
     /// Hash of the receipt's `asset_data` blob (DEFAULT_ASSET_DATA_HASH).
     pub receipt_asset_data_hash: [u8; 32],
     /// Receipt leaf flags.
@@ -99,7 +97,10 @@ pub fn leave_review_v1<'a>(
     }
     {
         let asset_data = ctx.accounts.asset.try_borrow_data()?;
-        if asset_data.is_empty() || asset_data[0] != MplCoreKey::AssetV1 as u8 {
+        // BaseAssetV1 = key (1) + owner (32) + ... so any legitimate
+        // AssetV1 is at least 33 bytes. Reject short buffers explicitly
+        // so the `asset_data[1..33]` slice below cannot panic.
+        if asset_data.len() < 33 || asset_data[0] != MplCoreKey::AssetV1 as u8 {
             return Err(MplAgentReputationError::InvalidCoreAsset.into());
         }
         let asset_owner = Pubkey::new_from_array(
@@ -183,6 +184,20 @@ pub fn leave_review_v1<'a>(
     let receipt_delegate = receipt_owner;
     let collection_hash = keccak::hashv(&[receipts_collection.as_ref()]).to_bytes();
 
+    // Bind the receipt to the reviewed agent: MintWorkReceiptV1 always
+    // writes `creators = [{address: agent_asset, verified: false, share:
+    // 100}]`, so we can compute the expected creator_hash on-chain from
+    // `ctx.accounts.asset.key`. This prevents replay of a real receipt
+    // for AgentA against a review for AgentB — the reconstructed leaf
+    // hash here would no longer match the receipt's actual leaf in the
+    // tree, so verify_leaf_cpi rejects.
+    let expected_creator_hash = keccak::hashv(&[
+        ctx.accounts.asset.key.as_ref(),
+        &[0u8],   // verified = false
+        &[100u8], // share = 100
+    ])
+    .to_bytes();
+
     let leaf_hash = keccak::hashv(&[
         // LeafSchemaV2 version byte
         &[2u8],
@@ -191,7 +206,7 @@ pub fn leave_review_v1<'a>(
         receipt_delegate.as_ref(),
         &args.receipt_nonce.to_le_bytes(),
         &args.receipt_data_hash,
-        &args.receipt_creator_hash,
+        &expected_creator_hash,
         &collection_hash,
         &args.receipt_asset_data_hash,
         &[args.receipt_flags],
