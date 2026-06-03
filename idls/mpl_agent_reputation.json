@@ -113,11 +113,11 @@
           ]
         },
         {
-          "name": "programConfig",
+          "name": "authority",
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Singleton ReviewsConfigV1 PDA. Signs the Bubblegum CPI as tree creator/delegate via invoke_signed"
+            "Reviews authority PDA at [\"reviews_authority\"] — signs the Bubblegum CPI as tree_creator/collection_authority via invoke_signed"
           ]
         },
         {
@@ -141,7 +141,7 @@
           "isMut": true,
           "isSigner": false,
           "docs": [
-            "Reviews collection (must equal program_config.reviews_collection)"
+            "Reviews collection PDA at [\"reviews_collection\"]"
           ]
         },
         {
@@ -197,7 +197,7 @@
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Receipts collection (must equal program_config.receipts_collection)"
+            "Canonical receipts collection PDA from mpl-agent-tools at [\"receipts_collection\"]"
           ]
         },
         {
@@ -231,26 +231,18 @@
       }
     },
     {
-      "name": "InitializeReviewsConfigV1",
+      "name": "CreateReviewsCollectionV1",
       "accounts": [
         {
-          "name": "admin",
+          "name": "payer",
           "isMut": true,
           "isSigner": true,
           "docs": [
-            "Bootstrapping admin; captured as the config authority"
+            "Funds the collection's rent"
           ]
         },
         {
-          "name": "programConfig",
-          "isMut": true,
-          "isSigner": false,
-          "docs": [
-            "ReviewsConfigV1 PDA at [\"program_config\"]"
-          ]
-        },
-        {
-          "name": "reviewsCollection",
+          "name": "collection",
           "isMut": true,
           "isSigner": false,
           "docs": [
@@ -258,11 +250,11 @@
           ]
         },
         {
-          "name": "receiptsCollection",
+          "name": "authority",
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "The canonical receipts collection from agent-tools (recorded in config for later validation)"
+            "Reviews authority PDA at [\"reviews_authority\"] — becomes the collection's update_authority"
           ]
         },
         {
@@ -284,9 +276,9 @@
       ],
       "args": [
         {
-          "name": "initializeReviewsConfigV1Args",
+          "name": "createReviewsCollectionV1Args",
           "type": {
-            "defined": "InitializeReviewsConfigV1Args"
+            "defined": "CreateReviewsCollectionV1Args"
           }
         }
       ],
@@ -299,19 +291,19 @@
       "name": "RegisterReviewsTreeV1",
       "accounts": [
         {
-          "name": "admin",
+          "name": "payer",
           "isMut": true,
           "isSigner": true,
           "docs": [
-            "Must match program_config.admin"
+            "Funds the tree rent"
           ]
         },
         {
-          "name": "programConfig",
-          "isMut": true,
+          "name": "authority",
+          "isMut": false,
           "isSigner": false,
           "docs": [
-            "ReviewsConfigV1 PDA"
+            "Reviews authority PDA at [\"reviews_authority\"] — set as tree_creator"
           ]
         },
         {
@@ -319,7 +311,7 @@
           "isMut": true,
           "isSigner": false,
           "docs": [
-            "Reviews merkle tree PDA at [\"reviews_tree\", program_config.next_tree_index_le]"
+            "Reviews merkle tree PDA at [\"reviews_tree\", tree_index_le]"
           ]
         },
         {
@@ -416,55 +408,6 @@
       }
     },
     {
-      "name": "ReviewsConfigV1",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "key",
-            "type": {
-              "defined": "Key"
-            },
-            "attrs": [
-              "idl-type"
-            ]
-          },
-          {
-            "name": "bump",
-            "type": "u8"
-          },
-          {
-            "name": "padding",
-            "type": {
-              "array": [
-                "u8",
-                6
-              ]
-            },
-            "attrs": [
-              "padding"
-            ]
-          },
-          {
-            "name": "admin",
-            "type": "publicKey"
-          },
-          {
-            "name": "reviewsCollection",
-            "type": "publicKey"
-          },
-          {
-            "name": "receiptsCollection",
-            "type": "publicKey"
-          },
-          {
-            "name": "nextTreeIndex",
-            "type": "u64"
-          }
-        ]
-      }
-    },
-    {
       "name": "ReviewRecordV1",
       "type": {
         "kind": "struct",
@@ -507,6 +450,26 @@
     }
   ],
   "types": [
+    {
+      "name": "CreateReviewsCollectionV1Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                7
+              ]
+            },
+            "attrs": [
+              "padding"
+            ]
+          }
+        ]
+      }
+    },
     {
       "name": "LeaveReviewV1Args",
       "type": {
@@ -567,7 +530,7 @@
       }
     },
     {
-      "name": "InitializeReviewsConfigV1Args",
+      "name": "RegisterReputationV1Args",
       "type": {
         "kind": "struct",
         "fields": [
@@ -596,12 +559,16 @@
             "type": {
               "array": [
                 "u8",
-                3
+                7
               ]
             },
             "attrs": [
               "padding"
             ]
+          },
+          {
+            "name": "treeIndex",
+            "type": "u64"
           },
           {
             "name": "maxDepth",
@@ -614,21 +581,13 @@
           {
             "name": "canopyDepth",
             "type": "u32"
-          }
-        ]
-      }
-    },
-    {
-      "name": "RegisterReputationV1Args",
-      "type": {
-        "kind": "struct",
-        "fields": [
+          },
           {
-            "name": "padding",
+            "name": "pad2",
             "type": {
               "array": [
                 "u8",
-                7
+                4
               ]
             },
             "attrs": [
@@ -651,9 +610,6 @@
           },
           {
             "name": "ReviewRecordV1"
-          },
-          {
-            "name": "ReviewsConfigV1"
           }
         ]
       }
@@ -722,18 +678,18 @@
     },
     {
       "code": 12,
-      "name": "InvalidProgramConfigDerivation",
-      "msg": "Invalid Program Config PDA derivation"
+      "name": "InvalidReviewsCollection",
+      "msg": "Invalid reviews collection PDA derivation"
     },
     {
       "code": 13,
-      "name": "ProgramConfigNotInitialized",
-      "msg": "Program Config not initialized"
+      "name": "InvalidReviewsAuthority",
+      "msg": "Invalid reviews authority PDA derivation"
     },
     {
       "code": 14,
-      "name": "ProgramConfigAlreadyInitialized",
-      "msg": "Program Config already initialized"
+      "name": "ReviewsCollectionAlreadyInitialized",
+      "msg": "Reviews collection already initialized"
     },
     {
       "code": 15,
@@ -742,23 +698,8 @@
     },
     {
       "code": 16,
-      "name": "InvalidReviewsCollection",
-      "msg": "Supplied reviews collection does not match config.reviews_collection"
-    },
-    {
-      "code": 17,
       "name": "InvalidReceiptsCollection",
-      "msg": "Supplied receipts collection does not match config.receipts_collection"
-    },
-    {
-      "code": 18,
-      "name": "UnauthorizedAdmin",
-      "msg": "Signer is not the program config admin"
-    },
-    {
-      "code": 19,
-      "name": "InvalidLogWrapperProgram",
-      "msg": "Invalid log wrapper program"
+      "msg": "Supplied receipts collection is not the canonical mpl-agent-tools receipts collection PDA"
     }
   ],
   "metadata": {

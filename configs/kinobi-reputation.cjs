@@ -1,4 +1,5 @@
 const path = require("path");
+const fs = require("fs");
 const k = require("@metaplex-foundation/kinobi");
 
 // Paths.
@@ -40,9 +41,29 @@ kinobi.update(
                 ),
             ],
         },
-        reviewsConfigV1: {
-            seeds: [k.constantPdaSeedNodeFromString("program_config")],
-        },
+    }),
+);
+
+// Stateless PDAs (not backed by an account struct — declared via addPdasVisitor
+// so we can use them as defaults on instruction accounts).
+kinobi.update(
+    new k.addPdasVisitor({
+        mplAgentReputation: [
+            k.pdaNode("reviewsCollection", [
+                k.constantPdaSeedNodeFromString("reviews_collection"),
+            ]),
+            k.pdaNode("reviewsAuthority", [
+                k.constantPdaSeedNodeFromString("reviews_authority"),
+            ]),
+            k.pdaNode("reviewsTree", [
+                k.constantPdaSeedNodeFromString("reviews_tree"),
+                k.variablePdaSeedNode(
+                    "treeIndex",
+                    k.numberTypeNode("u64"),
+                    "The reviews tree index",
+                ),
+            ]),
+        ],
     }),
 );
 
@@ -64,8 +85,11 @@ kinobi.update(
         },
         leaveReviewV1: {
             accounts: {
-                programConfig: {
-                    defaultValue: k.pdaValueNode("reviewsConfigV1"),
+                authority: {
+                    defaultValue: k.pdaValueNode("reviewsAuthority"),
+                },
+                coreCollection: {
+                    defaultValue: k.pdaValueNode("reviewsCollection"),
                 },
                 mplCoreProgram: {
                     defaultValue: k.publicKeyValueNode(MPL_CORE_ID, "mplCore"),
@@ -87,10 +111,13 @@ kinobi.update(
                 },
             },
         },
-        initializeReviewsConfigV1: {
+        createReviewsCollectionV1: {
             accounts: {
-                programConfig: {
-                    defaultValue: k.pdaValueNode("reviewsConfigV1"),
+                collection: {
+                    defaultValue: k.pdaValueNode("reviewsCollection"),
+                },
+                authority: {
+                    defaultValue: k.pdaValueNode("reviewsAuthority"),
                 },
                 mplCoreProgram: {
                     defaultValue: k.publicKeyValueNode(MPL_CORE_ID, "mplCore"),
@@ -99,8 +126,8 @@ kinobi.update(
         },
         registerReviewsTreeV1: {
             accounts: {
-                programConfig: {
-                    defaultValue: k.pdaValueNode("reviewsConfigV1"),
+                authority: {
+                    defaultValue: k.pdaValueNode("reviewsAuthority"),
                 },
                 bubblegumProgram: {
                     defaultValue: k.publicKeyValueNode(
@@ -136,3 +163,67 @@ kinobi.accept(
         crateFolder: crateDir,
     }),
 );
+
+// Post-process: write standalone PDA helpers expected by kinobi-emitted
+// instruction code (kinobi 1.0-alpha doesn't render find*Pda helpers for
+// PDAs added via addPdasVisitor, but it still emits references to them).
+const pdaHelperFile = path.join(jsDir, "accounts", "standalonePdas.ts");
+fs.writeFileSync(
+    pdaHelperFile,
+    `/**
+ * Hand-written PDA helpers for standalone PDAs (collections, authority,
+ * trees). Emitted by the kinobi-reputation config because kinobi 1.0-alpha
+ * doesn't render find*Pda helpers for PDAs added via addPdasVisitor.
+ */
+
+import { Context, Pda } from '@metaplex-foundation/umi';
+import { string, u64 } from '@metaplex-foundation/umi/serializers';
+
+const PROGRAM_ID = 'REPREG5c1gPHuHukEyANpksLdHFaJCiTrm6zJgNhRZR';
+
+function pda(
+    context: Pick<Context, 'eddsa' | 'programs'>,
+    seeds: Uint8Array[],
+): Pda {
+    const programId = context.programs.getPublicKey(
+        'mplAgentReputation',
+        PROGRAM_ID,
+    );
+    return context.eddsa.findPda(programId, seeds);
+}
+
+export function findReviewsCollectionPda(
+    context: Pick<Context, 'eddsa' | 'programs'>,
+): Pda {
+    return pda(context, [
+        string({ size: 'variable' }).serialize('reviews_collection'),
+    ]);
+}
+
+export function findReviewsAuthorityPda(
+    context: Pick<Context, 'eddsa' | 'programs'>,
+): Pda {
+    return pda(context, [
+        string({ size: 'variable' }).serialize('reviews_authority'),
+    ]);
+}
+
+export function findReviewsTreePda(
+    context: Pick<Context, 'eddsa' | 'programs'>,
+    seeds: { treeIndex: number | bigint },
+): Pda {
+    return pda(context, [
+        string({ size: 'variable' }).serialize('reviews_tree'),
+        u64().serialize(seeds.treeIndex),
+    ]);
+}
+`,
+);
+
+// Patch the accounts/index.ts to re-export from standalonePdas.
+const accountsIndex = path.join(jsDir, "accounts", "index.ts");
+let indexContent = fs.readFileSync(accountsIndex, "utf-8");
+if (!indexContent.includes("standalonePdas")) {
+    indexContent += "export * from './standalonePdas';\n";
+    fs.writeFileSync(accountsIndex, indexContent);
+}

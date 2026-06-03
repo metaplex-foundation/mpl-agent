@@ -12,7 +12,6 @@ export enum Key {
   Uninitialized,
   AgentReputationV1,
   ReviewRecordV1,
-  ReviewsConfigV1,
 }
 
 export type KeyArgs = Key;

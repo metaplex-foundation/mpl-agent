@@ -9,11 +9,11 @@ use solana_program::{
 use solana_system_interface::{instruction as system_instruction, program as system_program};
 
 use crate::{
-    error::MplAgentToolsError,
-    instruction::accounts::RegisterReceiptsTreeV1Accounts,
+    error::MplAgentReputationError,
+    instruction::accounts::RegisterReviewsTreeV1Accounts,
     state::{
-        check_receipts_authority_pda, check_receipts_tree_pda, RECEIPTS_AUTHORITY_PREFIX,
-        RECEIPTS_TREE_PREFIX,
+        check_reviews_authority_pda, check_reviews_tree_pda, REVIEWS_AUTHORITY_PREFIX,
+        REVIEWS_TREE_PREFIX,
     },
 };
 
@@ -23,8 +23,8 @@ const MPL_ACCOUNT_COMPRESSION_ID: solana_program::pubkey::Pubkey =
 
 /// Permissionless tree registration: the caller picks an unused
 /// `tree_index` and pays the rent. The tree is created at PDA
-/// `["receipts_tree", index_le]` and Bubblegum is configured with
-/// `tree_creator = ["receipts_authority"]` PDA, so the program signs
+/// `["reviews_tree", index_le]` and Bubblegum is configured with
+/// `tree_creator = ["reviews_authority"]` PDA, so the program signs
 /// every future mint.
 ///
 /// First-come-first-served: if two callers race for the same index the
@@ -32,10 +32,9 @@ const MPL_ACCOUNT_COMPRESSION_ID: solana_program::pubkey::Pubkey =
 /// initialised. The loser just retries with a higher index.
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Pod, Zeroable, ShankType)]
-pub struct RegisterReceiptsTreeV1Args {
+pub struct RegisterReviewsTreeV1Args {
     #[skip]
     pub discriminator: u8,
-    /// Padding to align the `u64` field.
     #[padding]
     pub _pad: [u8; 7],
     pub tree_index: u64,
@@ -45,35 +44,33 @@ pub struct RegisterReceiptsTreeV1Args {
     #[padding]
     pub _pad2: [u8; 4],
 }
-const _: () = assert!(core::mem::size_of::<RegisterReceiptsTreeV1Args>() == 32);
+const _: () = assert!(core::mem::size_of::<RegisterReviewsTreeV1Args>() == 32);
 
-pub fn register_receipts_tree_v1<'a>(
+pub fn register_reviews_tree_v1<'a>(
     accounts: &'a [AccountInfo<'a>],
-    args: &RegisterReceiptsTreeV1Args,
+    args: &RegisterReviewsTreeV1Args,
 ) -> ProgramResult {
-    let ctx = RegisterReceiptsTreeV1Accounts::context(accounts)?;
+    let ctx = RegisterReviewsTreeV1Accounts::context(accounts)?;
 
     assert_signer(ctx.accounts.payer)?;
 
     if *ctx.accounts.bubblegum_program.key != BUBBLEGUM_ID {
-        return Err(MplAgentToolsError::InvalidBubblegumProgram.into());
+        return Err(MplAgentReputationError::InvalidBubblegumProgram.into());
     }
     if *ctx.accounts.compression_program.key != MPL_ACCOUNT_COMPRESSION_ID {
-        return Err(MplAgentToolsError::InvalidCompressionProgram.into());
+        return Err(MplAgentReputationError::InvalidCompressionProgram.into());
     }
     if *ctx.accounts.system_program.key != system_program::id() {
-        return Err(MplAgentToolsError::InvalidSystemProgram.into());
+        return Err(MplAgentReputationError::InvalidSystemProgram.into());
     }
 
-    // Authority PDA — captured for invoke_signed at tree create time.
-    let authority_bump = check_receipts_authority_pda(ctx.accounts.authority)?;
+    let authority_bump = check_reviews_authority_pda(ctx.accounts.authority)?;
 
-    // Tree must match the canonical PDA for the supplied tree_index.
-    let tree_bump = check_receipts_tree_pda(ctx.accounts.merkle_tree, args.tree_index)?;
+    let tree_bump = check_reviews_tree_pda(ctx.accounts.merkle_tree, args.tree_index)?;
     if ctx.accounts.merkle_tree.data_len() != 0
         || *ctx.accounts.merkle_tree.owner != system_program::id()
     {
-        return Err(MplAgentToolsError::InvalidAccountData.into());
+        return Err(MplAgentReputationError::InvalidAccountData.into());
     }
 
     let size = merkle_tree_account_size(
@@ -84,12 +81,9 @@ pub fn register_receipts_tree_v1<'a>(
     let rent_lamports = Rent::get()?.minimum_balance(size);
 
     let index_bytes = args.tree_index.to_le_bytes();
-    let tree_seeds: &[&[u8]] = &[RECEIPTS_TREE_PREFIX, &index_bytes, &[tree_bump]];
-    let authority_seeds: &[&[u8]] = &[RECEIPTS_AUTHORITY_PREFIX, &[authority_bump]];
+    let tree_seeds: &[&[u8]] = &[REVIEWS_TREE_PREFIX, &index_bytes, &[tree_bump]];
+    let authority_seeds: &[&[u8]] = &[REVIEWS_AUTHORITY_PREFIX, &[authority_bump]];
 
-    // Allocate the merkle tree account at the PDA, owned by the
-    // compression program. The tree-PDA signs CreateAccount via its own
-    // seeds — that's only used here, never for subsequent mints.
     invoke_signed(
         &system_instruction::create_account(
             ctx.accounts.payer.key,
@@ -106,9 +100,6 @@ pub fn register_receipts_tree_v1<'a>(
         &[tree_seeds],
     )?;
 
-    // CPI Bubblegum's CreateTreeConfigV2 with `tree_creator =
-    // receipts_authority` PDA — this is the signer the program will
-    // present at every subsequent mint.
     CreateTreeConfigV2CpiBuilder::new(ctx.accounts.bubblegum_program)
         .tree_config(ctx.accounts.tree_config)
         .merkle_tree(ctx.accounts.merkle_tree)
@@ -123,7 +114,7 @@ pub fn register_receipts_tree_v1<'a>(
         .invoke_signed(&[authority_seeds])?;
 
     msg!(
-        "Registered receipts tree #{} at {}",
+        "Registered reviews tree #{} at {}",
         args.tree_index,
         ctx.accounts.merkle_tree.key,
     );
@@ -141,14 +132,11 @@ fn merkle_tree_account_size(
 ) -> Result<usize, ProgramError> {
     const HEADER_SIZE: usize = 88;
     const NODE_SIZE: usize = 32;
-    // ChangeLog<MAX_DEPTH>: root (32) + [Node; MAX_DEPTH] + index (u32) + _padding (u32)
     let change_log_size = NODE_SIZE + max_depth * NODE_SIZE + 4 + 4;
     let change_logs_total = change_log_size
         .checked_mul(max_buffer_size)
         .ok_or(ProgramError::ArithmeticOverflow)?;
-    // sequence_number, active_index, buffer_size (each u64) = 24
     let scalars = 24;
-    // Path<MAX_DEPTH>: [Node; MAX_DEPTH] + index (u32) + _padding (u32)
     let path_size = max_depth * NODE_SIZE + 4 + 4;
     let canopy_size = if canopy_depth == 0 {
         0
@@ -163,13 +151,13 @@ fn merkle_tree_account_size(
     Ok(HEADER_SIZE + scalars + change_logs_total + path_size + canopy_size)
 }
 
-pub fn cast_register_receipts_tree_args(
+pub fn cast_register_reviews_tree_args(
     data: &[u8],
-) -> Result<&RegisterReceiptsTreeV1Args, ProgramError> {
-    if data.len() < core::mem::size_of::<RegisterReceiptsTreeV1Args>() {
-        return Err(MplAgentToolsError::InvalidInstructionData.into());
+) -> Result<&RegisterReviewsTreeV1Args, ProgramError> {
+    if data.len() < core::mem::size_of::<RegisterReviewsTreeV1Args>() {
+        return Err(MplAgentReputationError::InvalidInstructionData.into());
     }
     Ok(bytemuck::from_bytes(
-        &data[..core::mem::size_of::<RegisterReceiptsTreeV1Args>()],
+        &data[..core::mem::size_of::<RegisterReviewsTreeV1Args>()],
     ))
 }

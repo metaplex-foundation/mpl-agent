@@ -21,7 +21,10 @@ import {
   struct,
   u8,
 } from '@metaplex-foundation/umi/serializers';
-import { findReviewsConfigV1Pda } from '../accounts';
+import {
+  findReceiptsAuthorityPda,
+  findReceiptsCollectionPda,
+} from '../accounts';
 import {
   ResolvedAccount,
   ResolvedAccountsWithIndices,
@@ -29,15 +32,13 @@ import {
 } from '../shared';
 
 // Accounts.
-export type InitializeReviewsConfigV1InstructionAccounts = {
-  /** Bootstrapping admin; captured as the config authority */
-  admin: Signer;
-  /** ReviewsConfigV1 PDA at ["program_config"] */
-  programConfig?: PublicKey | Pda;
-  /** Reviews collection PDA at ["reviews_collection"] */
-  reviewsCollection: PublicKey | Pda;
-  /** The canonical receipts collection from agent-tools (recorded in config for later validation) */
-  receiptsCollection: PublicKey | Pda;
+export type CreateReceiptsCollectionV1InstructionAccounts = {
+  /** Funds the collection's rent */
+  payer?: Signer;
+  /** Receipts collection PDA at ["receipts_collection"] */
+  collection?: PublicKey | Pda;
+  /** Receipts authority PDA at ["receipts_authority"] — becomes the collection's update_authority */
+  authority?: PublicKey | Pda;
   /** The MPL Core program */
   mplCoreProgram?: PublicKey | Pda;
   /** The system program */
@@ -45,87 +46,88 @@ export type InitializeReviewsConfigV1InstructionAccounts = {
 };
 
 // Data.
-export type InitializeReviewsConfigV1InstructionData = {
+export type CreateReceiptsCollectionV1InstructionData = {
   discriminator: number;
   padding: Array<number>;
 };
 
-export type InitializeReviewsConfigV1InstructionDataArgs = {};
+export type CreateReceiptsCollectionV1InstructionDataArgs = {};
 
-export function getInitializeReviewsConfigV1InstructionDataSerializer(): Serializer<
-  InitializeReviewsConfigV1InstructionDataArgs,
-  InitializeReviewsConfigV1InstructionData
+export function getCreateReceiptsCollectionV1InstructionDataSerializer(): Serializer<
+  CreateReceiptsCollectionV1InstructionDataArgs,
+  CreateReceiptsCollectionV1InstructionData
 > {
   return mapSerializer<
-    InitializeReviewsConfigV1InstructionDataArgs,
+    CreateReceiptsCollectionV1InstructionDataArgs,
     any,
-    InitializeReviewsConfigV1InstructionData
+    CreateReceiptsCollectionV1InstructionData
   >(
-    struct<InitializeReviewsConfigV1InstructionData>(
+    struct<CreateReceiptsCollectionV1InstructionData>(
       [
         ['discriminator', u8()],
         ['padding', array(u8(), { size: 7 })],
       ],
-      { description: 'InitializeReviewsConfigV1InstructionData' }
+      { description: 'CreateReceiptsCollectionV1InstructionData' }
     ),
-    (value) => ({ ...value, discriminator: 2, padding: [0, 0, 0, 0, 0, 0, 0] })
+    (value) => ({ ...value, discriminator: 4, padding: [0, 0, 0, 0, 0, 0, 0] })
   ) as Serializer<
-    InitializeReviewsConfigV1InstructionDataArgs,
-    InitializeReviewsConfigV1InstructionData
+    CreateReceiptsCollectionV1InstructionDataArgs,
+    CreateReceiptsCollectionV1InstructionData
   >;
 }
 
 // Instruction discriminator.
-export const initializeReviewsConfigV1InstructionDiscriminator = 2;
+export const createReceiptsCollectionV1InstructionDiscriminator = 4;
 
 // Instruction.
-export function initializeReviewsConfigV1(
-  context: Pick<Context, 'eddsa' | 'programs'>,
-  input: InitializeReviewsConfigV1InstructionAccounts
+export function createReceiptsCollectionV1(
+  context: Pick<Context, 'eddsa' | 'payer' | 'programs'>,
+  input: CreateReceiptsCollectionV1InstructionAccounts
 ): TransactionBuilder {
   // Program ID.
   const programId = context.programs.getPublicKey(
-    'mplAgentReputation',
-    'REPREG5c1gPHuHukEyANpksLdHFaJCiTrm6zJgNhRZR'
+    'mplAgentTools',
+    'TLREGni9ZEyGC3vnPZtqUh95xQ8oPqJSvNjvB7FGK8S'
   );
 
   // Accounts.
   const resolvedAccounts = {
-    admin: {
+    payer: {
       index: 0,
       isWritable: true as boolean,
-      value: input.admin ?? null,
+      value: input.payer ?? null,
     },
-    programConfig: {
+    collection: {
       index: 1,
       isWritable: true as boolean,
-      value: input.programConfig ?? null,
+      value: input.collection ?? null,
     },
-    reviewsCollection: {
+    authority: {
       index: 2,
-      isWritable: true as boolean,
-      value: input.reviewsCollection ?? null,
-    },
-    receiptsCollection: {
-      index: 3,
       isWritable: false as boolean,
-      value: input.receiptsCollection ?? null,
+      value: input.authority ?? null,
     },
     mplCoreProgram: {
-      index: 4,
+      index: 3,
       isWritable: false as boolean,
       value: input.mplCoreProgram ?? null,
     },
     systemProgram: {
-      index: 5,
+      index: 4,
       isWritable: false as boolean,
       value: input.systemProgram ?? null,
     },
   } satisfies ResolvedAccountsWithIndices;
 
   // Default values.
-  if (!resolvedAccounts.programConfig.value) {
-    resolvedAccounts.programConfig.value = findReviewsConfigV1Pda(context);
+  if (!resolvedAccounts.payer.value) {
+    resolvedAccounts.payer.value = context.payer;
+  }
+  if (!resolvedAccounts.collection.value) {
+    resolvedAccounts.collection.value = findReceiptsCollectionPda(context);
+  }
+  if (!resolvedAccounts.authority.value) {
+    resolvedAccounts.authority.value = findReceiptsAuthorityPda(context);
   }
   if (!resolvedAccounts.mplCoreProgram.value) {
     resolvedAccounts.mplCoreProgram.value = context.programs.getPublicKey(
@@ -156,7 +158,7 @@ export function initializeReviewsConfigV1(
 
   // Data.
   const data =
-    getInitializeReviewsConfigV1InstructionDataSerializer().serialize({});
+    getCreateReceiptsCollectionV1InstructionDataSerializer().serialize({});
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

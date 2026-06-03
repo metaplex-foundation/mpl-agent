@@ -11,7 +11,6 @@ import {
   hashMetadataDataV2 as _hashMetadataDataV2,
 } from '@metaplex-foundation/mpl-bubblegum';
 import {
-  createSignerFromKeypair,
   generateSigner,
   publicKey,
   PublicKey,
@@ -21,27 +20,21 @@ import {
 } from '@metaplex-foundation/umi';
 
 import {
-  fetchReviewsConfigV1,
-  findReviewsConfigV1Pda,
-  initializeReviewsConfigV1,
+  createReviewsCollectionV1,
+  findReviewsCollectionPda,
+  findReviewsTreePda,
   registerReviewsTreeV1,
 } from '../src/generated/reputation';
 import {
+  createReceiptsCollectionV1,
   delegateExecutionV1,
-  fetchToolsConfigV1,
   findExecutionDelegateRecordV1Pda,
   findExecutiveProfileV1Pda,
-  findToolsConfigV1Pda,
-  initializeToolsConfigV1,
+  findReceiptsCollectionPda,
+  findReceiptsTreePda,
   registerExecutiveV1,
   registerReceiptsTreeV1,
 } from '../src/generated/tools';
-import {
-  findReceiptsCollectionPda,
-  findReceiptsTreePda,
-  findReviewsCollectionPda,
-  findReviewsTreePda,
-} from '../src';
 import {
   findAgentIdentityV1Pda,
   registerIdentityV1,
@@ -60,15 +53,12 @@ export const DEFAULT_ASSET_DATA_HASH = new Uint8Array([
 export const TREE_MAX_DEPTH = 5;
 export const TREE_MAX_BUFFER = 8;
 
-/**
- * Idempotent: best-effort initialize each program's config. Subsequent
- * runs against the same validator skip the already-initialized step.
- */
+/** Best-effort: swallow "already initialized" errors from idempotent bootstrap. */
 async function maybe<T>(p: Promise<T>): Promise<void> {
   try {
     await p;
   } catch {
-    // Already initialized.
+    // Already done — fine.
   }
 }
 
@@ -82,94 +72,42 @@ export interface ReceiptsReviewsBootstrap {
 }
 
 /**
- * Initialize the singletons if needed and allocate one fresh receipts
- * tree + reviews tree pair (using the current `next_tree_index` on each
- * program). Returns everything callers need to drive `MintWorkReceiptV1`
- * and `LeaveReviewV1`.
+ * Permissionless bootstrap: idempotently create the canonical receipts +
+ * reviews collections, then allocate a fresh receipts tree + reviews tree
+ * pair at random indices for this test run. Random indices keep tests
+ * isolated (each gets a dedicated empty tree) and avoid races on a shared
+ * `next_tree_index` counter.
  */
-/**
- * Deterministic admin keypair shared by all test files. AVA spawns each
- * test file in its own worker, so without a stable seed each file's
- * `umi.payer` would differ and only the first file to run would be able
- * to register trees against the config. We derive a fixed keypair and
- * airdrop to it on demand.
- */
-const SHARED_ADMIN_SEED = new Uint8Array([
-  // 32 stable bytes — "agent-receipts-reviews-tests-1234".
-  0x61, 0x67, 0x65, 0x6e, 0x74, 0x2d, 0x72, 0x65, 0x63, 0x65, 0x69, 0x70, 0x74,
-  0x73, 0x2d, 0x72, 0x65, 0x76, 0x69, 0x65, 0x77, 0x73, 0x2d, 0x74, 0x65, 0x73,
-  0x74, 0x73, 0x2d, 0x31, 0x32, 0x33,
-]);
-
-export function getSharedAdmin(umi: Umi): Signer {
-  const kp = umi.eddsa.createKeypairFromSeed(SHARED_ADMIN_SEED);
-  return createSignerFromKeypair(umi, kp);
-}
-
-/** Make sure the shared admin has enough SOL to bootstrap and register trees. */
-async function ensureAdminFunded(umi: Umi, admin: Signer): Promise<void> {
-  const balance = await umi.rpc.getBalance(admin.publicKey);
-  // Trees + collection rent + tx fees easily fit in 0.5 SOL for the
-  // small dimensions we use.
-  if (balance.basisPoints < 500_000_000n) {
-    await umi.rpc.airdrop(admin.publicKey, {
-      basisPoints: 1_000_000_000n,
-      identifier: 'SOL',
-      decimals: 9,
-    });
-  }
-}
-
 export async function bootstrapReceiptsAndReviews(
   umi: Umi
 ): Promise<ReceiptsReviewsBootstrap> {
-  const admin = getSharedAdmin(umi);
-  await ensureAdminFunded(umi, admin);
-
   const receiptsCollection = publicKey(findReceiptsCollectionPda(umi));
   const reviewsCollection = publicKey(findReviewsCollectionPda(umi));
 
-  await maybe(
-    initializeToolsConfigV1(umi, {
-      admin,
-      collection: receiptsCollection,
-    }).sendAndConfirm(umi)
-  );
+  await maybe(createReceiptsCollectionV1(umi, {}).sendAndConfirm(umi));
+  await maybe(createReviewsCollectionV1(umi, {}).sendAndConfirm(umi));
 
-  await maybe(
-    initializeReviewsConfigV1(umi, {
-      admin,
-      reviewsCollection,
-      receiptsCollection,
-    }).sendAndConfirm(umi)
-  );
-
-  const toolsConfig = await fetchToolsConfigV1(umi, findToolsConfigV1Pda(umi));
-  const receiptsTreeIndex = toolsConfig.nextTreeIndex;
+  const receiptsTreeIndex = randomU64();
   const receiptsTree = publicKey(
     findReceiptsTreePda(umi, { treeIndex: receiptsTreeIndex })
   );
   await registerReceiptsTreeV1(umi, {
-    admin,
     merkleTree: receiptsTree,
     treeConfig: findTreeConfigPda(umi, { merkleTree: receiptsTree }),
+    treeIndex: receiptsTreeIndex,
     maxDepth: TREE_MAX_DEPTH,
     maxBufferSize: TREE_MAX_BUFFER,
     canopyDepth: 0,
   }).sendAndConfirm(umi);
 
-  const reviewsConfig = await fetchReviewsConfigV1(
-    umi,
-    findReviewsConfigV1Pda(umi)
-  );
-  const reviewsTreeIndex = reviewsConfig.nextTreeIndex;
+  const reviewsTreeIndex = randomU64();
   const reviewsTree = publicKey(
     findReviewsTreePda(umi, { treeIndex: reviewsTreeIndex })
   );
   await registerReviewsTreeV1(umi, {
-    admin,
     merkleTree: reviewsTree,
     treeConfig: findTreeConfigPda(umi, { merkleTree: reviewsTree }),
+    treeIndex: reviewsTreeIndex,
     maxDepth: TREE_MAX_DEPTH,
     maxBufferSize: TREE_MAX_BUFFER,
     canopyDepth: 0,
@@ -183,6 +121,16 @@ export async function bootstrapReceiptsAndReviews(
     reviewsTree,
     reviewsTreeIndex,
   };
+}
+
+function randomU64(): bigint {
+  // 56 random bits — comfortably within u64, no chance of collision in a
+  // test run.
+  const buf = new Uint8Array(7);
+  crypto.getRandomValues(buf);
+  let v = 0n;
+  for (const b of buf) v = (v << 8n) | BigInt(b);
+  return v;
 }
 
 export interface AgentSetup {

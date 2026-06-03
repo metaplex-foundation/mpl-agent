@@ -65,35 +65,21 @@ pub enum MplAgentToolsError {
     /// 17 (0x11) - Receipt URI must be non-empty and within size limits
     #[error("Receipt URI must be non-empty and within size limits")]
     ReceiptUriInvalid,
-    /// 18 (0x12) - Invalid Program Config PDA derivation
-    #[error("Invalid Program Config PDA derivation")]
-    InvalidProgramConfigDerivation,
-    /// 19 (0x13) - Program Config is not initialized
-    #[error("Program Config is not initialized")]
-    ProgramConfigNotInitialized,
-    /// 20 (0x14) - Program Config is already initialized
-    #[error("Program Config is already initialized")]
-    ProgramConfigAlreadyInitialized,
+    /// 18 (0x12) - Supplied collection is not the canonical receipts collection PDA
+    #[error("Supplied collection is not the canonical receipts collection PDA")]
+    InvalidReceiptsCollection,
+    /// 19 (0x13) - Supplied authority is not the canonical receipts authority PDA
+    #[error("Supplied authority is not the canonical receipts authority PDA")]
+    InvalidReceiptsAuthority,
+    /// 20 (0x14) - Receipts collection already exists
+    #[error("Receipts collection already exists")]
+    ReceiptsCollectionAlreadyInitialized,
     /// 21 (0x15) - Invalid receipts tree PDA derivation
     #[error("Invalid receipts tree PDA derivation")]
     InvalidReceiptsTreeDerivation,
-    /// 22 (0x16) - Supplied tree index does not match config.next_tree_index
-    #[error("Supplied tree index does not match config.next_tree_index")]
-    TreeIndexMismatch,
-    /// 23 (0x17) - Supplied collection does not match the program config's canonical receipts collection
-    #[error(
-        "Supplied collection does not match the program config's canonical receipts collection"
-    )]
-    InvalidReceiptsCollection,
-    /// 24 (0x18) - Invalid MPL Account Compression Program
+    /// 22 (0x16) - Invalid MPL Account Compression Program
     #[error("Invalid MPL Account Compression Program")]
     InvalidCompressionProgram,
-    /// 25 (0x19) - Invalid log wrapper program
-    #[error("Invalid log wrapper program")]
-    InvalidLogWrapperProgram,
-    /// 26 (0x1A) - Signer is not the program config admin
-    #[error("Signer is not the program config admin")]
-    UnauthorizedAdmin,
 }
 
 impl From<MplAgentToolsError> for ProgramError {
@@ -124,15 +110,11 @@ impl TryFrom<u32> for MplAgentToolsError {
             15 => Ok(MplAgentToolsError::InvalidBubblegumProgram),
             16 => Ok(MplAgentToolsError::ExecutiveAuthorityMismatch),
             17 => Ok(MplAgentToolsError::ReceiptUriInvalid),
-            18 => Ok(MplAgentToolsError::InvalidProgramConfigDerivation),
-            19 => Ok(MplAgentToolsError::ProgramConfigNotInitialized),
-            20 => Ok(MplAgentToolsError::ProgramConfigAlreadyInitialized),
+            18 => Ok(MplAgentToolsError::InvalidReceiptsCollection),
+            19 => Ok(MplAgentToolsError::InvalidReceiptsAuthority),
+            20 => Ok(MplAgentToolsError::ReceiptsCollectionAlreadyInitialized),
             21 => Ok(MplAgentToolsError::InvalidReceiptsTreeDerivation),
-            22 => Ok(MplAgentToolsError::TreeIndexMismatch),
-            23 => Ok(MplAgentToolsError::InvalidReceiptsCollection),
-            24 => Ok(MplAgentToolsError::InvalidCompressionProgram),
-            25 => Ok(MplAgentToolsError::InvalidLogWrapperProgram),
-            26 => Ok(MplAgentToolsError::UnauthorizedAdmin),
+            22 => Ok(MplAgentToolsError::InvalidCompressionProgram),
             _ => Err(ProgramError::InvalidArgument),
         }
     }
@@ -141,33 +123,59 @@ impl TryFrom<u32> for MplAgentToolsError {
 impl ToStr for MplAgentToolsError {
     fn to_str(&self) -> &'static str {
         match self {
-                            MplAgentToolsError::InvalidSystemProgram => "Invalid System Program",
-                            MplAgentToolsError::InvalidInstructionData => "Invalid instruction data",
-                            MplAgentToolsError::InvalidAccountData => "Invalid account data",
-                            MplAgentToolsError::InvalidMplCoreProgram => "Invalid MPL Core Program",
-                            MplAgentToolsError::InvalidCoreAsset => "Invalid Core Asset",
-                            MplAgentToolsError::ExecutiveProfileMustBeUninitialized => "Executive Profile must be uninitialized",
-                            MplAgentToolsError::InvalidExecutionDelegateRecordDerivation => "Invalid Execution Delegate Record Derivation",
-                            MplAgentToolsError::ExecutionDelegateRecordMustBeUninitialized => "Execution Delegate Record must be uninitialized",
-                            MplAgentToolsError::InvalidAgentIdentity => "Invalid Agent Identity",
-                            MplAgentToolsError::AgentIdentityNotRegistered => "Agent Identity not registered",
-                            MplAgentToolsError::AssetOwnerMustBeTheOneToDelegateExecution => "Asset owner must be the one to delegate execution",
-                            MplAgentToolsError::InvalidExecutiveProfileDerivation => "Invalid Executive Profile Derivation",
-                            MplAgentToolsError::ExecutionDelegateRecordMustBeInitialized => "Execution Delegate Record must be initialized",
-                            MplAgentToolsError::UnauthorizedRevoke => "Authority must be asset owner or executive to revoke",
-                            MplAgentToolsError::ExecutiveProfileMustBeInitialized => "Executive Profile must be initialized",
-                            MplAgentToolsError::InvalidBubblegumProgram => "Invalid Bubblegum Program",
-                            MplAgentToolsError::ExecutiveAuthorityMismatch => "Executive authority does not match the delegate record's authority",
-                            MplAgentToolsError::ReceiptUriInvalid => "Receipt URI must be non-empty and within size limits",
-                            MplAgentToolsError::InvalidProgramConfigDerivation => "Invalid Program Config PDA derivation",
-                            MplAgentToolsError::ProgramConfigNotInitialized => "Program Config is not initialized",
-                            MplAgentToolsError::ProgramConfigAlreadyInitialized => "Program Config is already initialized",
-                            MplAgentToolsError::InvalidReceiptsTreeDerivation => "Invalid receipts tree PDA derivation",
-                            MplAgentToolsError::TreeIndexMismatch => "Supplied tree index does not match config.next_tree_index",
-                            MplAgentToolsError::InvalidReceiptsCollection => "Supplied collection does not match the program config's canonical receipts collection",
-                            MplAgentToolsError::InvalidCompressionProgram => "Invalid MPL Account Compression Program",
-                            MplAgentToolsError::InvalidLogWrapperProgram => "Invalid log wrapper program",
-                            MplAgentToolsError::UnauthorizedAdmin => "Signer is not the program config admin",
-                    }
+            MplAgentToolsError::InvalidSystemProgram => "Invalid System Program",
+            MplAgentToolsError::InvalidInstructionData => "Invalid instruction data",
+            MplAgentToolsError::InvalidAccountData => "Invalid account data",
+            MplAgentToolsError::InvalidMplCoreProgram => "Invalid MPL Core Program",
+            MplAgentToolsError::InvalidCoreAsset => "Invalid Core Asset",
+            MplAgentToolsError::ExecutiveProfileMustBeUninitialized => {
+                "Executive Profile must be uninitialized"
+            }
+            MplAgentToolsError::InvalidExecutionDelegateRecordDerivation => {
+                "Invalid Execution Delegate Record Derivation"
+            }
+            MplAgentToolsError::ExecutionDelegateRecordMustBeUninitialized => {
+                "Execution Delegate Record must be uninitialized"
+            }
+            MplAgentToolsError::InvalidAgentIdentity => "Invalid Agent Identity",
+            MplAgentToolsError::AgentIdentityNotRegistered => "Agent Identity not registered",
+            MplAgentToolsError::AssetOwnerMustBeTheOneToDelegateExecution => {
+                "Asset owner must be the one to delegate execution"
+            }
+            MplAgentToolsError::InvalidExecutiveProfileDerivation => {
+                "Invalid Executive Profile Derivation"
+            }
+            MplAgentToolsError::ExecutionDelegateRecordMustBeInitialized => {
+                "Execution Delegate Record must be initialized"
+            }
+            MplAgentToolsError::UnauthorizedRevoke => {
+                "Authority must be asset owner or executive to revoke"
+            }
+            MplAgentToolsError::ExecutiveProfileMustBeInitialized => {
+                "Executive Profile must be initialized"
+            }
+            MplAgentToolsError::InvalidBubblegumProgram => "Invalid Bubblegum Program",
+            MplAgentToolsError::ExecutiveAuthorityMismatch => {
+                "Executive authority does not match the delegate record's authority"
+            }
+            MplAgentToolsError::ReceiptUriInvalid => {
+                "Receipt URI must be non-empty and within size limits"
+            }
+            MplAgentToolsError::InvalidReceiptsCollection => {
+                "Supplied collection is not the canonical receipts collection PDA"
+            }
+            MplAgentToolsError::InvalidReceiptsAuthority => {
+                "Supplied authority is not the canonical receipts authority PDA"
+            }
+            MplAgentToolsError::ReceiptsCollectionAlreadyInitialized => {
+                "Receipts collection already exists"
+            }
+            MplAgentToolsError::InvalidReceiptsTreeDerivation => {
+                "Invalid receipts tree PDA derivation"
+            }
+            MplAgentToolsError::InvalidCompressionProgram => {
+                "Invalid MPL Account Compression Program"
+            }
+        }
     }
 }

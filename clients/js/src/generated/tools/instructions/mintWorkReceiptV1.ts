@@ -22,7 +22,10 @@ import {
   u64,
   u8,
 } from '@metaplex-foundation/umi/serializers';
-import { findToolsConfigV1Pda } from '../accounts';
+import {
+  findReceiptsAuthorityPda,
+  findReceiptsCollectionPda,
+} from '../accounts';
 import {
   ResolvedAccount,
   ResolvedAccountsWithIndices,
@@ -41,14 +44,14 @@ export type MintWorkReceiptV1InstructionAccounts = {
   agentAsset: PublicKey | Pda;
   /** The client receiving the receipt (co-signs the handshake) */
   client: Signer;
-  /** Singleton program config PDA. Signs the Bubblegum CPI as tree creator/delegate via invoke_signed */
-  programConfig?: PublicKey | Pda;
+  /** Receipts authority PDA at ["receipts_authority"] — signs CPI via invoke_signed */
+  authority?: PublicKey | Pda;
   /** Bubblegum tree config PDA for the receipts tree */
   treeConfig: PublicKey | Pda;
   /** Receipts merkle tree at PDA ["receipts_tree", tree_index_le] */
   merkleTree: PublicKey | Pda;
-  /** Receipts collection (must equal program_config.collection) */
-  coreCollection: PublicKey | Pda;
+  /** Canonical receipts collection PDA at ["receipts_collection"] */
+  coreCollection?: PublicKey | Pda;
   /** Bubblegum's mpl-core CPI signer PDA */
   mplCoreCpiSigner: PublicKey | Pda;
   /** MPL Noop / log wrapper program */
@@ -144,10 +147,10 @@ export function mintWorkReceiptV1(
       isWritable: false as boolean,
       value: input.client ?? null,
     },
-    programConfig: {
+    authority: {
       index: 5,
       isWritable: false as boolean,
-      value: input.programConfig ?? null,
+      value: input.authority ?? null,
     },
     treeConfig: {
       index: 6,
@@ -203,8 +206,11 @@ export function mintWorkReceiptV1(
   if (!resolvedAccounts.payer.value) {
     resolvedAccounts.payer.value = context.payer;
   }
-  if (!resolvedAccounts.programConfig.value) {
-    resolvedAccounts.programConfig.value = findToolsConfigV1Pda(context);
+  if (!resolvedAccounts.authority.value) {
+    resolvedAccounts.authority.value = findReceiptsAuthorityPda(context);
+  }
+  if (!resolvedAccounts.coreCollection.value) {
+    resolvedAccounts.coreCollection.value = findReceiptsCollectionPda(context);
   }
   if (!resolvedAccounts.logWrapper.value) {
     resolvedAccounts.logWrapper.value = context.programs.getPublicKey(

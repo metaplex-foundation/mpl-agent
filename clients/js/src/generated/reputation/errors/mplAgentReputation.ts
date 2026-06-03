@@ -178,52 +178,46 @@ export class ReviewAlreadyExistsError extends ProgramError {
 codeToErrorMap.set(0xb, ReviewAlreadyExistsError);
 nameToErrorMap.set('ReviewAlreadyExists', ReviewAlreadyExistsError);
 
-/** InvalidProgramConfigDerivation: Invalid Program Config PDA derivation */
-export class InvalidProgramConfigDerivationError extends ProgramError {
-  override readonly name: string = 'InvalidProgramConfigDerivation';
+/** InvalidReviewsCollection: Invalid reviews collection PDA derivation */
+export class InvalidReviewsCollectionError extends ProgramError {
+  override readonly name: string = 'InvalidReviewsCollection';
 
   readonly code: number = 0xc; // 12
 
   constructor(program: Program, cause?: Error) {
-    super('Invalid Program Config PDA derivation', program, cause);
+    super('Invalid reviews collection PDA derivation', program, cause);
   }
 }
-codeToErrorMap.set(0xc, InvalidProgramConfigDerivationError);
-nameToErrorMap.set(
-  'InvalidProgramConfigDerivation',
-  InvalidProgramConfigDerivationError
-);
+codeToErrorMap.set(0xc, InvalidReviewsCollectionError);
+nameToErrorMap.set('InvalidReviewsCollection', InvalidReviewsCollectionError);
 
-/** ProgramConfigNotInitialized: Program Config not initialized */
-export class ProgramConfigNotInitializedError extends ProgramError {
-  override readonly name: string = 'ProgramConfigNotInitialized';
+/** InvalidReviewsAuthority: Invalid reviews authority PDA derivation */
+export class InvalidReviewsAuthorityError extends ProgramError {
+  override readonly name: string = 'InvalidReviewsAuthority';
 
   readonly code: number = 0xd; // 13
 
   constructor(program: Program, cause?: Error) {
-    super('Program Config not initialized', program, cause);
+    super('Invalid reviews authority PDA derivation', program, cause);
   }
 }
-codeToErrorMap.set(0xd, ProgramConfigNotInitializedError);
-nameToErrorMap.set(
-  'ProgramConfigNotInitialized',
-  ProgramConfigNotInitializedError
-);
+codeToErrorMap.set(0xd, InvalidReviewsAuthorityError);
+nameToErrorMap.set('InvalidReviewsAuthority', InvalidReviewsAuthorityError);
 
-/** ProgramConfigAlreadyInitialized: Program Config already initialized */
-export class ProgramConfigAlreadyInitializedError extends ProgramError {
-  override readonly name: string = 'ProgramConfigAlreadyInitialized';
+/** ReviewsCollectionAlreadyInitialized: Reviews collection already initialized */
+export class ReviewsCollectionAlreadyInitializedError extends ProgramError {
+  override readonly name: string = 'ReviewsCollectionAlreadyInitialized';
 
   readonly code: number = 0xe; // 14
 
   constructor(program: Program, cause?: Error) {
-    super('Program Config already initialized', program, cause);
+    super('Reviews collection already initialized', program, cause);
   }
 }
-codeToErrorMap.set(0xe, ProgramConfigAlreadyInitializedError);
+codeToErrorMap.set(0xe, ReviewsCollectionAlreadyInitializedError);
 nameToErrorMap.set(
-  'ProgramConfigAlreadyInitialized',
-  ProgramConfigAlreadyInitializedError
+  'ReviewsCollectionAlreadyInitialized',
+  ReviewsCollectionAlreadyInitializedError
 );
 
 /** InvalidReviewsTreeDerivation: Invalid reviews tree PDA derivation */
@@ -242,65 +236,22 @@ nameToErrorMap.set(
   InvalidReviewsTreeDerivationError
 );
 
-/** InvalidReviewsCollection: Supplied reviews collection does not match config.reviews_collection */
-export class InvalidReviewsCollectionError extends ProgramError {
-  override readonly name: string = 'InvalidReviewsCollection';
+/** InvalidReceiptsCollection: Supplied receipts collection is not the canonical mpl-agent-tools receipts collection PDA */
+export class InvalidReceiptsCollectionError extends ProgramError {
+  override readonly name: string = 'InvalidReceiptsCollection';
 
   readonly code: number = 0x10; // 16
 
   constructor(program: Program, cause?: Error) {
     super(
-      'Supplied reviews collection does not match config.reviews_collection',
+      'Supplied receipts collection is not the canonical mpl-agent-tools receipts collection PDA',
       program,
       cause
     );
   }
 }
-codeToErrorMap.set(0x10, InvalidReviewsCollectionError);
-nameToErrorMap.set('InvalidReviewsCollection', InvalidReviewsCollectionError);
-
-/** InvalidReceiptsCollection: Supplied receipts collection does not match config.receipts_collection */
-export class InvalidReceiptsCollectionError extends ProgramError {
-  override readonly name: string = 'InvalidReceiptsCollection';
-
-  readonly code: number = 0x11; // 17
-
-  constructor(program: Program, cause?: Error) {
-    super(
-      'Supplied receipts collection does not match config.receipts_collection',
-      program,
-      cause
-    );
-  }
-}
-codeToErrorMap.set(0x11, InvalidReceiptsCollectionError);
+codeToErrorMap.set(0x10, InvalidReceiptsCollectionError);
 nameToErrorMap.set('InvalidReceiptsCollection', InvalidReceiptsCollectionError);
-
-/** UnauthorizedAdmin: Signer is not the program config admin */
-export class UnauthorizedAdminError extends ProgramError {
-  override readonly name: string = 'UnauthorizedAdmin';
-
-  readonly code: number = 0x12; // 18
-
-  constructor(program: Program, cause?: Error) {
-    super('Signer is not the program config admin', program, cause);
-  }
-}
-codeToErrorMap.set(0x12, UnauthorizedAdminError);
-nameToErrorMap.set('UnauthorizedAdmin', UnauthorizedAdminError);
-
-/** InvalidLogWrapperProgram: Invalid log wrapper program */
-export class InvalidLogWrapperProgramError extends ProgramError {
-  override readonly name: string = 'InvalidLogWrapperProgram';
-
-  readonly code: number = 0x13; // 19
-
-  constructor(program: Program, cause?: Error) {
-    super('Invalid log wrapper program', program, cause);
-  }
-}
-codeToErrorMap.set(0x13, InvalidLogWrapperProgramError);
-nameToErrorMap.set('InvalidLogWrapperProgram', InvalidLogWrapperProgramError);
 
 /**
  * Attempts to resolve a custom program error from the provided error code.

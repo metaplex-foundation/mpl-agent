@@ -20,9 +20,10 @@ import {
   mapSerializer,
   struct,
   u32,
+  u64,
   u8,
 } from '@metaplex-foundation/umi/serializers';
-import { findToolsConfigV1Pda } from '../accounts';
+import { findReceiptsAuthorityPda } from '../accounts';
 import {
   ResolvedAccount,
   ResolvedAccountsWithIndices,
@@ -31,11 +32,11 @@ import {
 
 // Accounts.
 export type RegisterReceiptsTreeV1InstructionAccounts = {
-  /** Must match program_config.admin */
-  admin: Signer;
-  /** ProgramConfigV1 PDA */
-  programConfig?: PublicKey | Pda;
-  /** Receipts merkle tree PDA at ["receipts_tree", program_config.next_tree_index_le] */
+  /** Funds the tree rent */
+  payer?: Signer;
+  /** Receipts authority PDA at ["receipts_authority"] — set as tree_creator */
+  authority?: PublicKey | Pda;
+  /** Receipts merkle tree PDA at ["receipts_tree", tree_index_le] */
   merkleTree: PublicKey | Pda;
   /** Bubblegum tree config PDA (derived from merkle_tree) */
   treeConfig: PublicKey | Pda;
@@ -53,12 +54,15 @@ export type RegisterReceiptsTreeV1InstructionAccounts = {
 export type RegisterReceiptsTreeV1InstructionData = {
   discriminator: number;
   pad: Array<number>;
+  treeIndex: bigint;
   maxDepth: number;
   maxBufferSize: number;
   canopyDepth: number;
+  pad2: Array<number>;
 };
 
 export type RegisterReceiptsTreeV1InstructionDataArgs = {
+  treeIndex: number | bigint;
   maxDepth: number;
   maxBufferSize: number;
   canopyDepth: number;
@@ -76,14 +80,21 @@ export function getRegisterReceiptsTreeV1InstructionDataSerializer(): Serializer
     struct<RegisterReceiptsTreeV1InstructionData>(
       [
         ['discriminator', u8()],
-        ['pad', array(u8(), { size: 3 })],
+        ['pad', array(u8(), { size: 7 })],
+        ['treeIndex', u64()],
         ['maxDepth', u32()],
         ['maxBufferSize', u32()],
         ['canopyDepth', u32()],
+        ['pad2', array(u8(), { size: 4 })],
       ],
       { description: 'RegisterReceiptsTreeV1InstructionData' }
     ),
-    (value) => ({ ...value, discriminator: 5, pad: [0, 0, 0] })
+    (value) => ({
+      ...value,
+      discriminator: 5,
+      pad: [0, 0, 0, 0, 0, 0, 0],
+      pad2: [0, 0, 0, 0],
+    })
   ) as Serializer<
     RegisterReceiptsTreeV1InstructionDataArgs,
     RegisterReceiptsTreeV1InstructionData
@@ -99,7 +110,7 @@ export const registerReceiptsTreeV1InstructionDiscriminator = 5;
 
 // Instruction.
 export function registerReceiptsTreeV1(
-  context: Pick<Context, 'eddsa' | 'programs'>,
+  context: Pick<Context, 'eddsa' | 'payer' | 'programs'>,
   input: RegisterReceiptsTreeV1InstructionAccounts &
     RegisterReceiptsTreeV1InstructionArgs
 ): TransactionBuilder {
@@ -111,15 +122,15 @@ export function registerReceiptsTreeV1(
 
   // Accounts.
   const resolvedAccounts = {
-    admin: {
+    payer: {
       index: 0,
       isWritable: true as boolean,
-      value: input.admin ?? null,
+      value: input.payer ?? null,
     },
-    programConfig: {
+    authority: {
       index: 1,
-      isWritable: true as boolean,
-      value: input.programConfig ?? null,
+      isWritable: false as boolean,
+      value: input.authority ?? null,
     },
     merkleTree: {
       index: 2,
@@ -157,8 +168,11 @@ export function registerReceiptsTreeV1(
   const resolvedArgs: RegisterReceiptsTreeV1InstructionArgs = { ...input };
 
   // Default values.
-  if (!resolvedAccounts.programConfig.value) {
-    resolvedAccounts.programConfig.value = findToolsConfigV1Pda(context);
+  if (!resolvedAccounts.payer.value) {
+    resolvedAccounts.payer.value = context.payer;
+  }
+  if (!resolvedAccounts.authority.value) {
+    resolvedAccounts.authority.value = findReceiptsAuthorityPda(context);
   }
   if (!resolvedAccounts.logWrapper.value) {
     resolvedAccounts.logWrapper.value = context.programs.getPublicKey(

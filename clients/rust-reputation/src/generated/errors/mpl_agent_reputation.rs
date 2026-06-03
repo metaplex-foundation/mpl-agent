@@ -47,30 +47,23 @@ pub enum MplAgentReputationError {
     /// 11 (0xB) - A review already exists for this work receipt
     #[error("A review already exists for this work receipt")]
     ReviewAlreadyExists,
-    /// 12 (0xC) - Invalid Program Config PDA derivation
-    #[error("Invalid Program Config PDA derivation")]
-    InvalidProgramConfigDerivation,
-    /// 13 (0xD) - Program Config not initialized
-    #[error("Program Config not initialized")]
-    ProgramConfigNotInitialized,
-    /// 14 (0xE) - Program Config already initialized
-    #[error("Program Config already initialized")]
-    ProgramConfigAlreadyInitialized,
+    /// 12 (0xC) - Invalid reviews collection PDA derivation
+    #[error("Invalid reviews collection PDA derivation")]
+    InvalidReviewsCollection,
+    /// 13 (0xD) - Invalid reviews authority PDA derivation
+    #[error("Invalid reviews authority PDA derivation")]
+    InvalidReviewsAuthority,
+    /// 14 (0xE) - Reviews collection already initialized
+    #[error("Reviews collection already initialized")]
+    ReviewsCollectionAlreadyInitialized,
     /// 15 (0xF) - Invalid reviews tree PDA derivation
     #[error("Invalid reviews tree PDA derivation")]
     InvalidReviewsTreeDerivation,
-    /// 16 (0x10) - Supplied reviews collection does not match config.reviews_collection
-    #[error("Supplied reviews collection does not match config.reviews_collection")]
-    InvalidReviewsCollection,
-    /// 17 (0x11) - Supplied receipts collection does not match config.receipts_collection
-    #[error("Supplied receipts collection does not match config.receipts_collection")]
+    /// 16 (0x10) - Supplied receipts collection is not the canonical mpl-agent-tools receipts collection PDA
+    #[error(
+        "Supplied receipts collection is not the canonical mpl-agent-tools receipts collection PDA"
+    )]
     InvalidReceiptsCollection,
-    /// 18 (0x12) - Signer is not the program config admin
-    #[error("Signer is not the program config admin")]
-    UnauthorizedAdmin,
-    /// 19 (0x13) - Invalid log wrapper program
-    #[error("Invalid log wrapper program")]
-    InvalidLogWrapperProgram,
 }
 
 impl From<MplAgentReputationError> for ProgramError {
@@ -95,14 +88,11 @@ impl TryFrom<u32> for MplAgentReputationError {
             9 => Ok(MplAgentReputationError::InvalidBubblegumProgram),
             10 => Ok(MplAgentReputationError::InvalidCompressionProgram),
             11 => Ok(MplAgentReputationError::ReviewAlreadyExists),
-            12 => Ok(MplAgentReputationError::InvalidProgramConfigDerivation),
-            13 => Ok(MplAgentReputationError::ProgramConfigNotInitialized),
-            14 => Ok(MplAgentReputationError::ProgramConfigAlreadyInitialized),
+            12 => Ok(MplAgentReputationError::InvalidReviewsCollection),
+            13 => Ok(MplAgentReputationError::InvalidReviewsAuthority),
+            14 => Ok(MplAgentReputationError::ReviewsCollectionAlreadyInitialized),
             15 => Ok(MplAgentReputationError::InvalidReviewsTreeDerivation),
-            16 => Ok(MplAgentReputationError::InvalidReviewsCollection),
-            17 => Ok(MplAgentReputationError::InvalidReceiptsCollection),
-            18 => Ok(MplAgentReputationError::UnauthorizedAdmin),
-            19 => Ok(MplAgentReputationError::InvalidLogWrapperProgram),
+            16 => Ok(MplAgentReputationError::InvalidReceiptsCollection),
             _ => Err(ProgramError::InvalidArgument),
         }
     }
@@ -111,46 +101,23 @@ impl TryFrom<u32> for MplAgentReputationError {
 impl ToStr for MplAgentReputationError {
     fn to_str(&self) -> &'static str {
         match self {
-            MplAgentReputationError::InvalidSystemProgram => "Invalid System Program",
-            MplAgentReputationError::InvalidInstructionData => "Invalid instruction data",
-            MplAgentReputationError::InvalidAccountData => "Invalid account data",
-            MplAgentReputationError::InvalidMplCoreProgram => "Invalid MPL Core Program",
-            MplAgentReputationError::InvalidCoreAsset => "Invalid Core Asset",
-            MplAgentReputationError::AgentReputationAlreadyRegistered => {
-                "Agent Reputation already registered"
-            }
-            MplAgentReputationError::InvalidReviewRating => "Invalid review rating (must be 1..=5)",
-            MplAgentReputationError::FeedbackUriInvalid => {
-                "Feedback URI must be non-empty and within size limits"
-            }
-            MplAgentReputationError::LeafOwnerMismatch => {
-                "Leaf owner does not match the reviewed asset owner"
-            }
-            MplAgentReputationError::InvalidBubblegumProgram => "Invalid Bubblegum Program",
-            MplAgentReputationError::InvalidCompressionProgram => "Invalid Compression Program",
-            MplAgentReputationError::ReviewAlreadyExists => {
-                "A review already exists for this work receipt"
-            }
-            MplAgentReputationError::InvalidProgramConfigDerivation => {
-                "Invalid Program Config PDA derivation"
-            }
-            MplAgentReputationError::ProgramConfigNotInitialized => {
-                "Program Config not initialized"
-            }
-            MplAgentReputationError::ProgramConfigAlreadyInitialized => {
-                "Program Config already initialized"
-            }
-            MplAgentReputationError::InvalidReviewsTreeDerivation => {
-                "Invalid reviews tree PDA derivation"
-            }
-            MplAgentReputationError::InvalidReviewsCollection => {
-                "Supplied reviews collection does not match config.reviews_collection"
-            }
-            MplAgentReputationError::InvalidReceiptsCollection => {
-                "Supplied receipts collection does not match config.receipts_collection"
-            }
-            MplAgentReputationError::UnauthorizedAdmin => "Signer is not the program config admin",
-            MplAgentReputationError::InvalidLogWrapperProgram => "Invalid log wrapper program",
-        }
+                            MplAgentReputationError::InvalidSystemProgram => "Invalid System Program",
+                            MplAgentReputationError::InvalidInstructionData => "Invalid instruction data",
+                            MplAgentReputationError::InvalidAccountData => "Invalid account data",
+                            MplAgentReputationError::InvalidMplCoreProgram => "Invalid MPL Core Program",
+                            MplAgentReputationError::InvalidCoreAsset => "Invalid Core Asset",
+                            MplAgentReputationError::AgentReputationAlreadyRegistered => "Agent Reputation already registered",
+                            MplAgentReputationError::InvalidReviewRating => "Invalid review rating (must be 1..=5)",
+                            MplAgentReputationError::FeedbackUriInvalid => "Feedback URI must be non-empty and within size limits",
+                            MplAgentReputationError::LeafOwnerMismatch => "Leaf owner does not match the reviewed asset owner",
+                            MplAgentReputationError::InvalidBubblegumProgram => "Invalid Bubblegum Program",
+                            MplAgentReputationError::InvalidCompressionProgram => "Invalid Compression Program",
+                            MplAgentReputationError::ReviewAlreadyExists => "A review already exists for this work receipt",
+                            MplAgentReputationError::InvalidReviewsCollection => "Invalid reviews collection PDA derivation",
+                            MplAgentReputationError::InvalidReviewsAuthority => "Invalid reviews authority PDA derivation",
+                            MplAgentReputationError::ReviewsCollectionAlreadyInitialized => "Reviews collection already initialized",
+                            MplAgentReputationError::InvalidReviewsTreeDerivation => "Invalid reviews tree PDA derivation",
+                            MplAgentReputationError::InvalidReceiptsCollection => "Supplied receipts collection is not the canonical mpl-agent-tools receipts collection PDA",
+                    }
     }
 }

@@ -236,11 +236,11 @@
           ]
         },
         {
-          "name": "programConfig",
+          "name": "authority",
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Singleton program config PDA. Signs the Bubblegum CPI as tree creator/delegate via invoke_signed"
+            "Receipts authority PDA at [\"receipts_authority\"] — signs CPI via invoke_signed"
           ]
         },
         {
@@ -264,7 +264,7 @@
           "isMut": true,
           "isSigner": false,
           "docs": [
-            "Receipts collection (must equal program_config.collection)"
+            "Canonical receipts collection PDA at [\"receipts_collection\"]"
           ]
         },
         {
@@ -330,22 +330,14 @@
       }
     },
     {
-      "name": "InitializeToolsConfigV1",
+      "name": "CreateReceiptsCollectionV1",
       "accounts": [
         {
-          "name": "admin",
+          "name": "payer",
           "isMut": true,
           "isSigner": true,
           "docs": [
-            "Bootstrapping admin; captured as the config authority for future tree registration"
-          ]
-        },
-        {
-          "name": "programConfig",
-          "isMut": true,
-          "isSigner": false,
-          "docs": [
-            "ProgramConfigV1 PDA at [\"program_config\"]"
+            "Funds the collection's rent"
           ]
         },
         {
@@ -354,6 +346,14 @@
           "isSigner": false,
           "docs": [
             "Receipts collection PDA at [\"receipts_collection\"]"
+          ]
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Receipts authority PDA at [\"receipts_authority\"] — becomes the collection's update_authority"
           ]
         },
         {
@@ -375,9 +375,9 @@
       ],
       "args": [
         {
-          "name": "initializeToolsConfigV1Args",
+          "name": "createReceiptsCollectionV1Args",
           "type": {
-            "defined": "InitializeToolsConfigV1Args"
+            "defined": "CreateReceiptsCollectionV1Args"
           }
         }
       ],
@@ -390,19 +390,19 @@
       "name": "RegisterReceiptsTreeV1",
       "accounts": [
         {
-          "name": "admin",
+          "name": "payer",
           "isMut": true,
           "isSigner": true,
           "docs": [
-            "Must match program_config.admin"
+            "Funds the tree rent"
           ]
         },
         {
-          "name": "programConfig",
-          "isMut": true,
+          "name": "authority",
+          "isMut": false,
           "isSigner": false,
           "docs": [
-            "ProgramConfigV1 PDA"
+            "Receipts authority PDA at [\"receipts_authority\"] — set as tree_creator"
           ]
         },
         {
@@ -410,7 +410,7 @@
           "isMut": true,
           "isSigner": false,
           "docs": [
-            "Receipts merkle tree PDA at [\"receipts_tree\", program_config.next_tree_index_le]"
+            "Receipts merkle tree PDA at [\"receipts_tree\", tree_index_le]"
           ]
         },
         {
@@ -546,56 +546,11 @@
           }
         ]
       }
-    },
-    {
-      "name": "ToolsConfigV1",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "key",
-            "type": {
-              "defined": "Key"
-            },
-            "attrs": [
-              "idl-type"
-            ]
-          },
-          {
-            "name": "bump",
-            "type": "u8"
-          },
-          {
-            "name": "padding",
-            "type": {
-              "array": [
-                "u8",
-                6
-              ]
-            },
-            "attrs": [
-              "padding"
-            ]
-          },
-          {
-            "name": "admin",
-            "type": "publicKey"
-          },
-          {
-            "name": "collection",
-            "type": "publicKey"
-          },
-          {
-            "name": "nextTreeIndex",
-            "type": "u64"
-          }
-        ]
-      }
     }
   ],
   "types": [
     {
-      "name": "DelegateExecutionV1Args",
+      "name": "CreateReceiptsCollectionV1Args",
       "type": {
         "kind": "struct",
         "fields": [
@@ -615,7 +570,7 @@
       }
     },
     {
-      "name": "InitializeToolsConfigV1Args",
+      "name": "DelegateExecutionV1Args",
       "type": {
         "kind": "struct",
         "fields": [
@@ -680,12 +635,16 @@
             "type": {
               "array": [
                 "u8",
-                3
+                7
               ]
             },
             "attrs": [
               "padding"
             ]
+          },
+          {
+            "name": "treeIndex",
+            "type": "u64"
           },
           {
             "name": "maxDepth",
@@ -698,6 +657,18 @@
           {
             "name": "canopyDepth",
             "type": "u32"
+          },
+          {
+            "name": "pad2",
+            "type": {
+              "array": [
+                "u8",
+                4
+              ]
+            },
+            "attrs": [
+              "padding"
+            ]
           }
         ]
       }
@@ -735,9 +706,6 @@
           },
           {
             "name": "ExecutionDelegateRecordV1"
-          },
-          {
-            "name": "ToolsConfigV1"
           }
         ]
       }
@@ -836,18 +804,18 @@
     },
     {
       "code": 18,
-      "name": "InvalidProgramConfigDerivation",
-      "msg": "Invalid Program Config PDA derivation"
+      "name": "InvalidReceiptsCollection",
+      "msg": "Supplied collection is not the canonical receipts collection PDA"
     },
     {
       "code": 19,
-      "name": "ProgramConfigNotInitialized",
-      "msg": "Program Config is not initialized"
+      "name": "InvalidReceiptsAuthority",
+      "msg": "Supplied authority is not the canonical receipts authority PDA"
     },
     {
       "code": 20,
-      "name": "ProgramConfigAlreadyInitialized",
-      "msg": "Program Config is already initialized"
+      "name": "ReceiptsCollectionAlreadyInitialized",
+      "msg": "Receipts collection already exists"
     },
     {
       "code": 21,
@@ -856,28 +824,8 @@
     },
     {
       "code": 22,
-      "name": "TreeIndexMismatch",
-      "msg": "Supplied tree index does not match config.next_tree_index"
-    },
-    {
-      "code": 23,
-      "name": "InvalidReceiptsCollection",
-      "msg": "Supplied collection does not match the program config's canonical receipts collection"
-    },
-    {
-      "code": 24,
       "name": "InvalidCompressionProgram",
       "msg": "Invalid MPL Account Compression Program"
-    },
-    {
-      "code": 25,
-      "name": "InvalidLogWrapperProgram",
-      "msg": "Invalid log wrapper program"
-    },
-    {
-      "code": 26,
-      "name": "UnauthorizedAdmin",
-      "msg": "Signer is not the program config admin"
     }
   ],
   "metadata": {

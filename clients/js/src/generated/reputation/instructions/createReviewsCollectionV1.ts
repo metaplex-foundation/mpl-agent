@@ -21,7 +21,7 @@ import {
   struct,
   u8,
 } from '@metaplex-foundation/umi/serializers';
-import { findToolsConfigV1Pda } from '../accounts';
+import { findReviewsAuthorityPda, findReviewsCollectionPda } from '../accounts';
 import {
   ResolvedAccount,
   ResolvedAccountsWithIndices,
@@ -29,13 +29,13 @@ import {
 } from '../shared';
 
 // Accounts.
-export type InitializeToolsConfigV1InstructionAccounts = {
-  /** Bootstrapping admin; captured as the config authority for future tree registration */
-  admin: Signer;
-  /** ProgramConfigV1 PDA at ["program_config"] */
-  programConfig?: PublicKey | Pda;
-  /** Receipts collection PDA at ["receipts_collection"] */
-  collection: PublicKey | Pda;
+export type CreateReviewsCollectionV1InstructionAccounts = {
+  /** Funds the collection's rent */
+  payer?: Signer;
+  /** Reviews collection PDA at ["reviews_collection"] */
+  collection?: PublicKey | Pda;
+  /** Reviews authority PDA at ["reviews_authority"] — becomes the collection's update_authority */
+  authority?: PublicKey | Pda;
   /** The MPL Core program */
   mplCoreProgram?: PublicKey | Pda;
   /** The system program */
@@ -43,66 +43,66 @@ export type InitializeToolsConfigV1InstructionAccounts = {
 };
 
 // Data.
-export type InitializeToolsConfigV1InstructionData = {
+export type CreateReviewsCollectionV1InstructionData = {
   discriminator: number;
   padding: Array<number>;
 };
 
-export type InitializeToolsConfigV1InstructionDataArgs = {};
+export type CreateReviewsCollectionV1InstructionDataArgs = {};
 
-export function getInitializeToolsConfigV1InstructionDataSerializer(): Serializer<
-  InitializeToolsConfigV1InstructionDataArgs,
-  InitializeToolsConfigV1InstructionData
+export function getCreateReviewsCollectionV1InstructionDataSerializer(): Serializer<
+  CreateReviewsCollectionV1InstructionDataArgs,
+  CreateReviewsCollectionV1InstructionData
 > {
   return mapSerializer<
-    InitializeToolsConfigV1InstructionDataArgs,
+    CreateReviewsCollectionV1InstructionDataArgs,
     any,
-    InitializeToolsConfigV1InstructionData
+    CreateReviewsCollectionV1InstructionData
   >(
-    struct<InitializeToolsConfigV1InstructionData>(
+    struct<CreateReviewsCollectionV1InstructionData>(
       [
         ['discriminator', u8()],
         ['padding', array(u8(), { size: 7 })],
       ],
-      { description: 'InitializeToolsConfigV1InstructionData' }
+      { description: 'CreateReviewsCollectionV1InstructionData' }
     ),
-    (value) => ({ ...value, discriminator: 4, padding: [0, 0, 0, 0, 0, 0, 0] })
+    (value) => ({ ...value, discriminator: 2, padding: [0, 0, 0, 0, 0, 0, 0] })
   ) as Serializer<
-    InitializeToolsConfigV1InstructionDataArgs,
-    InitializeToolsConfigV1InstructionData
+    CreateReviewsCollectionV1InstructionDataArgs,
+    CreateReviewsCollectionV1InstructionData
   >;
 }
 
 // Instruction discriminator.
-export const initializeToolsConfigV1InstructionDiscriminator = 4;
+export const createReviewsCollectionV1InstructionDiscriminator = 2;
 
 // Instruction.
-export function initializeToolsConfigV1(
-  context: Pick<Context, 'eddsa' | 'programs'>,
-  input: InitializeToolsConfigV1InstructionAccounts
+export function createReviewsCollectionV1(
+  context: Pick<Context, 'eddsa' | 'payer' | 'programs'>,
+  input: CreateReviewsCollectionV1InstructionAccounts
 ): TransactionBuilder {
   // Program ID.
   const programId = context.programs.getPublicKey(
-    'mplAgentTools',
-    'TLREGni9ZEyGC3vnPZtqUh95xQ8oPqJSvNjvB7FGK8S'
+    'mplAgentReputation',
+    'REPREG5c1gPHuHukEyANpksLdHFaJCiTrm6zJgNhRZR'
   );
 
   // Accounts.
   const resolvedAccounts = {
-    admin: {
+    payer: {
       index: 0,
       isWritable: true as boolean,
-      value: input.admin ?? null,
-    },
-    programConfig: {
-      index: 1,
-      isWritable: true as boolean,
-      value: input.programConfig ?? null,
+      value: input.payer ?? null,
     },
     collection: {
-      index: 2,
+      index: 1,
       isWritable: true as boolean,
       value: input.collection ?? null,
+    },
+    authority: {
+      index: 2,
+      isWritable: false as boolean,
+      value: input.authority ?? null,
     },
     mplCoreProgram: {
       index: 3,
@@ -117,8 +117,14 @@ export function initializeToolsConfigV1(
   } satisfies ResolvedAccountsWithIndices;
 
   // Default values.
-  if (!resolvedAccounts.programConfig.value) {
-    resolvedAccounts.programConfig.value = findToolsConfigV1Pda(context);
+  if (!resolvedAccounts.payer.value) {
+    resolvedAccounts.payer.value = context.payer;
+  }
+  if (!resolvedAccounts.collection.value) {
+    resolvedAccounts.collection.value = findReviewsCollectionPda(context);
+  }
+  if (!resolvedAccounts.authority.value) {
+    resolvedAccounts.authority.value = findReviewsAuthorityPda(context);
   }
   if (!resolvedAccounts.mplCoreProgram.value) {
     resolvedAccounts.mplCoreProgram.value = context.programs.getPublicKey(
@@ -148,9 +154,8 @@ export function initializeToolsConfigV1(
   );
 
   // Data.
-  const data = getInitializeToolsConfigV1InstructionDataSerializer().serialize(
-    {}
-  );
+  const data =
+    getCreateReviewsCollectionV1InstructionDataSerializer().serialize({});
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

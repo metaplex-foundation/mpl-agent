@@ -3309,6 +3309,7 @@ version = "0.1.0"
 dependencies = [
  "borsh 1.6.1",
  "bytemuck",
+ "mpl-agent-tools",
  "mpl-bubblegum",
  "mpl-core",
  "mpl-utils",

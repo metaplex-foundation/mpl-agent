@@ -24,7 +24,7 @@ import {
   u64,
   u8,
 } from '@metaplex-foundation/umi/serializers';
-import { findReviewsConfigV1Pda } from '../accounts';
+import { findReviewsAuthorityPda, findReviewsCollectionPda } from '../accounts';
 import {
   ResolvedAccount,
   ResolvedAccountsWithIndices,
@@ -41,14 +41,14 @@ export type LeaveReviewV1InstructionAccounts = {
   asset: PublicKey | Pda;
   /** The owner of the new review cNFT leaf - must equal asset.owner */
   leafOwner: PublicKey | Pda;
-  /** Singleton ReviewsConfigV1 PDA. Signs the Bubblegum CPI as tree creator/delegate via invoke_signed */
-  programConfig?: PublicKey | Pda;
+  /** Reviews authority PDA at ["reviews_authority"] — signs the Bubblegum CPI as tree_creator/collection_authority via invoke_signed */
+  authority?: PublicKey | Pda;
   /** Bubblegum tree config PDA for the reviews tree */
   treeConfig: PublicKey | Pda;
   /** Reviews merkle tree at PDA ["reviews_tree", reviews_tree_index_le] */
   merkleTree: PublicKey | Pda;
-  /** Reviews collection (must equal program_config.reviews_collection) */
-  coreCollection: PublicKey | Pda;
+  /** Reviews collection PDA at ["reviews_collection"] */
+  coreCollection?: PublicKey | Pda;
   /** Bubblegum's mpl-core CPI signer PDA */
   mplCoreCpiSigner: PublicKey | Pda;
   /** MPL Noop / log wrapper program */
@@ -61,7 +61,7 @@ export type LeaveReviewV1InstructionAccounts = {
   bubblegumProgram?: PublicKey | Pda;
   /** Receipts Bubblegum merkle tree holding the receipt being referenced */
   receiptsMerkleTree: PublicKey | Pda;
-  /** Receipts collection (must equal program_config.receipts_collection) */
+  /** Canonical receipts collection PDA from mpl-agent-tools at ["receipts_collection"] */
   receiptsCollection: PublicKey | Pda;
   /** ReviewRecordV1 PDA seeded with the receipt's bubblegum asset id - idempotency gate */
   reviewRecord: PublicKey | Pda;
@@ -165,10 +165,10 @@ export function leaveReviewV1(
       isWritable: false as boolean,
       value: input.leafOwner ?? null,
     },
-    programConfig: {
+    authority: {
       index: 4,
       isWritable: false as boolean,
-      value: input.programConfig ?? null,
+      value: input.authority ?? null,
     },
     treeConfig: {
       index: 5,
@@ -239,8 +239,11 @@ export function leaveReviewV1(
   if (!resolvedAccounts.payer.value) {
     resolvedAccounts.payer.value = context.payer;
   }
-  if (!resolvedAccounts.programConfig.value) {
-    resolvedAccounts.programConfig.value = findReviewsConfigV1Pda(context);
+  if (!resolvedAccounts.authority.value) {
+    resolvedAccounts.authority.value = findReviewsAuthorityPda(context);
+  }
+  if (!resolvedAccounts.coreCollection.value) {
+    resolvedAccounts.coreCollection.value = findReviewsCollectionPda(context);
   }
   if (!resolvedAccounts.logWrapper.value) {
     resolvedAccounts.logWrapper.value = context.programs.getPublicKey(

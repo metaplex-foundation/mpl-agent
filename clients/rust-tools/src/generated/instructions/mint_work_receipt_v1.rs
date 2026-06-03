@@ -22,13 +22,13 @@ pub struct MintWorkReceiptV1 {
     pub agent_asset: solana_program::pubkey::Pubkey,
     /// The client receiving the receipt (co-signs the handshake)
     pub client: solana_program::pubkey::Pubkey,
-    /// Singleton program config PDA. Signs the Bubblegum CPI as tree creator/delegate via invoke_signed
-    pub program_config: solana_program::pubkey::Pubkey,
+    /// Receipts authority PDA at ["receipts_authority"] — signs CPI via invoke_signed
+    pub authority: solana_program::pubkey::Pubkey,
     /// Bubblegum tree config PDA for the receipts tree
     pub tree_config: solana_program::pubkey::Pubkey,
     /// Receipts merkle tree at PDA ["receipts_tree", tree_index_le]
     pub merkle_tree: solana_program::pubkey::Pubkey,
-    /// Receipts collection (must equal program_config.collection)
+    /// Canonical receipts collection PDA at ["receipts_collection"]
     pub core_collection: solana_program::pubkey::Pubkey,
     /// Bubblegum's mpl-core CPI signer PDA
     pub mpl_core_cpi_signer: solana_program::pubkey::Pubkey,
@@ -78,7 +78,7 @@ impl MintWorkReceiptV1 {
             true,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            self.program_config,
+            self.authority,
             false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
@@ -160,7 +160,7 @@ pub struct MintWorkReceiptV1InstructionArgs {
 ///   2. `[]` execution_delegate_record
 ///   3. `[]` agent_asset
 ///   4. `[signer]` client
-///   5. `[]` program_config
+///   5. `[]` authority
 ///   6. `[writable]` tree_config
 ///   7. `[writable]` merkle_tree
 ///   8. `[writable]` core_collection
@@ -177,7 +177,7 @@ pub struct MintWorkReceiptV1Builder {
     execution_delegate_record: Option<solana_program::pubkey::Pubkey>,
     agent_asset: Option<solana_program::pubkey::Pubkey>,
     client: Option<solana_program::pubkey::Pubkey>,
-    program_config: Option<solana_program::pubkey::Pubkey>,
+    authority: Option<solana_program::pubkey::Pubkey>,
     tree_config: Option<solana_program::pubkey::Pubkey>,
     merkle_tree: Option<solana_program::pubkey::Pubkey>,
     core_collection: Option<solana_program::pubkey::Pubkey>,
@@ -232,10 +232,10 @@ impl MintWorkReceiptV1Builder {
         self.client = Some(client);
         self
     }
-    /// Singleton program config PDA. Signs the Bubblegum CPI as tree creator/delegate via invoke_signed
+    /// Receipts authority PDA at ["receipts_authority"] — signs CPI via invoke_signed
     #[inline(always)]
-    pub fn program_config(&mut self, program_config: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.program_config = Some(program_config);
+    pub fn authority(&mut self, authority: solana_program::pubkey::Pubkey) -> &mut Self {
+        self.authority = Some(authority);
         self
     }
     /// Bubblegum tree config PDA for the receipts tree
@@ -250,7 +250,7 @@ impl MintWorkReceiptV1Builder {
         self.merkle_tree = Some(merkle_tree);
         self
     }
-    /// Receipts collection (must equal program_config.collection)
+    /// Canonical receipts collection PDA at ["receipts_collection"]
     #[inline(always)]
     pub fn core_collection(
         &mut self,
@@ -352,7 +352,7 @@ impl MintWorkReceiptV1Builder {
                 .expect("execution_delegate_record is not set"),
             agent_asset: self.agent_asset.expect("agent_asset is not set"),
             client: self.client.expect("client is not set"),
-            program_config: self.program_config.expect("program_config is not set"),
+            authority: self.authority.expect("authority is not set"),
             tree_config: self.tree_config.expect("tree_config is not set"),
             merkle_tree: self.merkle_tree.expect("merkle_tree is not set"),
             core_collection: self.core_collection.expect("core_collection is not set"),
@@ -396,13 +396,13 @@ pub struct MintWorkReceiptV1CpiAccounts<'a, 'b> {
     pub agent_asset: &'b solana_program::account_info::AccountInfo<'a>,
     /// The client receiving the receipt (co-signs the handshake)
     pub client: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Singleton program config PDA. Signs the Bubblegum CPI as tree creator/delegate via invoke_signed
-    pub program_config: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Receipts authority PDA at ["receipts_authority"] — signs CPI via invoke_signed
+    pub authority: &'b solana_program::account_info::AccountInfo<'a>,
     /// Bubblegum tree config PDA for the receipts tree
     pub tree_config: &'b solana_program::account_info::AccountInfo<'a>,
     /// Receipts merkle tree at PDA ["receipts_tree", tree_index_le]
     pub merkle_tree: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Receipts collection (must equal program_config.collection)
+    /// Canonical receipts collection PDA at ["receipts_collection"]
     pub core_collection: &'b solana_program::account_info::AccountInfo<'a>,
     /// Bubblegum's mpl-core CPI signer PDA
     pub mpl_core_cpi_signer: &'b solana_program::account_info::AccountInfo<'a>,
@@ -432,13 +432,13 @@ pub struct MintWorkReceiptV1Cpi<'a, 'b> {
     pub agent_asset: &'b solana_program::account_info::AccountInfo<'a>,
     /// The client receiving the receipt (co-signs the handshake)
     pub client: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Singleton program config PDA. Signs the Bubblegum CPI as tree creator/delegate via invoke_signed
-    pub program_config: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Receipts authority PDA at ["receipts_authority"] — signs CPI via invoke_signed
+    pub authority: &'b solana_program::account_info::AccountInfo<'a>,
     /// Bubblegum tree config PDA for the receipts tree
     pub tree_config: &'b solana_program::account_info::AccountInfo<'a>,
     /// Receipts merkle tree at PDA ["receipts_tree", tree_index_le]
     pub merkle_tree: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Receipts collection (must equal program_config.collection)
+    /// Canonical receipts collection PDA at ["receipts_collection"]
     pub core_collection: &'b solana_program::account_info::AccountInfo<'a>,
     /// Bubblegum's mpl-core CPI signer PDA
     pub mpl_core_cpi_signer: &'b solana_program::account_info::AccountInfo<'a>,
@@ -469,7 +469,7 @@ impl<'a, 'b> MintWorkReceiptV1Cpi<'a, 'b> {
             execution_delegate_record: accounts.execution_delegate_record,
             agent_asset: accounts.agent_asset,
             client: accounts.client,
-            program_config: accounts.program_config,
+            authority: accounts.authority,
             tree_config: accounts.tree_config,
             merkle_tree: accounts.merkle_tree,
             core_collection: accounts.core_collection,
@@ -537,7 +537,7 @@ impl<'a, 'b> MintWorkReceiptV1Cpi<'a, 'b> {
             true,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            *self.program_config.key,
+            *self.authority.key,
             false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
@@ -599,7 +599,7 @@ impl<'a, 'b> MintWorkReceiptV1Cpi<'a, 'b> {
         account_infos.push(self.execution_delegate_record.clone());
         account_infos.push(self.agent_asset.clone());
         account_infos.push(self.client.clone());
-        account_infos.push(self.program_config.clone());
+        account_infos.push(self.authority.clone());
         account_infos.push(self.tree_config.clone());
         account_infos.push(self.merkle_tree.clone());
         account_infos.push(self.core_collection.clone());
@@ -630,7 +630,7 @@ impl<'a, 'b> MintWorkReceiptV1Cpi<'a, 'b> {
 ///   2. `[]` execution_delegate_record
 ///   3. `[]` agent_asset
 ///   4. `[signer]` client
-///   5. `[]` program_config
+///   5. `[]` authority
 ///   6. `[writable]` tree_config
 ///   7. `[writable]` merkle_tree
 ///   8. `[writable]` core_collection
@@ -653,7 +653,7 @@ impl<'a, 'b> MintWorkReceiptV1CpiBuilder<'a, 'b> {
             execution_delegate_record: None,
             agent_asset: None,
             client: None,
-            program_config: None,
+            authority: None,
             tree_config: None,
             merkle_tree: None,
             core_collection: None,
@@ -711,13 +711,13 @@ impl<'a, 'b> MintWorkReceiptV1CpiBuilder<'a, 'b> {
         self.instruction.client = Some(client);
         self
     }
-    /// Singleton program config PDA. Signs the Bubblegum CPI as tree creator/delegate via invoke_signed
+    /// Receipts authority PDA at ["receipts_authority"] — signs CPI via invoke_signed
     #[inline(always)]
-    pub fn program_config(
+    pub fn authority(
         &mut self,
-        program_config: &'b solana_program::account_info::AccountInfo<'a>,
+        authority: &'b solana_program::account_info::AccountInfo<'a>,
     ) -> &mut Self {
-        self.instruction.program_config = Some(program_config);
+        self.instruction.authority = Some(authority);
         self
     }
     /// Bubblegum tree config PDA for the receipts tree
@@ -738,7 +738,7 @@ impl<'a, 'b> MintWorkReceiptV1CpiBuilder<'a, 'b> {
         self.instruction.merkle_tree = Some(merkle_tree);
         self
     }
-    /// Receipts collection (must equal program_config.collection)
+    /// Canonical receipts collection PDA at ["receipts_collection"]
     #[inline(always)]
     pub fn core_collection(
         &mut self,
@@ -886,10 +886,7 @@ impl<'a, 'b> MintWorkReceiptV1CpiBuilder<'a, 'b> {
 
             client: self.instruction.client.expect("client is not set"),
 
-            program_config: self
-                .instruction
-                .program_config
-                .expect("program_config is not set"),
+            authority: self.instruction.authority.expect("authority is not set"),
 
             tree_config: self
                 .instruction
@@ -951,7 +948,7 @@ struct MintWorkReceiptV1CpiBuilderInstruction<'a, 'b> {
     execution_delegate_record: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     agent_asset: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     client: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    program_config: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     tree_config: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     merkle_tree: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     core_collection: Option<&'b solana_program::account_info::AccountInfo<'a>>,

@@ -288,52 +288,54 @@ export class ReceiptUriInvalidError extends ProgramError {
 codeToErrorMap.set(0x11, ReceiptUriInvalidError);
 nameToErrorMap.set('ReceiptUriInvalid', ReceiptUriInvalidError);
 
-/** InvalidProgramConfigDerivation: Invalid Program Config PDA derivation */
-export class InvalidProgramConfigDerivationError extends ProgramError {
-  override readonly name: string = 'InvalidProgramConfigDerivation';
+/** InvalidReceiptsCollection: Supplied collection is not the canonical receipts collection PDA */
+export class InvalidReceiptsCollectionError extends ProgramError {
+  override readonly name: string = 'InvalidReceiptsCollection';
 
   readonly code: number = 0x12; // 18
 
   constructor(program: Program, cause?: Error) {
-    super('Invalid Program Config PDA derivation', program, cause);
+    super(
+      'Supplied collection is not the canonical receipts collection PDA',
+      program,
+      cause
+    );
   }
 }
-codeToErrorMap.set(0x12, InvalidProgramConfigDerivationError);
-nameToErrorMap.set(
-  'InvalidProgramConfigDerivation',
-  InvalidProgramConfigDerivationError
-);
+codeToErrorMap.set(0x12, InvalidReceiptsCollectionError);
+nameToErrorMap.set('InvalidReceiptsCollection', InvalidReceiptsCollectionError);
 
-/** ProgramConfigNotInitialized: Program Config is not initialized */
-export class ProgramConfigNotInitializedError extends ProgramError {
-  override readonly name: string = 'ProgramConfigNotInitialized';
+/** InvalidReceiptsAuthority: Supplied authority is not the canonical receipts authority PDA */
+export class InvalidReceiptsAuthorityError extends ProgramError {
+  override readonly name: string = 'InvalidReceiptsAuthority';
 
   readonly code: number = 0x13; // 19
 
   constructor(program: Program, cause?: Error) {
-    super('Program Config is not initialized', program, cause);
+    super(
+      'Supplied authority is not the canonical receipts authority PDA',
+      program,
+      cause
+    );
   }
 }
-codeToErrorMap.set(0x13, ProgramConfigNotInitializedError);
-nameToErrorMap.set(
-  'ProgramConfigNotInitialized',
-  ProgramConfigNotInitializedError
-);
+codeToErrorMap.set(0x13, InvalidReceiptsAuthorityError);
+nameToErrorMap.set('InvalidReceiptsAuthority', InvalidReceiptsAuthorityError);
 
-/** ProgramConfigAlreadyInitialized: Program Config is already initialized */
-export class ProgramConfigAlreadyInitializedError extends ProgramError {
-  override readonly name: string = 'ProgramConfigAlreadyInitialized';
+/** ReceiptsCollectionAlreadyInitialized: Receipts collection already exists */
+export class ReceiptsCollectionAlreadyInitializedError extends ProgramError {
+  override readonly name: string = 'ReceiptsCollectionAlreadyInitialized';
 
   readonly code: number = 0x14; // 20
 
   constructor(program: Program, cause?: Error) {
-    super('Program Config is already initialized', program, cause);
+    super('Receipts collection already exists', program, cause);
   }
 }
-codeToErrorMap.set(0x14, ProgramConfigAlreadyInitializedError);
+codeToErrorMap.set(0x14, ReceiptsCollectionAlreadyInitializedError);
 nameToErrorMap.set(
-  'ProgramConfigAlreadyInitialized',
-  ProgramConfigAlreadyInitializedError
+  'ReceiptsCollectionAlreadyInitialized',
+  ReceiptsCollectionAlreadyInitializedError
 );
 
 /** InvalidReceiptsTreeDerivation: Invalid receipts tree PDA derivation */
@@ -352,78 +354,18 @@ nameToErrorMap.set(
   InvalidReceiptsTreeDerivationError
 );
 
-/** TreeIndexMismatch: Supplied tree index does not match config.next_tree_index */
-export class TreeIndexMismatchError extends ProgramError {
-  override readonly name: string = 'TreeIndexMismatch';
-
-  readonly code: number = 0x16; // 22
-
-  constructor(program: Program, cause?: Error) {
-    super(
-      'Supplied tree index does not match config.next_tree_index',
-      program,
-      cause
-    );
-  }
-}
-codeToErrorMap.set(0x16, TreeIndexMismatchError);
-nameToErrorMap.set('TreeIndexMismatch', TreeIndexMismatchError);
-
-/** InvalidReceiptsCollection: Supplied collection does not match the program config's canonical receipts collection */
-export class InvalidReceiptsCollectionError extends ProgramError {
-  override readonly name: string = 'InvalidReceiptsCollection';
-
-  readonly code: number = 0x17; // 23
-
-  constructor(program: Program, cause?: Error) {
-    super(
-      "Supplied collection does not match the program config's canonical receipts collection",
-      program,
-      cause
-    );
-  }
-}
-codeToErrorMap.set(0x17, InvalidReceiptsCollectionError);
-nameToErrorMap.set('InvalidReceiptsCollection', InvalidReceiptsCollectionError);
-
 /** InvalidCompressionProgram: Invalid MPL Account Compression Program */
 export class InvalidCompressionProgramError extends ProgramError {
   override readonly name: string = 'InvalidCompressionProgram';
 
-  readonly code: number = 0x18; // 24
+  readonly code: number = 0x16; // 22
 
   constructor(program: Program, cause?: Error) {
     super('Invalid MPL Account Compression Program', program, cause);
   }
 }
-codeToErrorMap.set(0x18, InvalidCompressionProgramError);
+codeToErrorMap.set(0x16, InvalidCompressionProgramError);
 nameToErrorMap.set('InvalidCompressionProgram', InvalidCompressionProgramError);
-
-/** InvalidLogWrapperProgram: Invalid log wrapper program */
-export class InvalidLogWrapperProgramError extends ProgramError {
-  override readonly name: string = 'InvalidLogWrapperProgram';
-
-  readonly code: number = 0x19; // 25
-
-  constructor(program: Program, cause?: Error) {
-    super('Invalid log wrapper program', program, cause);
-  }
-}
-codeToErrorMap.set(0x19, InvalidLogWrapperProgramError);
-nameToErrorMap.set('InvalidLogWrapperProgram', InvalidLogWrapperProgramError);
-
-/** UnauthorizedAdmin: Signer is not the program config admin */
-export class UnauthorizedAdminError extends ProgramError {
-  override readonly name: string = 'UnauthorizedAdmin';
-
-  readonly code: number = 0x1a; // 26
-
-  constructor(program: Program, cause?: Error) {
-    super('Signer is not the program config admin', program, cause);
-  }
-}
-codeToErrorMap.set(0x1a, UnauthorizedAdminError);
-nameToErrorMap.set('UnauthorizedAdmin', UnauthorizedAdminError);
 
 /**
  * Attempts to resolve a custom program error from the provided error code.

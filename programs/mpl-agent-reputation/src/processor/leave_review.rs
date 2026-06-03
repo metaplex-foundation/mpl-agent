@@ -17,7 +17,10 @@ use solana_system_interface::program as system_program;
 use crate::{
     error::MplAgentReputationError,
     instruction::accounts::LeaveReviewV1Accounts,
-    state::{check_reviews_tree_pda, ReviewRecordV1, ReviewsConfigV1},
+    state::{
+        check_receipts_collection_pda, check_reviews_authority_pda, check_reviews_collection_pda,
+        check_reviews_tree_pda, ReviewRecordV1, REVIEWS_AUTHORITY_PREFIX,
+    },
 };
 
 /// Program ID of MPL Account Compression — the deployed compression program
@@ -128,27 +131,12 @@ pub fn leave_review_v1<'a>(
         return Err(MplAgentReputationError::InvalidSystemProgram.into());
     }
 
-    // Program config: load reviews+receipts collection pubkeys and bump.
-    let config_bump = ReviewsConfigV1::check_pda_derivation(ctx.accounts.program_config)?;
-    if ctx.accounts.program_config.owner != &crate::ID
-        || ctx.accounts.program_config.data_len() < core::mem::size_of::<ReviewsConfigV1>()
-    {
-        return Err(MplAgentReputationError::ProgramConfigNotInitialized.into());
-    }
-    let (reviews_collection_key, receipts_collection_key) = {
-        let cfg_data = ctx.accounts.program_config.try_borrow_data()?;
-        let cfg: &ReviewsConfigV1 =
-            bytemuck::from_bytes(&cfg_data[..core::mem::size_of::<ReviewsConfigV1>()]);
-        (cfg.reviews_collection, cfg.receipts_collection)
-    };
-    if *ctx.accounts.core_collection.key != reviews_collection_key {
-        return Err(MplAgentReputationError::InvalidReviewsCollection.into());
-    }
-    if *ctx.accounts.receipts_collection.key != receipts_collection_key {
-        return Err(MplAgentReputationError::InvalidReceiptsCollection.into());
-    }
-    // Reviews merkle tree must match the canonical PDA for the supplied index.
+    // Reviews collection + authority + tree: all canonical PDAs.
+    check_reviews_collection_pda(ctx.accounts.core_collection)?;
+    let authority_bump = check_reviews_authority_pda(ctx.accounts.authority)?;
     check_reviews_tree_pda(ctx.accounts.merkle_tree, args.reviews_tree_index)?;
+    // Receipts collection: canonical PDA from mpl-agent-tools.
+    check_receipts_collection_pda(ctx.accounts.receipts_collection)?;
 
     /****************************************************/
     /***************** Argument Guards ******************/
@@ -283,12 +271,17 @@ pub fn leave_review_v1<'a>(
         collection: Some(*ctx.accounts.core_collection.key),
     };
 
-    let config_signer_seeds: &[&[u8]] = &[ReviewsConfigV1::PREFIX, &[config_bump]];
+    // The reviews_authority PDA was registered as tree_creator at
+    // RegisterReviewsTreeV1 time AND is the reviews collection's
+    // update_authority. Signing the MintV2 CPI with this single PDA
+    // satisfies both `tree_creator_or_delegate` and the default
+    // `collection_authority`.
+    let authority_seeds: &[&[u8]] = &[REVIEWS_AUTHORITY_PREFIX, &[authority_bump]];
 
     MintV2CpiBuilder::new(ctx.accounts.bubblegum_program)
         .tree_config(ctx.accounts.tree_config)
         .payer(ctx.accounts.payer)
-        .tree_creator_or_delegate(Some(ctx.accounts.program_config))
+        .tree_creator_or_delegate(Some(ctx.accounts.authority))
         .collection_authority(None)
         .leaf_owner(ctx.accounts.leaf_owner)
         .leaf_delegate(None)
@@ -300,7 +293,7 @@ pub fn leave_review_v1<'a>(
         .mpl_core_program(ctx.accounts.mpl_core_program)
         .system_program(ctx.accounts.system_program)
         .metadata(metadata)
-        .invoke_signed(&[config_signer_seeds])?;
+        .invoke_signed(&[authority_seeds])?;
 
     Ok(())
 }

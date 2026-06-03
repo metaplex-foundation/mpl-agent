@@ -12,11 +12,11 @@ use borsh::{BorshDeserialize, BorshSerialize};
 
 /// Accounts.
 pub struct RegisterReviewsTreeV1 {
-    /// Must match program_config.admin
-    pub admin: solana_program::pubkey::Pubkey,
-    /// ReviewsConfigV1 PDA
-    pub program_config: solana_program::pubkey::Pubkey,
-    /// Reviews merkle tree PDA at ["reviews_tree", program_config.next_tree_index_le]
+    /// Funds the tree rent
+    pub payer: solana_program::pubkey::Pubkey,
+    /// Reviews authority PDA at ["reviews_authority"] — set as tree_creator
+    pub authority: solana_program::pubkey::Pubkey,
+    /// Reviews merkle tree PDA at ["reviews_tree", tree_index_le]
     pub merkle_tree: solana_program::pubkey::Pubkey,
     /// Bubblegum tree config PDA (derived from merkle_tree)
     pub tree_config: solana_program::pubkey::Pubkey,
@@ -45,10 +45,10 @@ impl RegisterReviewsTreeV1 {
     ) -> solana_program::instruction::Instruction {
         let mut accounts = Vec::with_capacity(8 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new(
-            self.admin, true,
+            self.payer, true,
         ));
-        accounts.push(solana_program::instruction::AccountMeta::new(
-            self.program_config,
+        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+            self.authority,
             false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
@@ -92,14 +92,16 @@ impl RegisterReviewsTreeV1 {
 #[cfg_attr(feature = "anchor", derive(AnchorSerialize, AnchorDeserialize))]
 pub struct RegisterReviewsTreeV1InstructionData {
     discriminator: u8,
-    pad: [u8; 3],
+    pad: [u8; 7],
+    pad2: [u8; 4],
 }
 
 impl RegisterReviewsTreeV1InstructionData {
     pub fn new() -> Self {
         Self {
             discriminator: 3,
-            pad: [0, 0, 0],
+            pad: [0, 0, 0, 0, 0, 0, 0],
+            pad2: [0, 0, 0, 0],
         }
     }
 }
@@ -109,6 +111,7 @@ impl RegisterReviewsTreeV1InstructionData {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct RegisterReviewsTreeV1InstructionArgs {
+    pub tree_index: u64,
     pub max_depth: u32,
     pub max_buffer_size: u32,
     pub canopy_depth: u32,
@@ -118,8 +121,8 @@ pub struct RegisterReviewsTreeV1InstructionArgs {
 ///
 /// ### Accounts:
 ///
-///   0. `[writable, signer]` admin
-///   1. `[writable]` program_config
+///   0. `[writable, signer]` payer
+///   1. `[]` authority
 ///   2. `[writable]` merkle_tree
 ///   3. `[writable]` tree_config
 ///   4. `[optional]` log_wrapper (default to `mnoopTCrg4p8ry25e4bcWA9XZjbNjMTfgYVGGEdRsf3`)
@@ -128,14 +131,15 @@ pub struct RegisterReviewsTreeV1InstructionArgs {
 ///   7. `[optional]` system_program (default to `11111111111111111111111111111111`)
 #[derive(Default)]
 pub struct RegisterReviewsTreeV1Builder {
-    admin: Option<solana_program::pubkey::Pubkey>,
-    program_config: Option<solana_program::pubkey::Pubkey>,
+    payer: Option<solana_program::pubkey::Pubkey>,
+    authority: Option<solana_program::pubkey::Pubkey>,
     merkle_tree: Option<solana_program::pubkey::Pubkey>,
     tree_config: Option<solana_program::pubkey::Pubkey>,
     log_wrapper: Option<solana_program::pubkey::Pubkey>,
     compression_program: Option<solana_program::pubkey::Pubkey>,
     bubblegum_program: Option<solana_program::pubkey::Pubkey>,
     system_program: Option<solana_program::pubkey::Pubkey>,
+    tree_index: Option<u64>,
     max_depth: Option<u32>,
     max_buffer_size: Option<u32>,
     canopy_depth: Option<u32>,
@@ -146,19 +150,19 @@ impl RegisterReviewsTreeV1Builder {
     pub fn new() -> Self {
         Self::default()
     }
-    /// Must match program_config.admin
+    /// Funds the tree rent
     #[inline(always)]
-    pub fn admin(&mut self, admin: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.admin = Some(admin);
+    pub fn payer(&mut self, payer: solana_program::pubkey::Pubkey) -> &mut Self {
+        self.payer = Some(payer);
         self
     }
-    /// ReviewsConfigV1 PDA
+    /// Reviews authority PDA at ["reviews_authority"] — set as tree_creator
     #[inline(always)]
-    pub fn program_config(&mut self, program_config: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.program_config = Some(program_config);
+    pub fn authority(&mut self, authority: solana_program::pubkey::Pubkey) -> &mut Self {
+        self.authority = Some(authority);
         self
     }
-    /// Reviews merkle tree PDA at ["reviews_tree", program_config.next_tree_index_le]
+    /// Reviews merkle tree PDA at ["reviews_tree", tree_index_le]
     #[inline(always)]
     pub fn merkle_tree(&mut self, merkle_tree: solana_program::pubkey::Pubkey) -> &mut Self {
         self.merkle_tree = Some(merkle_tree);
@@ -205,6 +209,11 @@ impl RegisterReviewsTreeV1Builder {
         self
     }
     #[inline(always)]
+    pub fn tree_index(&mut self, tree_index: u64) -> &mut Self {
+        self.tree_index = Some(tree_index);
+        self
+    }
+    #[inline(always)]
     pub fn max_depth(&mut self, max_depth: u32) -> &mut Self {
         self.max_depth = Some(max_depth);
         self
@@ -240,8 +249,8 @@ impl RegisterReviewsTreeV1Builder {
     #[allow(clippy::clone_on_copy)]
     pub fn instruction(&self) -> solana_program::instruction::Instruction {
         let accounts = RegisterReviewsTreeV1 {
-            admin: self.admin.expect("admin is not set"),
-            program_config: self.program_config.expect("program_config is not set"),
+            payer: self.payer.expect("payer is not set"),
+            authority: self.authority.expect("authority is not set"),
             merkle_tree: self.merkle_tree.expect("merkle_tree is not set"),
             tree_config: self.tree_config.expect("tree_config is not set"),
             log_wrapper: self.log_wrapper.unwrap_or(solana_program::pubkey!(
@@ -258,6 +267,7 @@ impl RegisterReviewsTreeV1Builder {
                 .unwrap_or(solana_program::pubkey!("11111111111111111111111111111111")),
         };
         let args = RegisterReviewsTreeV1InstructionArgs {
+            tree_index: self.tree_index.clone().expect("tree_index is not set"),
             max_depth: self.max_depth.clone().expect("max_depth is not set"),
             max_buffer_size: self
                 .max_buffer_size
@@ -272,11 +282,11 @@ impl RegisterReviewsTreeV1Builder {
 
 /// `register_reviews_tree_v1` CPI accounts.
 pub struct RegisterReviewsTreeV1CpiAccounts<'a, 'b> {
-    /// Must match program_config.admin
-    pub admin: &'b solana_program::account_info::AccountInfo<'a>,
-    /// ReviewsConfigV1 PDA
-    pub program_config: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Reviews merkle tree PDA at ["reviews_tree", program_config.next_tree_index_le]
+    /// Funds the tree rent
+    pub payer: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Reviews authority PDA at ["reviews_authority"] — set as tree_creator
+    pub authority: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Reviews merkle tree PDA at ["reviews_tree", tree_index_le]
     pub merkle_tree: &'b solana_program::account_info::AccountInfo<'a>,
     /// Bubblegum tree config PDA (derived from merkle_tree)
     pub tree_config: &'b solana_program::account_info::AccountInfo<'a>,
@@ -294,11 +304,11 @@ pub struct RegisterReviewsTreeV1CpiAccounts<'a, 'b> {
 pub struct RegisterReviewsTreeV1Cpi<'a, 'b> {
     /// The program to invoke.
     pub __program: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Must match program_config.admin
-    pub admin: &'b solana_program::account_info::AccountInfo<'a>,
-    /// ReviewsConfigV1 PDA
-    pub program_config: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Reviews merkle tree PDA at ["reviews_tree", program_config.next_tree_index_le]
+    /// Funds the tree rent
+    pub payer: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Reviews authority PDA at ["reviews_authority"] — set as tree_creator
+    pub authority: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Reviews merkle tree PDA at ["reviews_tree", tree_index_le]
     pub merkle_tree: &'b solana_program::account_info::AccountInfo<'a>,
     /// Bubblegum tree config PDA (derived from merkle_tree)
     pub tree_config: &'b solana_program::account_info::AccountInfo<'a>,
@@ -322,8 +332,8 @@ impl<'a, 'b> RegisterReviewsTreeV1Cpi<'a, 'b> {
     ) -> Self {
         Self {
             __program: program,
-            admin: accounts.admin,
-            program_config: accounts.program_config,
+            payer: accounts.payer,
+            authority: accounts.authority,
             merkle_tree: accounts.merkle_tree,
             tree_config: accounts.tree_config,
             log_wrapper: accounts.log_wrapper,
@@ -368,11 +378,11 @@ impl<'a, 'b> RegisterReviewsTreeV1Cpi<'a, 'b> {
     ) -> solana_program::entrypoint::ProgramResult {
         let mut accounts = Vec::with_capacity(8 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new(
-            *self.admin.key,
+            *self.payer.key,
             true,
         ));
-        accounts.push(solana_program::instruction::AccountMeta::new(
-            *self.program_config.key,
+        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+            *self.authority.key,
             false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
@@ -417,8 +427,8 @@ impl<'a, 'b> RegisterReviewsTreeV1Cpi<'a, 'b> {
         };
         let mut account_infos = Vec::with_capacity(8 + 1 + remaining_accounts.len());
         account_infos.push(self.__program.clone());
-        account_infos.push(self.admin.clone());
-        account_infos.push(self.program_config.clone());
+        account_infos.push(self.payer.clone());
+        account_infos.push(self.authority.clone());
         account_infos.push(self.merkle_tree.clone());
         account_infos.push(self.tree_config.clone());
         account_infos.push(self.log_wrapper.clone());
@@ -441,8 +451,8 @@ impl<'a, 'b> RegisterReviewsTreeV1Cpi<'a, 'b> {
 ///
 /// ### Accounts:
 ///
-///   0. `[writable, signer]` admin
-///   1. `[writable]` program_config
+///   0. `[writable, signer]` payer
+///   1. `[]` authority
 ///   2. `[writable]` merkle_tree
 ///   3. `[writable]` tree_config
 ///   4. `[]` log_wrapper
@@ -457,14 +467,15 @@ impl<'a, 'b> RegisterReviewsTreeV1CpiBuilder<'a, 'b> {
     pub fn new(program: &'b solana_program::account_info::AccountInfo<'a>) -> Self {
         let instruction = Box::new(RegisterReviewsTreeV1CpiBuilderInstruction {
             __program: program,
-            admin: None,
-            program_config: None,
+            payer: None,
+            authority: None,
             merkle_tree: None,
             tree_config: None,
             log_wrapper: None,
             compression_program: None,
             bubblegum_program: None,
             system_program: None,
+            tree_index: None,
             max_depth: None,
             max_buffer_size: None,
             canopy_depth: None,
@@ -472,22 +483,22 @@ impl<'a, 'b> RegisterReviewsTreeV1CpiBuilder<'a, 'b> {
         });
         Self { instruction }
     }
-    /// Must match program_config.admin
+    /// Funds the tree rent
     #[inline(always)]
-    pub fn admin(&mut self, admin: &'b solana_program::account_info::AccountInfo<'a>) -> &mut Self {
-        self.instruction.admin = Some(admin);
+    pub fn payer(&mut self, payer: &'b solana_program::account_info::AccountInfo<'a>) -> &mut Self {
+        self.instruction.payer = Some(payer);
         self
     }
-    /// ReviewsConfigV1 PDA
+    /// Reviews authority PDA at ["reviews_authority"] — set as tree_creator
     #[inline(always)]
-    pub fn program_config(
+    pub fn authority(
         &mut self,
-        program_config: &'b solana_program::account_info::AccountInfo<'a>,
+        authority: &'b solana_program::account_info::AccountInfo<'a>,
     ) -> &mut Self {
-        self.instruction.program_config = Some(program_config);
+        self.instruction.authority = Some(authority);
         self
     }
-    /// Reviews merkle tree PDA at ["reviews_tree", program_config.next_tree_index_le]
+    /// Reviews merkle tree PDA at ["reviews_tree", tree_index_le]
     #[inline(always)]
     pub fn merkle_tree(
         &mut self,
@@ -539,6 +550,11 @@ impl<'a, 'b> RegisterReviewsTreeV1CpiBuilder<'a, 'b> {
         system_program: &'b solana_program::account_info::AccountInfo<'a>,
     ) -> &mut Self {
         self.instruction.system_program = Some(system_program);
+        self
+    }
+    #[inline(always)]
+    pub fn tree_index(&mut self, tree_index: u64) -> &mut Self {
+        self.instruction.tree_index = Some(tree_index);
         self
     }
     #[inline(always)]
@@ -598,6 +614,11 @@ impl<'a, 'b> RegisterReviewsTreeV1CpiBuilder<'a, 'b> {
         signers_seeds: &[&[&[u8]]],
     ) -> solana_program::entrypoint::ProgramResult {
         let args = RegisterReviewsTreeV1InstructionArgs {
+            tree_index: self
+                .instruction
+                .tree_index
+                .clone()
+                .expect("tree_index is not set"),
             max_depth: self
                 .instruction
                 .max_depth
@@ -617,12 +638,9 @@ impl<'a, 'b> RegisterReviewsTreeV1CpiBuilder<'a, 'b> {
         let instruction = RegisterReviewsTreeV1Cpi {
             __program: self.instruction.__program,
 
-            admin: self.instruction.admin.expect("admin is not set"),
+            payer: self.instruction.payer.expect("payer is not set"),
 
-            program_config: self
-                .instruction
-                .program_config
-                .expect("program_config is not set"),
+            authority: self.instruction.authority.expect("authority is not set"),
 
             merkle_tree: self
                 .instruction
@@ -664,14 +682,15 @@ impl<'a, 'b> RegisterReviewsTreeV1CpiBuilder<'a, 'b> {
 
 struct RegisterReviewsTreeV1CpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
-    admin: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    program_config: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    payer: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     merkle_tree: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     tree_config: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     log_wrapper: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     compression_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     bubblegum_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     system_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    tree_index: Option<u64>,
     max_depth: Option<u32>,
     max_buffer_size: Option<u32>,
     canopy_depth: Option<u32>,

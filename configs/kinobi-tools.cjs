@@ -1,4 +1,5 @@
 const path = require("path");
+const fs = require("fs");
 const k = require("@metaplex-foundation/kinobi");
 
 // Paths.
@@ -43,9 +44,29 @@ kinobi.update(
                 ),
             ],
         },
-        toolsConfigV1: {
-            seeds: [k.constantPdaSeedNodeFromString("program_config")],
-        },
+    }),
+);
+
+// Stateless PDAs (not backed by an account struct — declared via addPdasVisitor
+// so we can use them as defaults on instruction accounts).
+kinobi.update(
+    new k.addPdasVisitor({
+        mplAgentTools: [
+            k.pdaNode("receiptsCollection", [
+                k.constantPdaSeedNodeFromString("receipts_collection"),
+            ]),
+            k.pdaNode("receiptsAuthority", [
+                k.constantPdaSeedNodeFromString("receipts_authority"),
+            ]),
+            k.pdaNode("receiptsTree", [
+                k.constantPdaSeedNodeFromString("receipts_tree"),
+                k.variablePdaSeedNode(
+                    "treeIndex",
+                    k.numberTypeNode("u64"),
+                    "The receipts tree index",
+                ),
+            ]),
+        ],
     }),
 );
 
@@ -89,8 +110,11 @@ kinobi.update(
         revokeExecutionV1: {},
         mintWorkReceiptV1: {
             accounts: {
-                programConfig: {
-                    defaultValue: k.pdaValueNode("toolsConfigV1"),
+                authority: {
+                    defaultValue: k.pdaValueNode("receiptsAuthority"),
+                },
+                coreCollection: {
+                    defaultValue: k.pdaValueNode("receiptsCollection"),
                 },
                 mplCoreProgram: {
                     defaultValue: k.publicKeyValueNode(MPL_CORE_ID, "mplCore"),
@@ -112,10 +136,13 @@ kinobi.update(
                 },
             },
         },
-        initializeToolsConfigV1: {
+        createReceiptsCollectionV1: {
             accounts: {
-                programConfig: {
-                    defaultValue: k.pdaValueNode("toolsConfigV1"),
+                collection: {
+                    defaultValue: k.pdaValueNode("receiptsCollection"),
+                },
+                authority: {
+                    defaultValue: k.pdaValueNode("receiptsAuthority"),
                 },
                 mplCoreProgram: {
                     defaultValue: k.publicKeyValueNode(MPL_CORE_ID, "mplCore"),
@@ -124,8 +151,8 @@ kinobi.update(
         },
         registerReceiptsTreeV1: {
             accounts: {
-                programConfig: {
-                    defaultValue: k.pdaValueNode("toolsConfigV1"),
+                authority: {
+                    defaultValue: k.pdaValueNode("receiptsAuthority"),
                 },
                 bubblegumProgram: {
                     defaultValue: k.publicKeyValueNode(
@@ -161,3 +188,67 @@ kinobi.accept(
         crateFolder: crateDir,
     }),
 );
+
+// Post-process: write standalone PDA helpers expected by kinobi-emitted
+// instruction code (kinobi 1.0-alpha doesn't render find*Pda helpers for
+// PDAs added via addPdasVisitor, but it still emits references to them).
+const pdaHelperFile = path.join(jsDir, "accounts", "standalonePdas.ts");
+fs.writeFileSync(
+    pdaHelperFile,
+    `/**
+ * Hand-written PDA helpers for standalone PDAs (collections, authority,
+ * trees). Emitted by the kinobi-tools config because kinobi 1.0-alpha
+ * doesn't render find*Pda helpers for PDAs added via addPdasVisitor.
+ */
+
+import { Context, Pda } from '@metaplex-foundation/umi';
+import { string, u64 } from '@metaplex-foundation/umi/serializers';
+
+const PROGRAM_ID = 'TLREGni9ZEyGC3vnPZtqUh95xQ8oPqJSvNjvB7FGK8S';
+
+function pda(
+    context: Pick<Context, 'eddsa' | 'programs'>,
+    seeds: Uint8Array[],
+): Pda {
+    const programId = context.programs.getPublicKey(
+        'mplAgentTools',
+        PROGRAM_ID,
+    );
+    return context.eddsa.findPda(programId, seeds);
+}
+
+export function findReceiptsCollectionPda(
+    context: Pick<Context, 'eddsa' | 'programs'>,
+): Pda {
+    return pda(context, [
+        string({ size: 'variable' }).serialize('receipts_collection'),
+    ]);
+}
+
+export function findReceiptsAuthorityPda(
+    context: Pick<Context, 'eddsa' | 'programs'>,
+): Pda {
+    return pda(context, [
+        string({ size: 'variable' }).serialize('receipts_authority'),
+    ]);
+}
+
+export function findReceiptsTreePda(
+    context: Pick<Context, 'eddsa' | 'programs'>,
+    seeds: { treeIndex: number | bigint },
+): Pda {
+    return pda(context, [
+        string({ size: 'variable' }).serialize('receipts_tree'),
+        u64().serialize(seeds.treeIndex),
+    ]);
+}
+`,
+);
+
+// Patch the accounts/index.ts to re-export from standalonePdas.
+const accountsIndex = path.join(jsDir, "accounts", "index.ts");
+let indexContent = fs.readFileSync(accountsIndex, "utf-8");
+if (!indexContent.includes("standalonePdas")) {
+    indexContent += "export * from './standalonePdas';\n";
+    fs.writeFileSync(accountsIndex, indexContent);
+}

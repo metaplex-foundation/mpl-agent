@@ -76,43 +76,25 @@ pub enum MplAgentToolsError {
     #[error("Receipt URI must be non-empty and within size limits")]
     ReceiptUriInvalid,
 
-    /// 18 - Invalid Program Config PDA derivation
-    #[error("Invalid Program Config PDA derivation")]
-    InvalidProgramConfigDerivation,
+    /// 18 - Invalid receipts collection PDA / address
+    #[error("Supplied collection is not the canonical receipts collection PDA")]
+    InvalidReceiptsCollection,
 
-    /// 19 - Program Config is uninitialized
-    #[error("Program Config is not initialized")]
-    ProgramConfigNotInitialized,
+    /// 19 - Invalid receipts authority PDA
+    #[error("Supplied authority is not the canonical receipts authority PDA")]
+    InvalidReceiptsAuthority,
 
-    /// 20 - Program Config already initialized
-    #[error("Program Config is already initialized")]
-    ProgramConfigAlreadyInitialized,
+    /// 20 - Receipts collection already initialized
+    #[error("Receipts collection already exists")]
+    ReceiptsCollectionAlreadyInitialized,
 
     /// 21 - Invalid receipts tree PDA derivation
     #[error("Invalid receipts tree PDA derivation")]
     InvalidReceiptsTreeDerivation,
 
-    /// 22 - Receipts tree index mismatch
-    #[error("Supplied tree index does not match config.next_tree_index")]
-    TreeIndexMismatch,
-
-    /// 23 - Invalid receipts collection
-    #[error(
-        "Supplied collection does not match the program config's canonical receipts collection"
-    )]
-    InvalidReceiptsCollection,
-
-    /// 24 - Invalid MPL Account Compression Program
+    /// 22 - Invalid MPL Account Compression Program
     #[error("Invalid MPL Account Compression Program")]
     InvalidCompressionProgram,
-
-    /// 25 - Invalid MPL Noop / log wrapper Program
-    #[error("Invalid log wrapper program")]
-    InvalidLogWrapperProgram,
-
-    /// 26 - Unauthorized admin signer
-    #[error("Signer is not the program config admin")]
-    UnauthorizedAdmin,
 }
 
 impl From<MplAgentToolsError> for ProgramError {

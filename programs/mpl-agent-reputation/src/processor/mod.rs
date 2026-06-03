@@ -1,22 +1,24 @@
+mod create_reviews_collection_v1;
 mod leave_review;
-mod program_config_ix;
 mod register;
+mod register_reviews_tree_v1;
 
-use bytemuck::try_from_bytes;
 use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, msg, pubkey::Pubkey};
 
 use crate::error::MplAgentReputationError;
 use crate::instruction::MplAgentReputationInstructionDiscriminant;
 
+pub use create_reviews_collection_v1::{
+    cast_create_reviews_collection_args, create_reviews_collection_v1,
+    CreateReviewsCollectionV1Args,
+};
 pub use leave_review::{
     deserialize_leave_review_args, leave_review_v1, LeaveReviewV1Args, MAX_FEEDBACK_URI_LEN,
 };
-pub use program_config_ix::{
-    cast_initialize_program_config_args, cast_register_reviews_tree_args,
-    initialize_program_config_v1, register_reviews_tree_v1, InitializeReviewsConfigV1Args,
-    RegisterReviewsTreeV1Args,
-};
 pub use register::{register_reputation_v1, RegisterReputationV1Args};
+pub use register_reviews_tree_v1::{
+    cast_register_reviews_tree_args, register_reviews_tree_v1, RegisterReviewsTreeV1Args,
+};
 
 /// Process incoming instructions.
 #[inline]
@@ -34,7 +36,7 @@ pub fn process_instruction<'a>(
             msg!("Instruction: RegisterReputationV1");
             register_reputation_v1(
                 accounts,
-                try_from_bytes(instruction_data)
+                bytemuck::try_from_bytes(instruction_data)
                     .map_err(|_| MplAgentReputationError::InvalidInstructionData)?,
             )
         }
@@ -43,10 +45,10 @@ pub fn process_instruction<'a>(
             let args = deserialize_leave_review_args(&instruction_data[1..])?;
             leave_review_v1(accounts, args)
         }
-        Ok(MplAgentReputationInstructionDiscriminant::InitializeReviewsConfigV1) => {
-            msg!("Instruction: InitializeReviewsConfigV1");
-            let args = cast_initialize_program_config_args(instruction_data)?;
-            initialize_program_config_v1(accounts, args)
+        Ok(MplAgentReputationInstructionDiscriminant::CreateReviewsCollectionV1) => {
+            msg!("Instruction: CreateReviewsCollectionV1");
+            let args = cast_create_reviews_collection_args(instruction_data)?;
+            create_reviews_collection_v1(accounts, args)
         }
         Ok(MplAgentReputationInstructionDiscriminant::RegisterReviewsTreeV1) => {
             msg!("Instruction: RegisterReviewsTreeV1");

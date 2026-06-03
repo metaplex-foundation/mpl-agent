@@ -8,4 +8,4 @@
 
 export * from './executionDelegateRecordV1';
 export * from './executiveProfileV1';
-export * from './toolsConfigV1';
+export * from './standalonePdas';

@@ -8,4 +8,4 @@
 
 export * from './agentReputationV1';
 export * from './reviewRecordV1';
-export * from './reviewsConfigV1';
+export * from './standalonePdas';

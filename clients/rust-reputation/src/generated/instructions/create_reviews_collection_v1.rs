@@ -11,20 +11,20 @@ use anchor_lang::prelude::{AnchorDeserialize, AnchorSerialize};
 use borsh::{BorshDeserialize, BorshSerialize};
 
 /// Accounts.
-pub struct InitializeToolsConfigV1 {
-    /// Bootstrapping admin; captured as the config authority for future tree registration
-    pub admin: solana_program::pubkey::Pubkey,
-    /// ProgramConfigV1 PDA at ["program_config"]
-    pub program_config: solana_program::pubkey::Pubkey,
-    /// Receipts collection PDA at ["receipts_collection"]
+pub struct CreateReviewsCollectionV1 {
+    /// Funds the collection's rent
+    pub payer: solana_program::pubkey::Pubkey,
+    /// Reviews collection PDA at ["reviews_collection"]
     pub collection: solana_program::pubkey::Pubkey,
+    /// Reviews authority PDA at ["reviews_authority"] — becomes the collection's update_authority
+    pub authority: solana_program::pubkey::Pubkey,
     /// The MPL Core program
     pub mpl_core_program: solana_program::pubkey::Pubkey,
     /// The system program
     pub system_program: solana_program::pubkey::Pubkey,
 }
 
-impl InitializeToolsConfigV1 {
+impl CreateReviewsCollectionV1 {
     pub fn instruction(&self) -> solana_program::instruction::Instruction {
         self.instruction_with_remaining_accounts(&[])
     }
@@ -35,14 +35,14 @@ impl InitializeToolsConfigV1 {
     ) -> solana_program::instruction::Instruction {
         let mut accounts = Vec::with_capacity(5 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new(
-            self.admin, true,
-        ));
-        accounts.push(solana_program::instruction::AccountMeta::new(
-            self.program_config,
-            false,
+            self.payer, true,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
             self.collection,
+            false,
+        ));
+        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+            self.authority,
             false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
@@ -54,10 +54,10 @@ impl InitializeToolsConfigV1 {
             false,
         ));
         accounts.extend_from_slice(remaining_accounts);
-        let data = borsh::to_vec(&(InitializeToolsConfigV1InstructionData::new())).unwrap();
+        let data = borsh::to_vec(&(CreateReviewsCollectionV1InstructionData::new())).unwrap();
 
         solana_program::instruction::Instruction {
-            program_id: crate::MPL_AGENT_TOOLS_ID,
+            program_id: crate::MPL_AGENT_REPUTATION_ID,
             accounts,
             data,
         }
@@ -66,59 +66,59 @@ impl InitializeToolsConfigV1 {
 
 #[cfg_attr(not(feature = "anchor"), derive(BorshSerialize, BorshDeserialize))]
 #[cfg_attr(feature = "anchor", derive(AnchorSerialize, AnchorDeserialize))]
-pub struct InitializeToolsConfigV1InstructionData {
+pub struct CreateReviewsCollectionV1InstructionData {
     discriminator: u8,
     padding: [u8; 7],
 }
 
-impl InitializeToolsConfigV1InstructionData {
+impl CreateReviewsCollectionV1InstructionData {
     pub fn new() -> Self {
         Self {
-            discriminator: 4,
+            discriminator: 2,
             padding: [0, 0, 0, 0, 0, 0, 0],
         }
     }
 }
 
-/// Instruction builder for `InitializeToolsConfigV1`.
+/// Instruction builder for `CreateReviewsCollectionV1`.
 ///
 /// ### Accounts:
 ///
-///   0. `[writable, signer]` admin
-///   1. `[writable]` program_config
-///   2. `[writable]` collection
+///   0. `[writable, signer]` payer
+///   1. `[writable]` collection
+///   2. `[]` authority
 ///   3. `[optional]` mpl_core_program (default to `CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d`)
 ///   4. `[optional]` system_program (default to `11111111111111111111111111111111`)
 #[derive(Default)]
-pub struct InitializeToolsConfigV1Builder {
-    admin: Option<solana_program::pubkey::Pubkey>,
-    program_config: Option<solana_program::pubkey::Pubkey>,
+pub struct CreateReviewsCollectionV1Builder {
+    payer: Option<solana_program::pubkey::Pubkey>,
     collection: Option<solana_program::pubkey::Pubkey>,
+    authority: Option<solana_program::pubkey::Pubkey>,
     mpl_core_program: Option<solana_program::pubkey::Pubkey>,
     system_program: Option<solana_program::pubkey::Pubkey>,
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
 }
 
-impl InitializeToolsConfigV1Builder {
+impl CreateReviewsCollectionV1Builder {
     pub fn new() -> Self {
         Self::default()
     }
-    /// Bootstrapping admin; captured as the config authority for future tree registration
+    /// Funds the collection's rent
     #[inline(always)]
-    pub fn admin(&mut self, admin: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.admin = Some(admin);
+    pub fn payer(&mut self, payer: solana_program::pubkey::Pubkey) -> &mut Self {
+        self.payer = Some(payer);
         self
     }
-    /// ProgramConfigV1 PDA at ["program_config"]
-    #[inline(always)]
-    pub fn program_config(&mut self, program_config: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.program_config = Some(program_config);
-        self
-    }
-    /// Receipts collection PDA at ["receipts_collection"]
+    /// Reviews collection PDA at ["reviews_collection"]
     #[inline(always)]
     pub fn collection(&mut self, collection: solana_program::pubkey::Pubkey) -> &mut Self {
         self.collection = Some(collection);
+        self
+    }
+    /// Reviews authority PDA at ["reviews_authority"] — becomes the collection's update_authority
+    #[inline(always)]
+    pub fn authority(&mut self, authority: solana_program::pubkey::Pubkey) -> &mut Self {
+        self.authority = Some(authority);
         self
     }
     /// `[optional account, default to 'CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d']`
@@ -158,10 +158,10 @@ impl InitializeToolsConfigV1Builder {
     }
     #[allow(clippy::clone_on_copy)]
     pub fn instruction(&self) -> solana_program::instruction::Instruction {
-        let accounts = InitializeToolsConfigV1 {
-            admin: self.admin.expect("admin is not set"),
-            program_config: self.program_config.expect("program_config is not set"),
+        let accounts = CreateReviewsCollectionV1 {
+            payer: self.payer.expect("payer is not set"),
             collection: self.collection.expect("collection is not set"),
+            authority: self.authority.expect("authority is not set"),
             mpl_core_program: self.mpl_core_program.unwrap_or(solana_program::pubkey!(
                 "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d"
             )),
@@ -174,46 +174,46 @@ impl InitializeToolsConfigV1Builder {
     }
 }
 
-/// `initialize_tools_config_v1` CPI accounts.
-pub struct InitializeToolsConfigV1CpiAccounts<'a, 'b> {
-    /// Bootstrapping admin; captured as the config authority for future tree registration
-    pub admin: &'b solana_program::account_info::AccountInfo<'a>,
-    /// ProgramConfigV1 PDA at ["program_config"]
-    pub program_config: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Receipts collection PDA at ["receipts_collection"]
+/// `create_reviews_collection_v1` CPI accounts.
+pub struct CreateReviewsCollectionV1CpiAccounts<'a, 'b> {
+    /// Funds the collection's rent
+    pub payer: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Reviews collection PDA at ["reviews_collection"]
     pub collection: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Reviews authority PDA at ["reviews_authority"] — becomes the collection's update_authority
+    pub authority: &'b solana_program::account_info::AccountInfo<'a>,
     /// The MPL Core program
     pub mpl_core_program: &'b solana_program::account_info::AccountInfo<'a>,
     /// The system program
     pub system_program: &'b solana_program::account_info::AccountInfo<'a>,
 }
 
-/// `initialize_tools_config_v1` CPI instruction.
-pub struct InitializeToolsConfigV1Cpi<'a, 'b> {
+/// `create_reviews_collection_v1` CPI instruction.
+pub struct CreateReviewsCollectionV1Cpi<'a, 'b> {
     /// The program to invoke.
     pub __program: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Bootstrapping admin; captured as the config authority for future tree registration
-    pub admin: &'b solana_program::account_info::AccountInfo<'a>,
-    /// ProgramConfigV1 PDA at ["program_config"]
-    pub program_config: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Receipts collection PDA at ["receipts_collection"]
+    /// Funds the collection's rent
+    pub payer: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Reviews collection PDA at ["reviews_collection"]
     pub collection: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Reviews authority PDA at ["reviews_authority"] — becomes the collection's update_authority
+    pub authority: &'b solana_program::account_info::AccountInfo<'a>,
     /// The MPL Core program
     pub mpl_core_program: &'b solana_program::account_info::AccountInfo<'a>,
     /// The system program
     pub system_program: &'b solana_program::account_info::AccountInfo<'a>,
 }
 
-impl<'a, 'b> InitializeToolsConfigV1Cpi<'a, 'b> {
+impl<'a, 'b> CreateReviewsCollectionV1Cpi<'a, 'b> {
     pub fn new(
         program: &'b solana_program::account_info::AccountInfo<'a>,
-        accounts: InitializeToolsConfigV1CpiAccounts<'a, 'b>,
+        accounts: CreateReviewsCollectionV1CpiAccounts<'a, 'b>,
     ) -> Self {
         Self {
             __program: program,
-            admin: accounts.admin,
-            program_config: accounts.program_config,
+            payer: accounts.payer,
             collection: accounts.collection,
+            authority: accounts.authority,
             mpl_core_program: accounts.mpl_core_program,
             system_program: accounts.system_program,
         }
@@ -253,15 +253,15 @@ impl<'a, 'b> InitializeToolsConfigV1Cpi<'a, 'b> {
     ) -> solana_program::entrypoint::ProgramResult {
         let mut accounts = Vec::with_capacity(5 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new(
-            *self.admin.key,
+            *self.payer.key,
             true,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
-            *self.program_config.key,
+            *self.collection.key,
             false,
         ));
-        accounts.push(solana_program::instruction::AccountMeta::new(
-            *self.collection.key,
+        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+            *self.authority.key,
             false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
@@ -279,18 +279,18 @@ impl<'a, 'b> InitializeToolsConfigV1Cpi<'a, 'b> {
                 is_signer: remaining_account.2,
             })
         });
-        let data = borsh::to_vec(&(InitializeToolsConfigV1InstructionData::new())).unwrap();
+        let data = borsh::to_vec(&(CreateReviewsCollectionV1InstructionData::new())).unwrap();
 
         let instruction = solana_program::instruction::Instruction {
-            program_id: crate::MPL_AGENT_TOOLS_ID,
+            program_id: crate::MPL_AGENT_REPUTATION_ID,
             accounts,
             data,
         };
         let mut account_infos = Vec::with_capacity(5 + 1 + remaining_accounts.len());
         account_infos.push(self.__program.clone());
-        account_infos.push(self.admin.clone());
-        account_infos.push(self.program_config.clone());
+        account_infos.push(self.payer.clone());
         account_infos.push(self.collection.clone());
+        account_infos.push(self.authority.clone());
         account_infos.push(self.mpl_core_program.clone());
         account_infos.push(self.system_program.clone());
         remaining_accounts
@@ -305,54 +305,54 @@ impl<'a, 'b> InitializeToolsConfigV1Cpi<'a, 'b> {
     }
 }
 
-/// Instruction builder for `InitializeToolsConfigV1` via CPI.
+/// Instruction builder for `CreateReviewsCollectionV1` via CPI.
 ///
 /// ### Accounts:
 ///
-///   0. `[writable, signer]` admin
-///   1. `[writable]` program_config
-///   2. `[writable]` collection
+///   0. `[writable, signer]` payer
+///   1. `[writable]` collection
+///   2. `[]` authority
 ///   3. `[]` mpl_core_program
 ///   4. `[]` system_program
-pub struct InitializeToolsConfigV1CpiBuilder<'a, 'b> {
-    instruction: Box<InitializeToolsConfigV1CpiBuilderInstruction<'a, 'b>>,
+pub struct CreateReviewsCollectionV1CpiBuilder<'a, 'b> {
+    instruction: Box<CreateReviewsCollectionV1CpiBuilderInstruction<'a, 'b>>,
 }
 
-impl<'a, 'b> InitializeToolsConfigV1CpiBuilder<'a, 'b> {
+impl<'a, 'b> CreateReviewsCollectionV1CpiBuilder<'a, 'b> {
     pub fn new(program: &'b solana_program::account_info::AccountInfo<'a>) -> Self {
-        let instruction = Box::new(InitializeToolsConfigV1CpiBuilderInstruction {
+        let instruction = Box::new(CreateReviewsCollectionV1CpiBuilderInstruction {
             __program: program,
-            admin: None,
-            program_config: None,
+            payer: None,
             collection: None,
+            authority: None,
             mpl_core_program: None,
             system_program: None,
             __remaining_accounts: Vec::new(),
         });
         Self { instruction }
     }
-    /// Bootstrapping admin; captured as the config authority for future tree registration
+    /// Funds the collection's rent
     #[inline(always)]
-    pub fn admin(&mut self, admin: &'b solana_program::account_info::AccountInfo<'a>) -> &mut Self {
-        self.instruction.admin = Some(admin);
+    pub fn payer(&mut self, payer: &'b solana_program::account_info::AccountInfo<'a>) -> &mut Self {
+        self.instruction.payer = Some(payer);
         self
     }
-    /// ProgramConfigV1 PDA at ["program_config"]
-    #[inline(always)]
-    pub fn program_config(
-        &mut self,
-        program_config: &'b solana_program::account_info::AccountInfo<'a>,
-    ) -> &mut Self {
-        self.instruction.program_config = Some(program_config);
-        self
-    }
-    /// Receipts collection PDA at ["receipts_collection"]
+    /// Reviews collection PDA at ["reviews_collection"]
     #[inline(always)]
     pub fn collection(
         &mut self,
         collection: &'b solana_program::account_info::AccountInfo<'a>,
     ) -> &mut Self {
         self.instruction.collection = Some(collection);
+        self
+    }
+    /// Reviews authority PDA at ["reviews_authority"] — becomes the collection's update_authority
+    #[inline(always)]
+    pub fn authority(
+        &mut self,
+        authority: &'b solana_program::account_info::AccountInfo<'a>,
+    ) -> &mut Self {
+        self.instruction.authority = Some(authority);
         self
     }
     /// The MPL Core program
@@ -414,17 +414,14 @@ impl<'a, 'b> InitializeToolsConfigV1CpiBuilder<'a, 'b> {
         &self,
         signers_seeds: &[&[&[u8]]],
     ) -> solana_program::entrypoint::ProgramResult {
-        let instruction = InitializeToolsConfigV1Cpi {
+        let instruction = CreateReviewsCollectionV1Cpi {
             __program: self.instruction.__program,
 
-            admin: self.instruction.admin.expect("admin is not set"),
-
-            program_config: self
-                .instruction
-                .program_config
-                .expect("program_config is not set"),
+            payer: self.instruction.payer.expect("payer is not set"),
 
             collection: self.instruction.collection.expect("collection is not set"),
+
+            authority: self.instruction.authority.expect("authority is not set"),
 
             mpl_core_program: self
                 .instruction
@@ -443,11 +440,11 @@ impl<'a, 'b> InitializeToolsConfigV1CpiBuilder<'a, 'b> {
     }
 }
 
-struct InitializeToolsConfigV1CpiBuilderInstruction<'a, 'b> {
+struct CreateReviewsCollectionV1CpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
-    admin: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    program_config: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    payer: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     collection: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     mpl_core_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     system_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     /// Additional instruction accounts `(AccountInfo, is_writable, is_signer)`.

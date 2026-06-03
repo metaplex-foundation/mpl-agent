@@ -20,13 +20,13 @@ pub struct LeaveReviewV1 {
     pub asset: solana_program::pubkey::Pubkey,
     /// The owner of the new review cNFT leaf - must equal asset.owner
     pub leaf_owner: solana_program::pubkey::Pubkey,
-    /// Singleton ReviewsConfigV1 PDA. Signs the Bubblegum CPI as tree creator/delegate via invoke_signed
-    pub program_config: solana_program::pubkey::Pubkey,
+    /// Reviews authority PDA at ["reviews_authority"] — signs the Bubblegum CPI as tree_creator/collection_authority via invoke_signed
+    pub authority: solana_program::pubkey::Pubkey,
     /// Bubblegum tree config PDA for the reviews tree
     pub tree_config: solana_program::pubkey::Pubkey,
     /// Reviews merkle tree at PDA ["reviews_tree", reviews_tree_index_le]
     pub merkle_tree: solana_program::pubkey::Pubkey,
-    /// Reviews collection (must equal program_config.reviews_collection)
+    /// Reviews collection PDA at ["reviews_collection"]
     pub core_collection: solana_program::pubkey::Pubkey,
     /// Bubblegum's mpl-core CPI signer PDA
     pub mpl_core_cpi_signer: solana_program::pubkey::Pubkey,
@@ -40,7 +40,7 @@ pub struct LeaveReviewV1 {
     pub bubblegum_program: solana_program::pubkey::Pubkey,
     /// Receipts Bubblegum merkle tree holding the receipt being referenced
     pub receipts_merkle_tree: solana_program::pubkey::Pubkey,
-    /// Receipts collection (must equal program_config.receipts_collection)
+    /// Canonical receipts collection PDA from mpl-agent-tools at ["receipts_collection"]
     pub receipts_collection: solana_program::pubkey::Pubkey,
     /// ReviewRecordV1 PDA seeded with the receipt's bubblegum asset id - idempotency gate
     pub review_record: solana_program::pubkey::Pubkey,
@@ -77,7 +77,7 @@ impl LeaveReviewV1 {
             false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            self.program_config,
+            self.authority,
             false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
@@ -177,7 +177,7 @@ pub struct LeaveReviewV1InstructionArgs {
 ///   1. `[signer]` reviewer
 ///   2. `[]` asset
 ///   3. `[]` leaf_owner
-///   4. `[]` program_config
+///   4. `[]` authority
 ///   5. `[writable]` tree_config
 ///   6. `[writable]` merkle_tree
 ///   7. `[writable]` core_collection
@@ -196,7 +196,7 @@ pub struct LeaveReviewV1Builder {
     reviewer: Option<solana_program::pubkey::Pubkey>,
     asset: Option<solana_program::pubkey::Pubkey>,
     leaf_owner: Option<solana_program::pubkey::Pubkey>,
-    program_config: Option<solana_program::pubkey::Pubkey>,
+    authority: Option<solana_program::pubkey::Pubkey>,
     tree_config: Option<solana_program::pubkey::Pubkey>,
     merkle_tree: Option<solana_program::pubkey::Pubkey>,
     core_collection: Option<solana_program::pubkey::Pubkey>,
@@ -249,10 +249,10 @@ impl LeaveReviewV1Builder {
         self.leaf_owner = Some(leaf_owner);
         self
     }
-    /// Singleton ReviewsConfigV1 PDA. Signs the Bubblegum CPI as tree creator/delegate via invoke_signed
+    /// Reviews authority PDA at ["reviews_authority"] — signs the Bubblegum CPI as tree_creator/collection_authority via invoke_signed
     #[inline(always)]
-    pub fn program_config(&mut self, program_config: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.program_config = Some(program_config);
+    pub fn authority(&mut self, authority: solana_program::pubkey::Pubkey) -> &mut Self {
+        self.authority = Some(authority);
         self
     }
     /// Bubblegum tree config PDA for the reviews tree
@@ -267,7 +267,7 @@ impl LeaveReviewV1Builder {
         self.merkle_tree = Some(merkle_tree);
         self
     }
-    /// Reviews collection (must equal program_config.reviews_collection)
+    /// Reviews collection PDA at ["reviews_collection"]
     #[inline(always)]
     pub fn core_collection(
         &mut self,
@@ -331,7 +331,7 @@ impl LeaveReviewV1Builder {
         self.receipts_merkle_tree = Some(receipts_merkle_tree);
         self
     }
-    /// Receipts collection (must equal program_config.receipts_collection)
+    /// Canonical receipts collection PDA from mpl-agent-tools at ["receipts_collection"]
     #[inline(always)]
     pub fn receipts_collection(
         &mut self,
@@ -423,7 +423,7 @@ impl LeaveReviewV1Builder {
             reviewer: self.reviewer.expect("reviewer is not set"),
             asset: self.asset.expect("asset is not set"),
             leaf_owner: self.leaf_owner.expect("leaf_owner is not set"),
-            program_config: self.program_config.expect("program_config is not set"),
+            authority: self.authority.expect("authority is not set"),
             tree_config: self.tree_config.expect("tree_config is not set"),
             merkle_tree: self.merkle_tree.expect("merkle_tree is not set"),
             core_collection: self.core_collection.expect("core_collection is not set"),
@@ -497,13 +497,13 @@ pub struct LeaveReviewV1CpiAccounts<'a, 'b> {
     pub asset: &'b solana_program::account_info::AccountInfo<'a>,
     /// The owner of the new review cNFT leaf - must equal asset.owner
     pub leaf_owner: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Singleton ReviewsConfigV1 PDA. Signs the Bubblegum CPI as tree creator/delegate via invoke_signed
-    pub program_config: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Reviews authority PDA at ["reviews_authority"] — signs the Bubblegum CPI as tree_creator/collection_authority via invoke_signed
+    pub authority: &'b solana_program::account_info::AccountInfo<'a>,
     /// Bubblegum tree config PDA for the reviews tree
     pub tree_config: &'b solana_program::account_info::AccountInfo<'a>,
     /// Reviews merkle tree at PDA ["reviews_tree", reviews_tree_index_le]
     pub merkle_tree: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Reviews collection (must equal program_config.reviews_collection)
+    /// Reviews collection PDA at ["reviews_collection"]
     pub core_collection: &'b solana_program::account_info::AccountInfo<'a>,
     /// Bubblegum's mpl-core CPI signer PDA
     pub mpl_core_cpi_signer: &'b solana_program::account_info::AccountInfo<'a>,
@@ -517,7 +517,7 @@ pub struct LeaveReviewV1CpiAccounts<'a, 'b> {
     pub bubblegum_program: &'b solana_program::account_info::AccountInfo<'a>,
     /// Receipts Bubblegum merkle tree holding the receipt being referenced
     pub receipts_merkle_tree: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Receipts collection (must equal program_config.receipts_collection)
+    /// Canonical receipts collection PDA from mpl-agent-tools at ["receipts_collection"]
     pub receipts_collection: &'b solana_program::account_info::AccountInfo<'a>,
     /// ReviewRecordV1 PDA seeded with the receipt's bubblegum asset id - idempotency gate
     pub review_record: &'b solana_program::account_info::AccountInfo<'a>,
@@ -537,13 +537,13 @@ pub struct LeaveReviewV1Cpi<'a, 'b> {
     pub asset: &'b solana_program::account_info::AccountInfo<'a>,
     /// The owner of the new review cNFT leaf - must equal asset.owner
     pub leaf_owner: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Singleton ReviewsConfigV1 PDA. Signs the Bubblegum CPI as tree creator/delegate via invoke_signed
-    pub program_config: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Reviews authority PDA at ["reviews_authority"] — signs the Bubblegum CPI as tree_creator/collection_authority via invoke_signed
+    pub authority: &'b solana_program::account_info::AccountInfo<'a>,
     /// Bubblegum tree config PDA for the reviews tree
     pub tree_config: &'b solana_program::account_info::AccountInfo<'a>,
     /// Reviews merkle tree at PDA ["reviews_tree", reviews_tree_index_le]
     pub merkle_tree: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Reviews collection (must equal program_config.reviews_collection)
+    /// Reviews collection PDA at ["reviews_collection"]
     pub core_collection: &'b solana_program::account_info::AccountInfo<'a>,
     /// Bubblegum's mpl-core CPI signer PDA
     pub mpl_core_cpi_signer: &'b solana_program::account_info::AccountInfo<'a>,
@@ -557,7 +557,7 @@ pub struct LeaveReviewV1Cpi<'a, 'b> {
     pub bubblegum_program: &'b solana_program::account_info::AccountInfo<'a>,
     /// Receipts Bubblegum merkle tree holding the receipt being referenced
     pub receipts_merkle_tree: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Receipts collection (must equal program_config.receipts_collection)
+    /// Canonical receipts collection PDA from mpl-agent-tools at ["receipts_collection"]
     pub receipts_collection: &'b solana_program::account_info::AccountInfo<'a>,
     /// ReviewRecordV1 PDA seeded with the receipt's bubblegum asset id - idempotency gate
     pub review_record: &'b solana_program::account_info::AccountInfo<'a>,
@@ -579,7 +579,7 @@ impl<'a, 'b> LeaveReviewV1Cpi<'a, 'b> {
             reviewer: accounts.reviewer,
             asset: accounts.asset,
             leaf_owner: accounts.leaf_owner,
-            program_config: accounts.program_config,
+            authority: accounts.authority,
             tree_config: accounts.tree_config,
             merkle_tree: accounts.merkle_tree,
             core_collection: accounts.core_collection,
@@ -646,7 +646,7 @@ impl<'a, 'b> LeaveReviewV1Cpi<'a, 'b> {
             false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            *self.program_config.key,
+            *self.authority.key,
             false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
@@ -719,7 +719,7 @@ impl<'a, 'b> LeaveReviewV1Cpi<'a, 'b> {
         account_infos.push(self.reviewer.clone());
         account_infos.push(self.asset.clone());
         account_infos.push(self.leaf_owner.clone());
-        account_infos.push(self.program_config.clone());
+        account_infos.push(self.authority.clone());
         account_infos.push(self.tree_config.clone());
         account_infos.push(self.merkle_tree.clone());
         account_infos.push(self.core_collection.clone());
@@ -752,7 +752,7 @@ impl<'a, 'b> LeaveReviewV1Cpi<'a, 'b> {
 ///   1. `[signer]` reviewer
 ///   2. `[]` asset
 ///   3. `[]` leaf_owner
-///   4. `[]` program_config
+///   4. `[]` authority
 ///   5. `[writable]` tree_config
 ///   6. `[writable]` merkle_tree
 ///   7. `[writable]` core_collection
@@ -777,7 +777,7 @@ impl<'a, 'b> LeaveReviewV1CpiBuilder<'a, 'b> {
             reviewer: None,
             asset: None,
             leaf_owner: None,
-            program_config: None,
+            authority: None,
             tree_config: None,
             merkle_tree: None,
             core_collection: None,
@@ -833,13 +833,13 @@ impl<'a, 'b> LeaveReviewV1CpiBuilder<'a, 'b> {
         self.instruction.leaf_owner = Some(leaf_owner);
         self
     }
-    /// Singleton ReviewsConfigV1 PDA. Signs the Bubblegum CPI as tree creator/delegate via invoke_signed
+    /// Reviews authority PDA at ["reviews_authority"] — signs the Bubblegum CPI as tree_creator/collection_authority via invoke_signed
     #[inline(always)]
-    pub fn program_config(
+    pub fn authority(
         &mut self,
-        program_config: &'b solana_program::account_info::AccountInfo<'a>,
+        authority: &'b solana_program::account_info::AccountInfo<'a>,
     ) -> &mut Self {
-        self.instruction.program_config = Some(program_config);
+        self.instruction.authority = Some(authority);
         self
     }
     /// Bubblegum tree config PDA for the reviews tree
@@ -860,7 +860,7 @@ impl<'a, 'b> LeaveReviewV1CpiBuilder<'a, 'b> {
         self.instruction.merkle_tree = Some(merkle_tree);
         self
     }
-    /// Reviews collection (must equal program_config.reviews_collection)
+    /// Reviews collection PDA at ["reviews_collection"]
     #[inline(always)]
     pub fn core_collection(
         &mut self,
@@ -923,7 +923,7 @@ impl<'a, 'b> LeaveReviewV1CpiBuilder<'a, 'b> {
         self.instruction.receipts_merkle_tree = Some(receipts_merkle_tree);
         self
     }
-    /// Receipts collection (must equal program_config.receipts_collection)
+    /// Canonical receipts collection PDA from mpl-agent-tools at ["receipts_collection"]
     #[inline(always)]
     pub fn receipts_collection(
         &mut self,
@@ -1090,10 +1090,7 @@ impl<'a, 'b> LeaveReviewV1CpiBuilder<'a, 'b> {
 
             leaf_owner: self.instruction.leaf_owner.expect("leaf_owner is not set"),
 
-            program_config: self
-                .instruction
-                .program_config
-                .expect("program_config is not set"),
+            authority: self.instruction.authority.expect("authority is not set"),
 
             tree_config: self
                 .instruction
@@ -1169,7 +1166,7 @@ struct LeaveReviewV1CpiBuilderInstruction<'a, 'b> {
     reviewer: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     asset: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     leaf_owner: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    program_config: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     tree_config: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     merkle_tree: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     core_collection: Option<&'b solana_program::account_info::AccountInfo<'a>>,

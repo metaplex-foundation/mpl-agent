@@ -52,37 +52,28 @@ pub enum MplAgentReputationError {
     #[error("A review already exists for this work receipt")]
     ReviewAlreadyExists,
 
-    /// 12 - Invalid Program Config PDA derivation
-    #[error("Invalid Program Config PDA derivation")]
-    InvalidProgramConfigDerivation,
+    /// 12 - Invalid reviews collection PDA derivation
+    #[error("Invalid reviews collection PDA derivation")]
+    InvalidReviewsCollection,
 
-    /// 13 - Program Config not initialized
-    #[error("Program Config not initialized")]
-    ProgramConfigNotInitialized,
+    /// 13 - Invalid reviews authority PDA derivation
+    #[error("Invalid reviews authority PDA derivation")]
+    InvalidReviewsAuthority,
 
-    /// 14 - Program Config already initialized
-    #[error("Program Config already initialized")]
-    ProgramConfigAlreadyInitialized,
+    /// 14 - Reviews collection already initialized
+    #[error("Reviews collection already initialized")]
+    ReviewsCollectionAlreadyInitialized,
 
     /// 15 - Invalid reviews tree PDA derivation
     #[error("Invalid reviews tree PDA derivation")]
     InvalidReviewsTreeDerivation,
 
-    /// 16 - Reviews collection mismatch
-    #[error("Supplied reviews collection does not match config.reviews_collection")]
-    InvalidReviewsCollection,
-
-    /// 17 - Receipts collection mismatch
-    #[error("Supplied receipts collection does not match config.receipts_collection")]
+    /// 16 - Receipts collection mismatch — supplied account is not the
+    ///      canonical mpl-agent-tools receipts collection PDA.
+    #[error(
+        "Supplied receipts collection is not the canonical mpl-agent-tools receipts collection PDA"
+    )]
     InvalidReceiptsCollection,
-
-    /// 18 - Unauthorized admin
-    #[error("Signer is not the program config admin")]
-    UnauthorizedAdmin,
-
-    /// 22 - Invalid log wrapper program
-    #[error("Invalid log wrapper program")]
-    InvalidLogWrapperProgram,
 }
 
 impl From<MplAgentReputationError> for ProgramError {

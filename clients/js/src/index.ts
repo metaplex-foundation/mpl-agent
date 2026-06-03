@@ -1,7 +1,6 @@
 export * from './api';
 export * from './plugin';
 export * from './reputation';
-export * from './pdas';
 
 // Full namespace exports (includes everything: types, errors, shared helpers)
 export * as identity from './generated/identity';

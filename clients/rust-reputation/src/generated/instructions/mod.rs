@@ -5,12 +5,12 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
-pub(crate) mod r#initialize_reviews_config_v1;
+pub(crate) mod r#create_reviews_collection_v1;
 pub(crate) mod r#leave_review_v1;
 pub(crate) mod r#register_reputation_v1;
 pub(crate) mod r#register_reviews_tree_v1;
 
-pub use self::r#initialize_reviews_config_v1::*;
+pub use self::r#create_reviews_collection_v1::*;
 pub use self::r#leave_review_v1::*;
 pub use self::r#register_reputation_v1::*;
 pub use self::r#register_reviews_tree_v1::*;
