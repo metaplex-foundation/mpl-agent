@@ -1,16 +1,20 @@
 mod agent_reputation;
+mod review_record;
+mod seeds;
 
 pub use agent_reputation::*;
+pub use review_record::*;
+pub use seeds::*;
 
 use shank::ShankType;
 
 /// Account discriminator enum.
-/// Stored as a u8 in account data but represented as an enum for type safety.
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, ShankType)]
 pub enum Key {
     Uninitialized,
     AgentReputationV1,
+    ReviewRecordV1,
 }
 
 impl From<u8> for Key {
@@ -18,6 +22,7 @@ impl From<u8> for Key {
         match value {
             0 => Key::Uninitialized,
             1 => Key::AgentReputationV1,
+            2 => Key::ReviewRecordV1,
             _ => Key::Uninitialized,
         }
     }

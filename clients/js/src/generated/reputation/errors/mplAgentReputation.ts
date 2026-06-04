@@ -96,6 +96,183 @@ nameToErrorMap.set(
   AgentReputationAlreadyRegisteredError
 );
 
+/** InvalidReviewRating: Invalid review rating (must be 1..=5) */
+export class InvalidReviewRatingError extends ProgramError {
+  override readonly name: string = 'InvalidReviewRating';
+
+  readonly code: number = 0x6; // 6
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid review rating (must be 1..=5)', program, cause);
+  }
+}
+codeToErrorMap.set(0x6, InvalidReviewRatingError);
+nameToErrorMap.set('InvalidReviewRating', InvalidReviewRatingError);
+
+/** FeedbackUriInvalid: Feedback URI must be non-empty and within size limits */
+export class FeedbackUriInvalidError extends ProgramError {
+  override readonly name: string = 'FeedbackUriInvalid';
+
+  readonly code: number = 0x7; // 7
+
+  constructor(program: Program, cause?: Error) {
+    super(
+      'Feedback URI must be non-empty and within size limits',
+      program,
+      cause
+    );
+  }
+}
+codeToErrorMap.set(0x7, FeedbackUriInvalidError);
+nameToErrorMap.set('FeedbackUriInvalid', FeedbackUriInvalidError);
+
+/** LeafOwnerMismatch: Leaf owner does not match the reviewed asset owner */
+export class LeafOwnerMismatchError extends ProgramError {
+  override readonly name: string = 'LeafOwnerMismatch';
+
+  readonly code: number = 0x8; // 8
+
+  constructor(program: Program, cause?: Error) {
+    super('Leaf owner does not match the reviewed asset owner', program, cause);
+  }
+}
+codeToErrorMap.set(0x8, LeafOwnerMismatchError);
+nameToErrorMap.set('LeafOwnerMismatch', LeafOwnerMismatchError);
+
+/** InvalidBubblegumProgram: Invalid Bubblegum Program */
+export class InvalidBubblegumProgramError extends ProgramError {
+  override readonly name: string = 'InvalidBubblegumProgram';
+
+  readonly code: number = 0x9; // 9
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid Bubblegum Program', program, cause);
+  }
+}
+codeToErrorMap.set(0x9, InvalidBubblegumProgramError);
+nameToErrorMap.set('InvalidBubblegumProgram', InvalidBubblegumProgramError);
+
+/** InvalidCompressionProgram: Invalid Compression Program */
+export class InvalidCompressionProgramError extends ProgramError {
+  override readonly name: string = 'InvalidCompressionProgram';
+
+  readonly code: number = 0xa; // 10
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid Compression Program', program, cause);
+  }
+}
+codeToErrorMap.set(0xa, InvalidCompressionProgramError);
+nameToErrorMap.set('InvalidCompressionProgram', InvalidCompressionProgramError);
+
+/** ReviewAlreadyExists: A review already exists for this work receipt */
+export class ReviewAlreadyExistsError extends ProgramError {
+  override readonly name: string = 'ReviewAlreadyExists';
+
+  readonly code: number = 0xb; // 11
+
+  constructor(program: Program, cause?: Error) {
+    super('A review already exists for this work receipt', program, cause);
+  }
+}
+codeToErrorMap.set(0xb, ReviewAlreadyExistsError);
+nameToErrorMap.set('ReviewAlreadyExists', ReviewAlreadyExistsError);
+
+/** InvalidReviewsCollection: Invalid reviews collection PDA derivation */
+export class InvalidReviewsCollectionError extends ProgramError {
+  override readonly name: string = 'InvalidReviewsCollection';
+
+  readonly code: number = 0xc; // 12
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid reviews collection PDA derivation', program, cause);
+  }
+}
+codeToErrorMap.set(0xc, InvalidReviewsCollectionError);
+nameToErrorMap.set('InvalidReviewsCollection', InvalidReviewsCollectionError);
+
+/** InvalidReviewsAuthority: Invalid reviews authority PDA derivation */
+export class InvalidReviewsAuthorityError extends ProgramError {
+  override readonly name: string = 'InvalidReviewsAuthority';
+
+  readonly code: number = 0xd; // 13
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid reviews authority PDA derivation', program, cause);
+  }
+}
+codeToErrorMap.set(0xd, InvalidReviewsAuthorityError);
+nameToErrorMap.set('InvalidReviewsAuthority', InvalidReviewsAuthorityError);
+
+/** ReviewsCollectionAlreadyInitialized: Reviews collection already initialized */
+export class ReviewsCollectionAlreadyInitializedError extends ProgramError {
+  override readonly name: string = 'ReviewsCollectionAlreadyInitialized';
+
+  readonly code: number = 0xe; // 14
+
+  constructor(program: Program, cause?: Error) {
+    super('Reviews collection already initialized', program, cause);
+  }
+}
+codeToErrorMap.set(0xe, ReviewsCollectionAlreadyInitializedError);
+nameToErrorMap.set(
+  'ReviewsCollectionAlreadyInitialized',
+  ReviewsCollectionAlreadyInitializedError
+);
+
+/** InvalidReviewsTreeDerivation: Invalid reviews tree PDA derivation */
+export class InvalidReviewsTreeDerivationError extends ProgramError {
+  override readonly name: string = 'InvalidReviewsTreeDerivation';
+
+  readonly code: number = 0xf; // 15
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid reviews tree PDA derivation', program, cause);
+  }
+}
+codeToErrorMap.set(0xf, InvalidReviewsTreeDerivationError);
+nameToErrorMap.set(
+  'InvalidReviewsTreeDerivation',
+  InvalidReviewsTreeDerivationError
+);
+
+/** InvalidReceiptsCollection: Supplied receipts collection is not the canonical mpl-agent-tools receipts collection PDA */
+export class InvalidReceiptsCollectionError extends ProgramError {
+  override readonly name: string = 'InvalidReceiptsCollection';
+
+  readonly code: number = 0x10; // 16
+
+  constructor(program: Program, cause?: Error) {
+    super(
+      'Supplied receipts collection is not the canonical mpl-agent-tools receipts collection PDA',
+      program,
+      cause
+    );
+  }
+}
+codeToErrorMap.set(0x10, InvalidReceiptsCollectionError);
+nameToErrorMap.set('InvalidReceiptsCollection', InvalidReceiptsCollectionError);
+
+/** InvalidReceiptsTreeDerivation: Supplied receipts merkle tree is not the canonical mpl-agent-tools receipts tree PDA */
+export class InvalidReceiptsTreeDerivationError extends ProgramError {
+  override readonly name: string = 'InvalidReceiptsTreeDerivation';
+
+  readonly code: number = 0x11; // 17
+
+  constructor(program: Program, cause?: Error) {
+    super(
+      'Supplied receipts merkle tree is not the canonical mpl-agent-tools receipts tree PDA',
+      program,
+      cause
+    );
+  }
+}
+codeToErrorMap.set(0x11, InvalidReceiptsTreeDerivationError);
+nameToErrorMap.set(
+  'InvalidReceiptsTreeDerivation',
+  InvalidReceiptsTreeDerivationError
+);
+
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors

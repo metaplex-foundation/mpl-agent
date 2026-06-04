@@ -238,6 +238,135 @@ nameToErrorMap.set(
   ExecutiveProfileMustBeInitializedError
 );
 
+/** InvalidBubblegumProgram: Invalid Bubblegum Program */
+export class InvalidBubblegumProgramError extends ProgramError {
+  override readonly name: string = 'InvalidBubblegumProgram';
+
+  readonly code: number = 0xf; // 15
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid Bubblegum Program', program, cause);
+  }
+}
+codeToErrorMap.set(0xf, InvalidBubblegumProgramError);
+nameToErrorMap.set('InvalidBubblegumProgram', InvalidBubblegumProgramError);
+
+/** ExecutiveAuthorityMismatch: Executive authority does not match the delegate record's authority */
+export class ExecutiveAuthorityMismatchError extends ProgramError {
+  override readonly name: string = 'ExecutiveAuthorityMismatch';
+
+  readonly code: number = 0x10; // 16
+
+  constructor(program: Program, cause?: Error) {
+    super(
+      "Executive authority does not match the delegate record's authority",
+      program,
+      cause
+    );
+  }
+}
+codeToErrorMap.set(0x10, ExecutiveAuthorityMismatchError);
+nameToErrorMap.set(
+  'ExecutiveAuthorityMismatch',
+  ExecutiveAuthorityMismatchError
+);
+
+/** ReceiptUriInvalid: Receipt URI must be non-empty and within size limits */
+export class ReceiptUriInvalidError extends ProgramError {
+  override readonly name: string = 'ReceiptUriInvalid';
+
+  readonly code: number = 0x11; // 17
+
+  constructor(program: Program, cause?: Error) {
+    super(
+      'Receipt URI must be non-empty and within size limits',
+      program,
+      cause
+    );
+  }
+}
+codeToErrorMap.set(0x11, ReceiptUriInvalidError);
+nameToErrorMap.set('ReceiptUriInvalid', ReceiptUriInvalidError);
+
+/** InvalidReceiptsCollection: Supplied collection is not the canonical receipts collection PDA */
+export class InvalidReceiptsCollectionError extends ProgramError {
+  override readonly name: string = 'InvalidReceiptsCollection';
+
+  readonly code: number = 0x12; // 18
+
+  constructor(program: Program, cause?: Error) {
+    super(
+      'Supplied collection is not the canonical receipts collection PDA',
+      program,
+      cause
+    );
+  }
+}
+codeToErrorMap.set(0x12, InvalidReceiptsCollectionError);
+nameToErrorMap.set('InvalidReceiptsCollection', InvalidReceiptsCollectionError);
+
+/** InvalidReceiptsAuthority: Supplied authority is not the canonical receipts authority PDA */
+export class InvalidReceiptsAuthorityError extends ProgramError {
+  override readonly name: string = 'InvalidReceiptsAuthority';
+
+  readonly code: number = 0x13; // 19
+
+  constructor(program: Program, cause?: Error) {
+    super(
+      'Supplied authority is not the canonical receipts authority PDA',
+      program,
+      cause
+    );
+  }
+}
+codeToErrorMap.set(0x13, InvalidReceiptsAuthorityError);
+nameToErrorMap.set('InvalidReceiptsAuthority', InvalidReceiptsAuthorityError);
+
+/** ReceiptsCollectionAlreadyInitialized: Receipts collection already exists */
+export class ReceiptsCollectionAlreadyInitializedError extends ProgramError {
+  override readonly name: string = 'ReceiptsCollectionAlreadyInitialized';
+
+  readonly code: number = 0x14; // 20
+
+  constructor(program: Program, cause?: Error) {
+    super('Receipts collection already exists', program, cause);
+  }
+}
+codeToErrorMap.set(0x14, ReceiptsCollectionAlreadyInitializedError);
+nameToErrorMap.set(
+  'ReceiptsCollectionAlreadyInitialized',
+  ReceiptsCollectionAlreadyInitializedError
+);
+
+/** InvalidReceiptsTreeDerivation: Invalid receipts tree PDA derivation */
+export class InvalidReceiptsTreeDerivationError extends ProgramError {
+  override readonly name: string = 'InvalidReceiptsTreeDerivation';
+
+  readonly code: number = 0x15; // 21
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid receipts tree PDA derivation', program, cause);
+  }
+}
+codeToErrorMap.set(0x15, InvalidReceiptsTreeDerivationError);
+nameToErrorMap.set(
+  'InvalidReceiptsTreeDerivation',
+  InvalidReceiptsTreeDerivationError
+);
+
+/** InvalidCompressionProgram: Invalid MPL Account Compression Program */
+export class InvalidCompressionProgramError extends ProgramError {
+  override readonly name: string = 'InvalidCompressionProgram';
+
+  readonly code: number = 0x16; // 22
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid MPL Account Compression Program', program, cause);
+  }
+}
+codeToErrorMap.set(0x16, InvalidCompressionProgramError);
+nameToErrorMap.set('InvalidCompressionProgram', InvalidCompressionProgramError);
+
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors

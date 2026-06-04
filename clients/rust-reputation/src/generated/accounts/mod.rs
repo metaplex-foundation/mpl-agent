@@ -6,5 +6,7 @@
 //!
 
 pub(crate) mod r#agent_reputation_v1;
+pub(crate) mod r#review_record_v1;
 
 pub use self::r#agent_reputation_v1::*;
+pub use self::r#review_record_v1::*;

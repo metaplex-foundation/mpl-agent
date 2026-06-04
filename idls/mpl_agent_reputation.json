@@ -76,6 +76,297 @@
         "type": "u8",
         "value": 0
       }
+    },
+    {
+      "name": "LeaveReviewV1",
+      "accounts": [
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Pays for the review cNFT mint and the review record PDA"
+          ]
+        },
+        {
+          "name": "reviewer",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "The wallet leaving the review; must own the work receipt"
+          ]
+        },
+        {
+          "name": "asset",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The Core asset being reviewed (the agent)"
+          ]
+        },
+        {
+          "name": "leafOwner",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The owner of the new review cNFT leaf - must equal asset.owner"
+          ]
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Reviews authority PDA at [\"reviews_authority\"] — signs the Bubblegum CPI as tree_creator/collection_authority via invoke_signed"
+          ]
+        },
+        {
+          "name": "treeConfig",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Bubblegum tree config PDA for the reviews tree"
+          ]
+        },
+        {
+          "name": "merkleTree",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Reviews merkle tree at PDA [\"reviews_tree\", reviews_tree_index_le]"
+          ]
+        },
+        {
+          "name": "coreCollection",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Reviews collection PDA at [\"reviews_collection\"]"
+          ]
+        },
+        {
+          "name": "mplCoreCpiSigner",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Bubblegum's mpl-core CPI signer PDA"
+          ]
+        },
+        {
+          "name": "logWrapper",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "MPL Noop / log wrapper program"
+          ]
+        },
+        {
+          "name": "compressionProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "MPL Account Compression program (used for both Bubblegum mint and verify_leaf CPI)"
+          ]
+        },
+        {
+          "name": "mplCoreProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The MPL Core program"
+          ]
+        },
+        {
+          "name": "bubblegumProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The MPL Bubblegum program"
+          ]
+        },
+        {
+          "name": "receiptsMerkleTree",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Receipts Bubblegum merkle tree holding the receipt being referenced"
+          ]
+        },
+        {
+          "name": "receiptsCollection",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Canonical receipts collection PDA from mpl-agent-tools at [\"receipts_collection\"]"
+          ]
+        },
+        {
+          "name": "reviewRecord",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "ReviewRecordV1 PDA seeded with the receipt's bubblegum asset id - idempotency gate"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The system program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "leaveReviewV1Args",
+          "type": {
+            "defined": "LeaveReviewV1Args"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 1
+      }
+    },
+    {
+      "name": "CreateReviewsCollectionV1",
+      "accounts": [
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Funds the collection's rent"
+          ]
+        },
+        {
+          "name": "collection",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Reviews collection PDA at [\"reviews_collection\"]"
+          ]
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Reviews authority PDA at [\"reviews_authority\"] — becomes the collection's update_authority"
+          ]
+        },
+        {
+          "name": "mplCoreProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The MPL Core program"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The system program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "createReviewsCollectionV1Args",
+          "type": {
+            "defined": "CreateReviewsCollectionV1Args"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 2
+      }
+    },
+    {
+      "name": "RegisterReviewsTreeV1",
+      "accounts": [
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Funds the tree rent"
+          ]
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Reviews authority PDA at [\"reviews_authority\"] — set as tree_creator"
+          ]
+        },
+        {
+          "name": "merkleTree",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Reviews merkle tree PDA at [\"reviews_tree\", tree_index_le]"
+          ]
+        },
+        {
+          "name": "treeConfig",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Bubblegum tree config PDA (derived from merkle_tree)"
+          ]
+        },
+        {
+          "name": "logWrapper",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "MPL Noop / log wrapper program"
+          ]
+        },
+        {
+          "name": "compressionProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "MPL Account Compression program"
+          ]
+        },
+        {
+          "name": "bubblegumProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The MPL Bubblegum program"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The system program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "registerReviewsTreeV1Args",
+          "type": {
+            "defined": "RegisterReviewsTreeV1Args"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 3
+      }
     }
   ],
   "accounts": [
@@ -115,9 +406,133 @@
           }
         ]
       }
+    },
+    {
+      "name": "ReviewRecordV1",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "key",
+            "type": {
+              "defined": "Key"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                6
+              ]
+            },
+            "attrs": [
+              "padding"
+            ]
+          },
+          {
+            "name": "reviewer",
+            "type": "publicKey"
+          },
+          {
+            "name": "receiptAssetId",
+            "type": "publicKey"
+          }
+        ]
+      }
     }
   ],
   "types": [
+    {
+      "name": "CreateReviewsCollectionV1Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                7
+              ]
+            },
+            "attrs": [
+              "padding"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "LeaveReviewV1Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "rating",
+            "type": "u8"
+          },
+          {
+            "name": "feedbackUri",
+            "type": "string"
+          },
+          {
+            "name": "reviewsTreeIndex",
+            "type": "u64"
+          },
+          {
+            "name": "receiptsTreeIndex",
+            "type": "u64"
+          },
+          {
+            "name": "receiptNonce",
+            "type": "u64"
+          },
+          {
+            "name": "receiptIndex",
+            "type": "u32"
+          },
+          {
+            "name": "receiptRoot",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "receiptDataHash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "receiptAssetDataHash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "receiptFlags",
+            "type": "u8"
+          }
+        ]
+      }
+    },
     {
       "name": "RegisterReputationV1Args",
       "type": {
@@ -139,6 +554,54 @@
       }
     },
     {
+      "name": "RegisterReviewsTreeV1Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "pad",
+            "type": {
+              "array": [
+                "u8",
+                7
+              ]
+            },
+            "attrs": [
+              "padding"
+            ]
+          },
+          {
+            "name": "treeIndex",
+            "type": "u64"
+          },
+          {
+            "name": "maxDepth",
+            "type": "u32"
+          },
+          {
+            "name": "maxBufferSize",
+            "type": "u32"
+          },
+          {
+            "name": "canopyDepth",
+            "type": "u32"
+          },
+          {
+            "name": "pad2",
+            "type": {
+              "array": [
+                "u8",
+                4
+              ]
+            },
+            "attrs": [
+              "padding"
+            ]
+          }
+        ]
+      }
+    },
+    {
       "name": "Key",
       "type": {
         "kind": "enum",
@@ -148,6 +611,9 @@
           },
           {
             "name": "AgentReputationV1"
+          },
+          {
+            "name": "ReviewRecordV1"
           }
         ]
       }
@@ -183,6 +649,66 @@
       "code": 5,
       "name": "AgentReputationAlreadyRegistered",
       "msg": "Agent Reputation already registered"
+    },
+    {
+      "code": 6,
+      "name": "InvalidReviewRating",
+      "msg": "Invalid review rating (must be 1..=5)"
+    },
+    {
+      "code": 7,
+      "name": "FeedbackUriInvalid",
+      "msg": "Feedback URI must be non-empty and within size limits"
+    },
+    {
+      "code": 8,
+      "name": "LeafOwnerMismatch",
+      "msg": "Leaf owner does not match the reviewed asset owner"
+    },
+    {
+      "code": 9,
+      "name": "InvalidBubblegumProgram",
+      "msg": "Invalid Bubblegum Program"
+    },
+    {
+      "code": 10,
+      "name": "InvalidCompressionProgram",
+      "msg": "Invalid Compression Program"
+    },
+    {
+      "code": 11,
+      "name": "ReviewAlreadyExists",
+      "msg": "A review already exists for this work receipt"
+    },
+    {
+      "code": 12,
+      "name": "InvalidReviewsCollection",
+      "msg": "Invalid reviews collection PDA derivation"
+    },
+    {
+      "code": 13,
+      "name": "InvalidReviewsAuthority",
+      "msg": "Invalid reviews authority PDA derivation"
+    },
+    {
+      "code": 14,
+      "name": "ReviewsCollectionAlreadyInitialized",
+      "msg": "Reviews collection already initialized"
+    },
+    {
+      "code": 15,
+      "name": "InvalidReviewsTreeDerivation",
+      "msg": "Invalid reviews tree PDA derivation"
+    },
+    {
+      "code": 16,
+      "name": "InvalidReceiptsCollection",
+      "msg": "Supplied receipts collection is not the canonical mpl-agent-tools receipts collection PDA"
+    },
+    {
+      "code": 17,
+      "name": "InvalidReceiptsTreeDerivation",
+      "msg": "Supplied receipts merkle tree is not the canonical mpl-agent-tools receipts tree PDA"
     }
   ],
   "metadata": {

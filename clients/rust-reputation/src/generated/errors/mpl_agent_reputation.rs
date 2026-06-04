@@ -29,6 +29,46 @@ pub enum MplAgentReputationError {
     /// 5 (0x5) - Agent Reputation already registered
     #[error("Agent Reputation already registered")]
     AgentReputationAlreadyRegistered,
+    /// 6 (0x6) - Invalid review rating (must be 1..=5)
+    #[error("Invalid review rating (must be 1..=5)")]
+    InvalidReviewRating,
+    /// 7 (0x7) - Feedback URI must be non-empty and within size limits
+    #[error("Feedback URI must be non-empty and within size limits")]
+    FeedbackUriInvalid,
+    /// 8 (0x8) - Leaf owner does not match the reviewed asset owner
+    #[error("Leaf owner does not match the reviewed asset owner")]
+    LeafOwnerMismatch,
+    /// 9 (0x9) - Invalid Bubblegum Program
+    #[error("Invalid Bubblegum Program")]
+    InvalidBubblegumProgram,
+    /// 10 (0xA) - Invalid Compression Program
+    #[error("Invalid Compression Program")]
+    InvalidCompressionProgram,
+    /// 11 (0xB) - A review already exists for this work receipt
+    #[error("A review already exists for this work receipt")]
+    ReviewAlreadyExists,
+    /// 12 (0xC) - Invalid reviews collection PDA derivation
+    #[error("Invalid reviews collection PDA derivation")]
+    InvalidReviewsCollection,
+    /// 13 (0xD) - Invalid reviews authority PDA derivation
+    #[error("Invalid reviews authority PDA derivation")]
+    InvalidReviewsAuthority,
+    /// 14 (0xE) - Reviews collection already initialized
+    #[error("Reviews collection already initialized")]
+    ReviewsCollectionAlreadyInitialized,
+    /// 15 (0xF) - Invalid reviews tree PDA derivation
+    #[error("Invalid reviews tree PDA derivation")]
+    InvalidReviewsTreeDerivation,
+    /// 16 (0x10) - Supplied receipts collection is not the canonical mpl-agent-tools receipts collection PDA
+    #[error(
+        "Supplied receipts collection is not the canonical mpl-agent-tools receipts collection PDA"
+    )]
+    InvalidReceiptsCollection,
+    /// 17 (0x11) - Supplied receipts merkle tree is not the canonical mpl-agent-tools receipts tree PDA
+    #[error(
+        "Supplied receipts merkle tree is not the canonical mpl-agent-tools receipts tree PDA"
+    )]
+    InvalidReceiptsTreeDerivation,
 }
 
 impl From<MplAgentReputationError> for ProgramError {
@@ -47,6 +87,18 @@ impl TryFrom<u32> for MplAgentReputationError {
             3 => Ok(MplAgentReputationError::InvalidMplCoreProgram),
             4 => Ok(MplAgentReputationError::InvalidCoreAsset),
             5 => Ok(MplAgentReputationError::AgentReputationAlreadyRegistered),
+            6 => Ok(MplAgentReputationError::InvalidReviewRating),
+            7 => Ok(MplAgentReputationError::FeedbackUriInvalid),
+            8 => Ok(MplAgentReputationError::LeafOwnerMismatch),
+            9 => Ok(MplAgentReputationError::InvalidBubblegumProgram),
+            10 => Ok(MplAgentReputationError::InvalidCompressionProgram),
+            11 => Ok(MplAgentReputationError::ReviewAlreadyExists),
+            12 => Ok(MplAgentReputationError::InvalidReviewsCollection),
+            13 => Ok(MplAgentReputationError::InvalidReviewsAuthority),
+            14 => Ok(MplAgentReputationError::ReviewsCollectionAlreadyInitialized),
+            15 => Ok(MplAgentReputationError::InvalidReviewsTreeDerivation),
+            16 => Ok(MplAgentReputationError::InvalidReceiptsCollection),
+            17 => Ok(MplAgentReputationError::InvalidReceiptsTreeDerivation),
             _ => Err(ProgramError::InvalidArgument),
         }
     }
@@ -55,14 +107,24 @@ impl TryFrom<u32> for MplAgentReputationError {
 impl ToStr for MplAgentReputationError {
     fn to_str(&self) -> &'static str {
         match self {
-            MplAgentReputationError::InvalidSystemProgram => "Invalid System Program",
-            MplAgentReputationError::InvalidInstructionData => "Invalid instruction data",
-            MplAgentReputationError::InvalidAccountData => "Invalid account data",
-            MplAgentReputationError::InvalidMplCoreProgram => "Invalid MPL Core Program",
-            MplAgentReputationError::InvalidCoreAsset => "Invalid Core Asset",
-            MplAgentReputationError::AgentReputationAlreadyRegistered => {
-                "Agent Reputation already registered"
-            }
-        }
+                            MplAgentReputationError::InvalidSystemProgram => "Invalid System Program",
+                            MplAgentReputationError::InvalidInstructionData => "Invalid instruction data",
+                            MplAgentReputationError::InvalidAccountData => "Invalid account data",
+                            MplAgentReputationError::InvalidMplCoreProgram => "Invalid MPL Core Program",
+                            MplAgentReputationError::InvalidCoreAsset => "Invalid Core Asset",
+                            MplAgentReputationError::AgentReputationAlreadyRegistered => "Agent Reputation already registered",
+                            MplAgentReputationError::InvalidReviewRating => "Invalid review rating (must be 1..=5)",
+                            MplAgentReputationError::FeedbackUriInvalid => "Feedback URI must be non-empty and within size limits",
+                            MplAgentReputationError::LeafOwnerMismatch => "Leaf owner does not match the reviewed asset owner",
+                            MplAgentReputationError::InvalidBubblegumProgram => "Invalid Bubblegum Program",
+                            MplAgentReputationError::InvalidCompressionProgram => "Invalid Compression Program",
+                            MplAgentReputationError::ReviewAlreadyExists => "A review already exists for this work receipt",
+                            MplAgentReputationError::InvalidReviewsCollection => "Invalid reviews collection PDA derivation",
+                            MplAgentReputationError::InvalidReviewsAuthority => "Invalid reviews authority PDA derivation",
+                            MplAgentReputationError::ReviewsCollectionAlreadyInitialized => "Reviews collection already initialized",
+                            MplAgentReputationError::InvalidReviewsTreeDerivation => "Invalid reviews tree PDA derivation",
+                            MplAgentReputationError::InvalidReceiptsCollection => "Supplied receipts collection is not the canonical mpl-agent-tools receipts collection PDA",
+                            MplAgentReputationError::InvalidReceiptsTreeDerivation => "Supplied receipts merkle tree is not the canonical mpl-agent-tools receipts tree PDA",
+                    }
     }
 }
