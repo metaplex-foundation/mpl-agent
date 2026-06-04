@@ -488,6 +488,10 @@
             "type": "u64"
           },
           {
+            "name": "receiptsTreeIndex",
+            "type": "u64"
+          },
+          {
             "name": "receiptNonce",
             "type": "u64"
           },
@@ -700,6 +704,11 @@
       "code": 16,
       "name": "InvalidReceiptsCollection",
       "msg": "Supplied receipts collection is not the canonical mpl-agent-tools receipts collection PDA"
+    },
+    {
+      "code": 17,
+      "name": "InvalidReceiptsTreeDerivation",
+      "msg": "Supplied receipts merkle tree is not the canonical mpl-agent-tools receipts tree PDA"
     }
   ],
   "metadata": {

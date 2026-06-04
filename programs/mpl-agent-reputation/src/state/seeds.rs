@@ -57,6 +57,21 @@ pub fn check_receipts_collection_pda(address: &AccountInfo) -> Result<u8, Progra
     )
 }
 
+/// Verify the supplied account is the canonical receipts tree PDA for
+/// `index` (derived from `mpl_agent_tools`'s program id +
+/// `[b"receipts_tree", index_le]`). Without this check a caller could pass
+/// any attacker-controlled compression tree and forge a receipt leaf,
+/// bypassing the work-receipt gate on LeaveReviewV1.
+pub fn check_receipts_tree_pda(address: &AccountInfo, index: u64) -> Result<u8, ProgramError> {
+    const RECEIPTS_TREE_PREFIX: &[u8] = b"receipts_tree";
+    assert_derivation(
+        &mpl_agent_tools::ID,
+        address,
+        &[RECEIPTS_TREE_PREFIX, &index.to_le_bytes()],
+        MplAgentReputationError::InvalidReceiptsTreeDerivation,
+    )
+}
+
 /// Helper: derive the receipts collection address without account check.
 pub fn receipts_collection_address() -> Pubkey {
     const RECEIPTS_COLLECTION_PREFIX: &[u8] = b"receipts_collection";

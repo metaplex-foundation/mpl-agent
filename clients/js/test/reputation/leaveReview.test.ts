@@ -85,6 +85,7 @@ test('program-managed trees: full receipt → review flow', async (t) => {
     receiptsCollection,
     reviewRecord,
     reviewsTreeIndex,
+    receiptsTreeIndex,
     receiptNonce: 0n,
     receiptIndex: 0,
     receiptRoot: publicKeyBytes(

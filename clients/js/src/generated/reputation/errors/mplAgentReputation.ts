@@ -253,6 +253,26 @@ export class InvalidReceiptsCollectionError extends ProgramError {
 codeToErrorMap.set(0x10, InvalidReceiptsCollectionError);
 nameToErrorMap.set('InvalidReceiptsCollection', InvalidReceiptsCollectionError);
 
+/** InvalidReceiptsTreeDerivation: Supplied receipts merkle tree is not the canonical mpl-agent-tools receipts tree PDA */
+export class InvalidReceiptsTreeDerivationError extends ProgramError {
+  override readonly name: string = 'InvalidReceiptsTreeDerivation';
+
+  readonly code: number = 0x11; // 17
+
+  constructor(program: Program, cause?: Error) {
+    super(
+      'Supplied receipts merkle tree is not the canonical mpl-agent-tools receipts tree PDA',
+      program,
+      cause
+    );
+  }
+}
+codeToErrorMap.set(0x11, InvalidReceiptsTreeDerivationError);
+nameToErrorMap.set(
+  'InvalidReceiptsTreeDerivation',
+  InvalidReceiptsTreeDerivationError
+);
+
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors

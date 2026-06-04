@@ -18,8 +18,9 @@ use crate::{
     error::MplAgentReputationError,
     instruction::accounts::LeaveReviewV1Accounts,
     state::{
-        check_receipts_collection_pda, check_reviews_authority_pda, check_reviews_collection_pda,
-        check_reviews_tree_pda, ReviewRecordV1, REVIEWS_AUTHORITY_PREFIX,
+        check_receipts_collection_pda, check_receipts_tree_pda, check_reviews_authority_pda,
+        check_reviews_collection_pda, check_reviews_tree_pda, ReviewRecordV1,
+        REVIEWS_AUTHORITY_PREFIX,
     },
 };
 
@@ -57,6 +58,13 @@ pub struct LeaveReviewV1Args {
     pub reviews_tree_index: u64,
 
     // --- Receipt merkle proof ------------------------------------------------
+    /// Index of the receipts tree the work-receipt lives in (must match the
+    /// canonical mpl-agent-tools PDA `["receipts_tree",
+    /// receipts_tree_index_le]`). Binds the supplied `receipts_merkle_tree`
+    /// account to a tree the tools program actually created, preventing an
+    /// attacker from substituting a self-controlled compression tree with a
+    /// forged leaf.
+    pub receipts_tree_index: u64,
     /// Receipt leaf's nonce within its tree.
     pub receipt_nonce: u64,
     /// Receipt leaf's index within its tree.
@@ -135,8 +143,12 @@ pub fn leave_review_v1<'a>(
     check_reviews_collection_pda(ctx.accounts.core_collection)?;
     let authority_bump = check_reviews_authority_pda(ctx.accounts.authority)?;
     check_reviews_tree_pda(ctx.accounts.merkle_tree, args.reviews_tree_index)?;
-    // Receipts collection: canonical PDA from mpl-agent-tools.
+    // Receipts collection + tree: canonical PDAs from mpl-agent-tools. The
+    // tree check is what binds the work-receipt proof to a tree only
+    // MintWorkReceiptV1 can append to — without it, anyone could verify a
+    // forged leaf against their own compression tree.
     check_receipts_collection_pda(ctx.accounts.receipts_collection)?;
+    check_receipts_tree_pda(ctx.accounts.receipts_merkle_tree, args.receipts_tree_index)?;
 
     /****************************************************/
     /***************** Argument Guards ******************/

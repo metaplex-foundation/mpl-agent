@@ -75,6 +75,7 @@ export type LeaveReviewV1InstructionData = {
   rating: number;
   feedbackUri: string;
   reviewsTreeIndex: bigint;
+  receiptsTreeIndex: bigint;
   receiptNonce: bigint;
   receiptIndex: number;
   receiptRoot: Uint8Array;
@@ -87,6 +88,7 @@ export type LeaveReviewV1InstructionDataArgs = {
   rating: number;
   feedbackUri: string;
   reviewsTreeIndex: number | bigint;
+  receiptsTreeIndex: number | bigint;
   receiptNonce: number | bigint;
   receiptIndex: number;
   receiptRoot: Uint8Array;
@@ -110,6 +112,7 @@ export function getLeaveReviewV1InstructionDataSerializer(): Serializer<
         ['rating', u8()],
         ['feedbackUri', string()],
         ['reviewsTreeIndex', u64()],
+        ['receiptsTreeIndex', u64()],
         ['receiptNonce', u64()],
         ['receiptIndex', u32()],
         ['receiptRoot', bytes({ size: 32 })],

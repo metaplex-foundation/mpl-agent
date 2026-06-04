@@ -74,6 +74,13 @@ pub enum MplAgentReputationError {
         "Supplied receipts collection is not the canonical mpl-agent-tools receipts collection PDA"
     )]
     InvalidReceiptsCollection,
+
+    /// 17 - Receipts tree mismatch — supplied account is not the
+    ///      canonical mpl-agent-tools receipts tree PDA.
+    #[error(
+        "Supplied receipts merkle tree is not the canonical mpl-agent-tools receipts tree PDA"
+    )]
+    InvalidReceiptsTreeDerivation,
 }
 
 impl From<MplAgentReputationError> for ProgramError {

@@ -161,6 +161,7 @@ pub struct LeaveReviewV1InstructionArgs {
     pub rating: u8,
     pub feedback_uri: String,
     pub reviews_tree_index: u64,
+    pub receipts_tree_index: u64,
     pub receipt_nonce: u64,
     pub receipt_index: u32,
     pub receipt_root: [u8; 32],
@@ -212,6 +213,7 @@ pub struct LeaveReviewV1Builder {
     rating: Option<u8>,
     feedback_uri: Option<String>,
     reviews_tree_index: Option<u64>,
+    receipts_tree_index: Option<u64>,
     receipt_nonce: Option<u64>,
     receipt_index: Option<u32>,
     receipt_root: Option<[u8; 32]>,
@@ -369,6 +371,11 @@ impl LeaveReviewV1Builder {
         self
     }
     #[inline(always)]
+    pub fn receipts_tree_index(&mut self, receipts_tree_index: u64) -> &mut Self {
+        self.receipts_tree_index = Some(receipts_tree_index);
+        self
+    }
+    #[inline(always)]
     pub fn receipt_nonce(&mut self, receipt_nonce: u64) -> &mut Self {
         self.receipt_nonce = Some(receipt_nonce);
         self
@@ -460,6 +467,10 @@ impl LeaveReviewV1Builder {
                 .reviews_tree_index
                 .clone()
                 .expect("reviews_tree_index is not set"),
+            receipts_tree_index: self
+                .receipts_tree_index
+                .clone()
+                .expect("receipts_tree_index is not set"),
             receipt_nonce: self
                 .receipt_nonce
                 .clone()
@@ -793,6 +804,7 @@ impl<'a, 'b> LeaveReviewV1CpiBuilder<'a, 'b> {
             rating: None,
             feedback_uri: None,
             reviews_tree_index: None,
+            receipts_tree_index: None,
             receipt_nonce: None,
             receipt_index: None,
             receipt_root: None,
@@ -966,6 +978,11 @@ impl<'a, 'b> LeaveReviewV1CpiBuilder<'a, 'b> {
         self
     }
     #[inline(always)]
+    pub fn receipts_tree_index(&mut self, receipts_tree_index: u64) -> &mut Self {
+        self.instruction.receipts_tree_index = Some(receipts_tree_index);
+        self
+    }
+    #[inline(always)]
     pub fn receipt_nonce(&mut self, receipt_nonce: u64) -> &mut Self {
         self.instruction.receipt_nonce = Some(receipt_nonce);
         self
@@ -1048,6 +1065,11 @@ impl<'a, 'b> LeaveReviewV1CpiBuilder<'a, 'b> {
                 .reviews_tree_index
                 .clone()
                 .expect("reviews_tree_index is not set"),
+            receipts_tree_index: self
+                .instruction
+                .receipts_tree_index
+                .clone()
+                .expect("receipts_tree_index is not set"),
             receipt_nonce: self
                 .instruction
                 .receipt_nonce
@@ -1182,6 +1204,7 @@ struct LeaveReviewV1CpiBuilderInstruction<'a, 'b> {
     rating: Option<u8>,
     feedback_uri: Option<String>,
     reviews_tree_index: Option<u64>,
+    receipts_tree_index: Option<u64>,
     receipt_nonce: Option<u64>,
     receipt_index: Option<u32>,
     receipt_root: Option<[u8; 32]>,

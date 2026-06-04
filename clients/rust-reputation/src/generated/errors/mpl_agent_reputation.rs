@@ -64,6 +64,11 @@ pub enum MplAgentReputationError {
         "Supplied receipts collection is not the canonical mpl-agent-tools receipts collection PDA"
     )]
     InvalidReceiptsCollection,
+    /// 17 (0x11) - Supplied receipts merkle tree is not the canonical mpl-agent-tools receipts tree PDA
+    #[error(
+        "Supplied receipts merkle tree is not the canonical mpl-agent-tools receipts tree PDA"
+    )]
+    InvalidReceiptsTreeDerivation,
 }
 
 impl From<MplAgentReputationError> for ProgramError {
@@ -93,6 +98,7 @@ impl TryFrom<u32> for MplAgentReputationError {
             14 => Ok(MplAgentReputationError::ReviewsCollectionAlreadyInitialized),
             15 => Ok(MplAgentReputationError::InvalidReviewsTreeDerivation),
             16 => Ok(MplAgentReputationError::InvalidReceiptsCollection),
+            17 => Ok(MplAgentReputationError::InvalidReceiptsTreeDerivation),
             _ => Err(ProgramError::InvalidArgument),
         }
     }
@@ -118,6 +124,7 @@ impl ToStr for MplAgentReputationError {
                             MplAgentReputationError::ReviewsCollectionAlreadyInitialized => "Reviews collection already initialized",
                             MplAgentReputationError::InvalidReviewsTreeDerivation => "Invalid reviews tree PDA derivation",
                             MplAgentReputationError::InvalidReceiptsCollection => "Supplied receipts collection is not the canonical mpl-agent-tools receipts collection PDA",
+                            MplAgentReputationError::InvalidReceiptsTreeDerivation => "Supplied receipts merkle tree is not the canonical mpl-agent-tools receipts tree PDA",
                     }
     }
 }

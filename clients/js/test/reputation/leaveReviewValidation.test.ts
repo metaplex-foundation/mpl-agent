@@ -17,7 +17,7 @@ import {
   leaveReviewV1,
 } from '../../src/generated/reputation';
 import { mintWorkReceiptV1 } from '../../src/generated/tools';
-import { findReviewsTreePda } from '../../src';
+import { findReceiptsTreePda, findReviewsTreePda } from '../../src';
 import { createUmi } from '../_setup';
 import {
   bootstrapReceiptsAndReviews,
@@ -79,6 +79,7 @@ async function setupContext(umi: Awaited<ReturnType<typeof createUmi>>) {
     receiptsCollection: ctx.receiptsCollection,
     reviewRecord,
     reviewsTreeIndex: ctx.reviewsTreeIndex,
+    receiptsTreeIndex: ctx.receiptsTreeIndex,
     receiptNonce: 0n,
     receiptIndex: 0,
     receiptRoot: publicKeyBytes(
@@ -183,6 +184,30 @@ test('leaveReviewV1 — rejects merkle_tree that does not match reviewsTreeIndex
       ...sharedArgs,
       merkleTree: fakeTree,
       treeConfig: findTreeConfigPda(umi, { merkleTree: fakeTree }),
+    }).sendAndConfirm(umi)
+  );
+});
+
+test('leaveReviewV1 — rejects receipts_merkle_tree that is not the canonical PDA', async (t) => {
+  // Without this PDA check, an attacker could stand up their own
+  // Bubblegum-compatible compression tree, append a forged work-receipt
+  // leaf to it (the attacker is the tree authority), then pass it as
+  // `receipts_merkle_tree`. The on-chain `verify_leaf_cpi` would happily
+  // confirm the forged leaf is in the attacker's tree and a fake review
+  // would be minted against any target agent.
+  //
+  // The fix derives the canonical receipts-tree PDA from the supplied
+  // `receipts_tree_index` arg and rejects any tree that isn't at that
+  // exact PDA. Substituting a different (still-canonical) receipts tree
+  // here trips the check before verify_leaf is even reached.
+  const umi = (await createUmi()).use(mplBubblegum());
+  const { sharedArgs } = await setupContext(umi);
+
+  const otherTree = publicKey(findReceiptsTreePda(umi, { treeIndex: 9999n }));
+  await t.throwsAsync(() =>
+    leaveReviewV1(umi, {
+      ...sharedArgs,
+      receiptsMerkleTree: otherTree,
     }).sendAndConfirm(umi)
   );
 });
