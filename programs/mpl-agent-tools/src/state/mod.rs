@@ -1,13 +1,16 @@
 mod execution_delegate_record_v1;
 mod executive_profile_v1;
+mod seeds;
 
 pub use execution_delegate_record_v1::*;
 pub use executive_profile_v1::*;
+pub use seeds::*;
 
 use shank::ShankType;
 
-/// Account discriminator enum.
-/// Stored as a u8 in account data but represented as an enum for type safety.
+/// Account discriminator enum for the two on-chain record accounts in
+/// this program. Receipts collection/authority/tree are stateless PDAs
+/// without their own discriminator.
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, ShankType)]
 pub enum Key {

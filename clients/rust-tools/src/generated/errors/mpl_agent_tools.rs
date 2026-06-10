@@ -56,6 +56,30 @@ pub enum MplAgentToolsError {
     /// 14 (0xE) - Executive Profile must be initialized
     #[error("Executive Profile must be initialized")]
     ExecutiveProfileMustBeInitialized,
+    /// 15 (0xF) - Invalid Bubblegum Program
+    #[error("Invalid Bubblegum Program")]
+    InvalidBubblegumProgram,
+    /// 16 (0x10) - Executive authority does not match the delegate record's authority
+    #[error("Executive authority does not match the delegate record's authority")]
+    ExecutiveAuthorityMismatch,
+    /// 17 (0x11) - Receipt URI must be non-empty and within size limits
+    #[error("Receipt URI must be non-empty and within size limits")]
+    ReceiptUriInvalid,
+    /// 18 (0x12) - Supplied collection is not the canonical receipts collection PDA
+    #[error("Supplied collection is not the canonical receipts collection PDA")]
+    InvalidReceiptsCollection,
+    /// 19 (0x13) - Supplied authority is not the canonical receipts authority PDA
+    #[error("Supplied authority is not the canonical receipts authority PDA")]
+    InvalidReceiptsAuthority,
+    /// 20 (0x14) - Receipts collection already exists
+    #[error("Receipts collection already exists")]
+    ReceiptsCollectionAlreadyInitialized,
+    /// 21 (0x15) - Invalid receipts tree PDA derivation
+    #[error("Invalid receipts tree PDA derivation")]
+    InvalidReceiptsTreeDerivation,
+    /// 22 (0x16) - Invalid MPL Account Compression Program
+    #[error("Invalid MPL Account Compression Program")]
+    InvalidCompressionProgram,
 }
 
 impl From<MplAgentToolsError> for ProgramError {
@@ -83,6 +107,14 @@ impl TryFrom<u32> for MplAgentToolsError {
             12 => Ok(MplAgentToolsError::ExecutionDelegateRecordMustBeInitialized),
             13 => Ok(MplAgentToolsError::UnauthorizedRevoke),
             14 => Ok(MplAgentToolsError::ExecutiveProfileMustBeInitialized),
+            15 => Ok(MplAgentToolsError::InvalidBubblegumProgram),
+            16 => Ok(MplAgentToolsError::ExecutiveAuthorityMismatch),
+            17 => Ok(MplAgentToolsError::ReceiptUriInvalid),
+            18 => Ok(MplAgentToolsError::InvalidReceiptsCollection),
+            19 => Ok(MplAgentToolsError::InvalidReceiptsAuthority),
+            20 => Ok(MplAgentToolsError::ReceiptsCollectionAlreadyInitialized),
+            21 => Ok(MplAgentToolsError::InvalidReceiptsTreeDerivation),
+            22 => Ok(MplAgentToolsError::InvalidCompressionProgram),
             _ => Err(ProgramError::InvalidArgument),
         }
     }
@@ -121,6 +153,28 @@ impl ToStr for MplAgentToolsError {
             }
             MplAgentToolsError::ExecutiveProfileMustBeInitialized => {
                 "Executive Profile must be initialized"
+            }
+            MplAgentToolsError::InvalidBubblegumProgram => "Invalid Bubblegum Program",
+            MplAgentToolsError::ExecutiveAuthorityMismatch => {
+                "Executive authority does not match the delegate record's authority"
+            }
+            MplAgentToolsError::ReceiptUriInvalid => {
+                "Receipt URI must be non-empty and within size limits"
+            }
+            MplAgentToolsError::InvalidReceiptsCollection => {
+                "Supplied collection is not the canonical receipts collection PDA"
+            }
+            MplAgentToolsError::InvalidReceiptsAuthority => {
+                "Supplied authority is not the canonical receipts authority PDA"
+            }
+            MplAgentToolsError::ReceiptsCollectionAlreadyInitialized => {
+                "Receipts collection already exists"
+            }
+            MplAgentToolsError::InvalidReceiptsTreeDerivation => {
+                "Invalid receipts tree PDA derivation"
+            }
+            MplAgentToolsError::InvalidCompressionProgram => {
+                "Invalid MPL Account Compression Program"
             }
         }
     }
