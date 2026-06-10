@@ -20,6 +20,12 @@ import {
 } from '@metaplex-foundation/umi';
 
 import {
+  createReviewsCollectionV1,
+  findReviewsCollectionPda,
+  findReviewsTreePda,
+  registerReviewsTreeV1,
+} from '../src/generated/reputation';
+import {
   createReceiptsCollectionV1,
   delegateExecutionV1,
   findExecutionDelegateRecordV1Pda,
@@ -73,11 +79,19 @@ async function maybe<T>(p: Promise<T>, expectedHex: string): Promise<void> {
 
 /** Custom program error code for MplAgentToolsError::ReceiptsCollectionAlreadyInitialized. */
 const RECEIPTS_COLLECTION_ALREADY_INITIALIZED_HEX = '0x14';
+/** Custom program error code for MplAgentReputationError::ReviewsCollectionAlreadyInitialized. */
+const REVIEWS_COLLECTION_ALREADY_INITIALIZED_HEX = '0xd';
 
 export interface ReceiptsBootstrap {
   receiptsCollection: PublicKey;
   receiptsTree: PublicKey;
   receiptsTreeIndex: bigint;
+}
+
+export interface ReceiptsReviewsBootstrap extends ReceiptsBootstrap {
+  reviewsCollection: PublicKey;
+  reviewsTree: PublicKey;
+  reviewsTreeIndex: bigint;
 }
 
 /**
@@ -111,6 +125,44 @@ export async function bootstrapReceipts(umi: Umi): Promise<ReceiptsBootstrap> {
     receiptsCollection,
     receiptsTree,
     receiptsTreeIndex,
+  };
+}
+
+/**
+ * Extends `bootstrapReceipts` with the reviews-side counterpart:
+ * idempotently creates the reviews collection and allocates a fresh
+ * reviews tree at a random index. Returns the combined context every
+ * `LeaveReviewV1` test needs.
+ */
+export async function bootstrapReceiptsAndReviews(
+  umi: Umi
+): Promise<ReceiptsReviewsBootstrap> {
+  const receipts = await bootstrapReceipts(umi);
+  const reviewsCollection = publicKey(findReviewsCollectionPda(umi));
+
+  await maybe(
+    createReviewsCollectionV1(umi, {}).sendAndConfirm(umi),
+    REVIEWS_COLLECTION_ALREADY_INITIALIZED_HEX
+  );
+
+  const reviewsTreeIndex = randomU64();
+  const reviewsTree = publicKey(
+    findReviewsTreePda(umi, { treeIndex: reviewsTreeIndex })
+  );
+  await registerReviewsTreeV1(umi, {
+    merkleTree: reviewsTree,
+    treeConfig: findTreeConfigPda(umi, { merkleTree: reviewsTree }),
+    treeIndex: reviewsTreeIndex,
+    maxDepth: TREE_MAX_DEPTH,
+    maxBufferSize: TREE_MAX_BUFFER,
+    canopyDepth: 0,
+  }).sendAndConfirm(umi);
+
+  return {
+    ...receipts,
+    reviewsCollection,
+    reviewsTree,
+    reviewsTreeIndex,
   };
 }
 
