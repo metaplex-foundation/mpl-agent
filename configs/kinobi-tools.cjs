@@ -192,6 +192,9 @@ kinobi.accept(
 // Post-process: write standalone PDA helpers expected by kinobi-emitted
 // instruction code (kinobi 1.0-alpha doesn't render find*Pda helpers for
 // PDAs added via addPdasVisitor, but it still emits references to them).
+// The source below is pre-formatted to match the repo's prettier config
+// (2-space indent, single quotes, trailing commas) so `pnpm generate` is
+// idempotent and CI's "working directory is clean" check passes.
 const pdaHelperFile = path.join(jsDir, "accounts", "standalonePdas.ts");
 fs.writeFileSync(
     pdaHelperFile,
@@ -207,42 +210,39 @@ import { string, u64 } from '@metaplex-foundation/umi/serializers';
 const PROGRAM_ID = 'TLREGni9ZEyGC3vnPZtqUh95xQ8oPqJSvNjvB7FGK8S';
 
 function pda(
-    context: Pick<Context, 'eddsa' | 'programs'>,
-    seeds: Uint8Array[],
+  context: Pick<Context, 'eddsa' | 'programs'>,
+  seeds: Uint8Array[]
 ): Pda {
-    const programId = context.programs.getPublicKey(
-        'mplAgentTools',
-        PROGRAM_ID,
-    );
-    return context.eddsa.findPda(programId, seeds);
+  const programId = context.programs.getPublicKey('mplAgentTools', PROGRAM_ID);
+  return context.eddsa.findPda(programId, seeds);
 }
 
 export function findReceiptsCollectionPda(
-    context: Pick<Context, 'eddsa' | 'programs'>,
+  context: Pick<Context, 'eddsa' | 'programs'>
 ): Pda {
-    return pda(context, [
-        string({ size: 'variable' }).serialize('receipts_collection'),
-    ]);
+  return pda(context, [
+    string({ size: 'variable' }).serialize('receipts_collection'),
+  ]);
 }
 
 export function findReceiptsAuthorityPda(
-    context: Pick<Context, 'eddsa' | 'programs'>,
+  context: Pick<Context, 'eddsa' | 'programs'>
 ): Pda {
-    return pda(context, [
-        string({ size: 'variable' }).serialize('receipts_authority'),
-    ]);
+  return pda(context, [
+    string({ size: 'variable' }).serialize('receipts_authority'),
+  ]);
 }
 
 export function findReceiptsTreePda(
-    context: Pick<Context, 'eddsa' | 'programs'>,
-    seeds: { treeIndex: number | bigint },
+  context: Pick<Context, 'eddsa' | 'programs'>,
+  seeds: { treeIndex: number | bigint }
 ): Pda {
-    return pda(context, [
-        string({ size: 'variable' }).serialize('receipts_tree'),
-        u64().serialize(seeds.treeIndex),
-    ]);
+  return pda(context, [
+    string({ size: 'variable' }).serialize('receipts_tree'),
+    u64().serialize(seeds.treeIndex),
+  ]);
 }
-`,
+`
 );
 
 // Patch the accounts/index.ts to re-export from standalonePdas.
