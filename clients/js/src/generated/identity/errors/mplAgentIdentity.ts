@@ -177,6 +177,23 @@ export class GenesisNotMintFundedError extends ProgramError {
 codeToErrorMap.set(0xb, GenesisNotMintFundedError);
 nameToErrorMap.set('GenesisNotMintFunded', GenesisNotMintFundedError);
 
+/** GenesisAuthorityMismatch: Genesis account authority does not match the agent wallet */
+export class GenesisAuthorityMismatchError extends ProgramError {
+  override readonly name: string = 'GenesisAuthorityMismatch';
+
+  readonly code: number = 0xc; // 12
+
+  constructor(program: Program, cause?: Error) {
+    super(
+      'Genesis account authority does not match the agent wallet',
+      program,
+      cause
+    );
+  }
+}
+codeToErrorMap.set(0xc, GenesisAuthorityMismatchError);
+nameToErrorMap.set('GenesisAuthorityMismatch', GenesisAuthorityMismatchError);
+
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors
