@@ -19,10 +19,7 @@ pub use create_receipts_collection_v1::{
     CreateReceiptsCollectionV1Args,
 };
 pub use delegate_execution_v1::{delegate_execution_v1, DelegateExecutionV1Args};
-pub use mint_work_receipt_v1::{
-    deserialize_mint_work_receipt_args, mint_work_receipt_v1, MintWorkReceiptV1Args,
-    MAX_RECEIPT_URI_LEN,
-};
+pub use mint_work_receipt_v1::{mint_work_receipt_v1, MintWorkReceiptV1Args, MAX_RECEIPT_URI_LEN};
 pub use register_executive_v1::{register_executive_v1, RegisterExecutiveV1Args};
 pub use register_receipts_tree_v1::{
     cast_register_receipts_tree_args, register_receipts_tree_v1, RegisterReceiptsTreeV1Args,
@@ -64,8 +61,7 @@ pub fn process_instruction<'a>(
         }
         Ok(MplAgentToolsInstructionDiscriminant::MintWorkReceiptV1) => {
             msg!("Instruction: MintWorkReceiptV1");
-            let args = deserialize_mint_work_receipt_args(&instruction_data[1..])?;
-            mint_work_receipt_v1(accounts, args)
+            mint_work_receipt_v1(accounts, instruction_data)
         }
         Ok(MplAgentToolsInstructionDiscriminant::CreateReceiptsCollectionV1) => {
             msg!("Instruction: CreateReceiptsCollectionV1");

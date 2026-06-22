@@ -804,12 +804,27 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "receiptUri",
-            "type": "string"
+            "name": "pad",
+            "type": {
+              "array": [
+                "u8",
+                7
+              ]
+            },
+            "attrs": [
+              "padding"
+            ]
           },
           {
             "name": "treeIndex",
             "type": "u64"
+          },
+          {
+            "name": "receiptUri",
+            "type": "string",
+            "attrs": [
+              "idl-type"
+            ]
           }
         ]
       }

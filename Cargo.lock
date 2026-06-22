@@ -3343,7 +3343,6 @@ dependencies = [
 name = "mpl-agent-tools-program"
 version = "0.1.0"
 dependencies = [
- "borsh 1.6.1",
  "bytemuck",
  "mpl-agent-identity",
  "mpl-bubblegum",

@@ -1,5 +1,4 @@
-use borsh::{BorshDeserialize, BorshSerialize};
-use bytemuck::from_bytes;
+use bytemuck::{from_bytes, Pod, Zeroable};
 use mpl_bubblegum::{
     instructions::MintV2CpiBuilder,
     types::{Creator, MetadataArgsV2, TokenStandard},
@@ -30,20 +29,47 @@ pub const MAX_RECEIPT_URI_LEN: usize = 200;
 const MPL_ACCOUNT_COMPRESSION_ID: solana_program::pubkey::Pubkey =
     solana_program::pubkey!("mcmt6YrQEMKw8Mw43FmpRLmf7BqRnFMKmAcbxE3xkAW");
 
-#[derive(Clone, Debug, PartialEq, Eq, BorshSerialize, BorshDeserialize, ShankType)]
+/// Fixed-head Pod args for `MintWorkReceiptV1`. The `receipt_uri` string
+/// is a zero-sized sentinel; the actual UTF-8 bytes are length-prefixed
+/// (u32 LE) and appended after this struct in the instruction data. This
+/// keeps the on-chain ABI zero-copy while letting kinobi render
+/// `receiptUri: string` in the generated clients via the
+/// `#[idl_type("String")]` annotation.
+#[repr(C)]
+#[derive(Pod, Zeroable, PartialEq, Eq, Debug, Clone, Copy, ShankType)]
 pub struct MintWorkReceiptV1Args {
-    /// URI of the off-chain receipt JSON.
-    pub receipt_uri: String,
+    #[skip]
+    pub discriminator: u8,
+    /// Padding to align the `u64` field.
+    #[padding]
+    pub _pad: [u8; 7],
     /// Index of the receipts tree this receipt is being minted into.
     /// Must match the tree PDA seeds (`["receipts_tree", index_le]`).
     pub tree_index: u64,
+    /// URI of the off-chain receipt JSON. Stored as a length-prefixed
+    /// UTF-8 string immediately after this struct in instruction data.
+    #[idl_type("String")]
+    pub receipt_uri: [u8; 0],
 }
+const _: () = assert!(core::mem::size_of::<MintWorkReceiptV1Args>() == 16);
+const _: () = assert!(core::mem::align_of::<MintWorkReceiptV1Args>() == 8);
 
 pub fn mint_work_receipt_v1<'a>(
     accounts: &'a [AccountInfo<'a>],
-    args: MintWorkReceiptV1Args,
+    instruction_data: &[u8],
 ) -> ProgramResult {
     let ctx = MintWorkReceiptV1Accounts::context(accounts)?;
+
+    // Split the raw instruction data into the Pod head and the
+    // length-prefixed string tail.
+    if instruction_data.len() < core::mem::size_of::<MintWorkReceiptV1Args>() {
+        return Err(MplAgentToolsError::InvalidInstructionData.into());
+    }
+    let (args_bytes, tail) =
+        instruction_data.split_at(core::mem::size_of::<MintWorkReceiptV1Args>());
+    let args: &MintWorkReceiptV1Args = from_bytes(args_bytes);
+
+    let receipt_uri = read_length_prefixed_string(tail, MAX_RECEIPT_URI_LEN)?;
 
     // Signers. The client is intentionally NOT a signer — coordinating a
     // real-time handshake with the receiving wallet is impractical. The
@@ -102,7 +128,7 @@ pub fn mint_work_receipt_v1<'a>(
     }
 
     // Argument guard.
-    if args.receipt_uri.is_empty() || args.receipt_uri.len() > MAX_RECEIPT_URI_LEN {
+    if receipt_uri.is_empty() {
         return Err(MplAgentToolsError::ReceiptUriInvalid.into());
     }
 
@@ -117,7 +143,7 @@ pub fn mint_work_receipt_v1<'a>(
     let metadata = MetadataArgsV2 {
         name: "Agent Work Receipt".to_string(),
         symbol: "AGENTRCPT".to_string(),
-        uri: args.receipt_uri,
+        uri: receipt_uri,
         seller_fee_basis_points: 0,
         primary_sale_happened: false,
         is_mutable: false,
@@ -165,9 +191,21 @@ pub fn mint_work_receipt_v1<'a>(
     Ok(())
 }
 
-pub fn deserialize_mint_work_receipt_args(
-    data: &[u8],
-) -> Result<MintWorkReceiptV1Args, ProgramError> {
-    MintWorkReceiptV1Args::try_from_slice(data)
+/// Parse a Borsh-style length-prefixed UTF-8 string from `data`:
+/// `[u32 LE length][bytes...]`. Rejects if the buffer is too short, the
+/// declared length exceeds `max_len`, or the bytes aren't valid UTF-8.
+fn read_length_prefixed_string(data: &[u8], max_len: usize) -> Result<String, ProgramError> {
+    if data.len() < 4 {
+        return Err(MplAgentToolsError::InvalidInstructionData.into());
+    }
+    let len = u32::from_le_bytes(
+        data[..4]
+            .try_into()
+            .map_err(|_| MplAgentToolsError::InvalidInstructionData)?,
+    ) as usize;
+    if len > max_len || data.len() < 4 + len {
+        return Err(MplAgentToolsError::ReceiptUriInvalid.into());
+    }
+    String::from_utf8(data[4..4 + len].to_vec())
         .map_err(|_| MplAgentToolsError::InvalidInstructionData.into())
 }

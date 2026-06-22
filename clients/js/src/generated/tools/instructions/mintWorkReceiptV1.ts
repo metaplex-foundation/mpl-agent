@@ -16,6 +16,7 @@ import {
 } from '@metaplex-foundation/umi';
 import {
   Serializer,
+  array,
   mapSerializer,
   string,
   struct,
@@ -69,13 +70,14 @@ export type MintWorkReceiptV1InstructionAccounts = {
 // Data.
 export type MintWorkReceiptV1InstructionData = {
   discriminator: number;
-  receiptUri: string;
+  pad: Array<number>;
   treeIndex: bigint;
+  receiptUri: string;
 };
 
 export type MintWorkReceiptV1InstructionDataArgs = {
-  receiptUri: string;
   treeIndex: number | bigint;
+  receiptUri: string;
 };
 
 export function getMintWorkReceiptV1InstructionDataSerializer(): Serializer<
@@ -90,12 +92,13 @@ export function getMintWorkReceiptV1InstructionDataSerializer(): Serializer<
     struct<MintWorkReceiptV1InstructionData>(
       [
         ['discriminator', u8()],
-        ['receiptUri', string()],
+        ['pad', array(u8(), { size: 7 })],
         ['treeIndex', u64()],
+        ['receiptUri', string()],
       ],
       { description: 'MintWorkReceiptV1InstructionData' }
     ),
-    (value) => ({ ...value, discriminator: 3 })
+    (value) => ({ ...value, discriminator: 3, pad: [0, 0, 0, 0, 0, 0, 0] })
   ) as Serializer<
     MintWorkReceiptV1InstructionDataArgs,
     MintWorkReceiptV1InstructionData

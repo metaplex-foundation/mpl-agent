@@ -134,11 +134,15 @@ impl MintWorkReceiptV1 {
 #[cfg_attr(feature = "anchor", derive(AnchorSerialize, AnchorDeserialize))]
 pub struct MintWorkReceiptV1InstructionData {
     discriminator: u8,
+    pad: [u8; 7],
 }
 
 impl MintWorkReceiptV1InstructionData {
     pub fn new() -> Self {
-        Self { discriminator: 3 }
+        Self {
+            discriminator: 3,
+            pad: [0, 0, 0, 0, 0, 0, 0],
+        }
     }
 }
 
@@ -147,8 +151,8 @@ impl MintWorkReceiptV1InstructionData {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct MintWorkReceiptV1InstructionArgs {
-    pub receipt_uri: String,
     pub tree_index: u64,
+    pub receipt_uri: String,
 }
 
 /// Instruction builder for `MintWorkReceiptV1`.
@@ -187,8 +191,8 @@ pub struct MintWorkReceiptV1Builder {
     mpl_core_program: Option<solana_program::pubkey::Pubkey>,
     bubblegum_program: Option<solana_program::pubkey::Pubkey>,
     system_program: Option<solana_program::pubkey::Pubkey>,
-    receipt_uri: Option<String>,
     tree_index: Option<u64>,
+    receipt_uri: Option<String>,
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
 }
 
@@ -313,13 +317,13 @@ impl MintWorkReceiptV1Builder {
         self
     }
     #[inline(always)]
-    pub fn receipt_uri(&mut self, receipt_uri: String) -> &mut Self {
-        self.receipt_uri = Some(receipt_uri);
+    pub fn tree_index(&mut self, tree_index: u64) -> &mut Self {
+        self.tree_index = Some(tree_index);
         self
     }
     #[inline(always)]
-    pub fn tree_index(&mut self, tree_index: u64) -> &mut Self {
-        self.tree_index = Some(tree_index);
+    pub fn receipt_uri(&mut self, receipt_uri: String) -> &mut Self {
+        self.receipt_uri = Some(receipt_uri);
         self
     }
     /// Add an aditional account to the instruction.
@@ -376,8 +380,8 @@ impl MintWorkReceiptV1Builder {
                 .unwrap_or(solana_program::pubkey!("11111111111111111111111111111111")),
         };
         let args = MintWorkReceiptV1InstructionArgs {
-            receipt_uri: self.receipt_uri.clone().expect("receipt_uri is not set"),
             tree_index: self.tree_index.clone().expect("tree_index is not set"),
+            receipt_uri: self.receipt_uri.clone().expect("receipt_uri is not set"),
         };
 
         accounts.instruction_with_remaining_accounts(args, &self.__remaining_accounts)
@@ -663,8 +667,8 @@ impl<'a, 'b> MintWorkReceiptV1CpiBuilder<'a, 'b> {
             mpl_core_program: None,
             bubblegum_program: None,
             system_program: None,
-            receipt_uri: None,
             tree_index: None,
+            receipt_uri: None,
             __remaining_accounts: Vec::new(),
         });
         Self { instruction }
@@ -802,13 +806,13 @@ impl<'a, 'b> MintWorkReceiptV1CpiBuilder<'a, 'b> {
         self
     }
     #[inline(always)]
-    pub fn receipt_uri(&mut self, receipt_uri: String) -> &mut Self {
-        self.instruction.receipt_uri = Some(receipt_uri);
+    pub fn tree_index(&mut self, tree_index: u64) -> &mut Self {
+        self.instruction.tree_index = Some(tree_index);
         self
     }
     #[inline(always)]
-    pub fn tree_index(&mut self, tree_index: u64) -> &mut Self {
-        self.instruction.tree_index = Some(tree_index);
+    pub fn receipt_uri(&mut self, receipt_uri: String) -> &mut Self {
+        self.instruction.receipt_uri = Some(receipt_uri);
         self
     }
     /// Add an additional account to the instruction.
@@ -853,16 +857,16 @@ impl<'a, 'b> MintWorkReceiptV1CpiBuilder<'a, 'b> {
         signers_seeds: &[&[&[u8]]],
     ) -> solana_program::entrypoint::ProgramResult {
         let args = MintWorkReceiptV1InstructionArgs {
-            receipt_uri: self
-                .instruction
-                .receipt_uri
-                .clone()
-                .expect("receipt_uri is not set"),
             tree_index: self
                 .instruction
                 .tree_index
                 .clone()
                 .expect("tree_index is not set"),
+            receipt_uri: self
+                .instruction
+                .receipt_uri
+                .clone()
+                .expect("receipt_uri is not set"),
         };
         let instruction = MintWorkReceiptV1Cpi {
             __program: self.instruction.__program,
@@ -958,8 +962,8 @@ struct MintWorkReceiptV1CpiBuilderInstruction<'a, 'b> {
     mpl_core_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     bubblegum_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     system_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    receipt_uri: Option<String>,
     tree_index: Option<u64>,
+    receipt_uri: Option<String>,
     /// Additional instruction accounts `(AccountInfo, is_writable, is_signer)`.
     __remaining_accounts: Vec<(
         &'b solana_program::account_info::AccountInfo<'a>,
