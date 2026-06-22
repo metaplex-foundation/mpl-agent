@@ -57,6 +57,7 @@ pub struct CloseWorkReceiptV1Args {
 }
 const _: () = assert!(core::mem::size_of::<CloseWorkReceiptV1Args>() == 168);
 const _: () = assert!(core::mem::size_of::<CloseWorkReceiptV1Args>() % 8 == 0);
+const _: () = assert!(core::mem::align_of::<CloseWorkReceiptV1Args>() == 8);
 
 /// Number of named accounts in `CloseWorkReceiptV1` (everything before
 /// the merkle proof remaining accounts). Must stay in sync with the
