@@ -17,7 +17,7 @@ use crate::{
     instruction::accounts::MintWorkReceiptV1Accounts,
     state::{
         check_receipts_authority_pda, check_receipts_collection_pda, check_receipts_tree_pda,
-        ExecutionDelegateRecordV1, RECEIPTS_AUTHORITY_PREFIX,
+        ExecutionDelegateRecordV1, Key, RECEIPTS_AUTHORITY_PREFIX,
     },
 };
 
@@ -88,6 +88,9 @@ pub fn mint_work_receipt_v1<'a>(
     }
 
     // Execution delegate record = initialized and matches agent+executive.
+    // Owner + length checks alone don't prove the account is actually a
+    // delegate record (e.g., a different PDA owned by this program at the
+    // same size would slip through); also pin the discriminator byte.
     if ctx.accounts.execution_delegate_record.owner != &crate::ID
         || ctx.accounts.execution_delegate_record.data_len()
             < core::mem::size_of::<ExecutionDelegateRecordV1>()
@@ -96,6 +99,9 @@ pub fn mint_work_receipt_v1<'a>(
     }
     {
         let dr_data = ctx.accounts.execution_delegate_record.try_borrow_data()?;
+        if dr_data[0] != Key::ExecutionDelegateRecordV1 as u8 {
+            return Err(MplAgentToolsError::ExecutionDelegateRecordMustBeInitialized.into());
+        }
         let dr: &ExecutionDelegateRecordV1 =
             from_bytes(&dr_data[..core::mem::size_of::<ExecutionDelegateRecordV1>()]);
         if dr.agent_asset != *ctx.accounts.agent_asset.key {
