@@ -668,6 +668,18 @@
         "kind": "struct",
         "fields": [
           {
+            "name": "pad",
+            "type": {
+              "array": [
+                "u8",
+                7
+              ]
+            },
+            "attrs": [
+              "padding"
+            ]
+          },
+          {
             "name": "treeIndex",
             "type": "u64"
           },
@@ -712,12 +724,36 @@
             "type": "u8"
           },
           {
+            "name": "pad2",
+            "type": {
+              "array": [
+                "u8",
+                7
+              ]
+            },
+            "attrs": [
+              "padding"
+            ]
+          },
+          {
             "name": "nonce",
             "type": "u64"
           },
           {
             "name": "index",
             "type": "u32"
+          },
+          {
+            "name": "pad3",
+            "type": {
+              "array": [
+                "u8",
+                4
+              ]
+            },
+            "attrs": [
+              "padding"
+            ]
           }
         ]
       }

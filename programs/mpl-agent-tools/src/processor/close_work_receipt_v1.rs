@@ -1,4 +1,4 @@
-use borsh::{BorshDeserialize, BorshSerialize};
+use bytemuck::{Pod, Zeroable};
 use mpl_bubblegum::{instructions::BurnV2CpiBuilder, ID as BUBBLEGUM_ID};
 use mpl_utils::assert_signer;
 use shank::ShankType;
@@ -22,9 +22,16 @@ const MPL_ACCOUNT_COMPRESSION_ID: solana_program::pubkey::Pubkey =
 
 /// Arguments for `CloseWorkReceiptV1`. Mirrors Bubblegum's
 /// `BurnV2InstructionArgs` exactly — the caller supplies the leaf proof
-/// data the compression program will verify.
-#[derive(Clone, Debug, PartialEq, Eq, BorshSerialize, BorshDeserialize, ShankType)]
+/// data the compression program will verify. Fixed-size; uses the
+/// repo's Pod/zero-copy ABI convention.
+#[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Pod, Zeroable, ShankType)]
 pub struct CloseWorkReceiptV1Args {
+    #[skip]
+    pub discriminator: u8,
+    /// Padding to align the `u64` field that follows.
+    #[padding]
+    pub _pad: [u8; 7],
     /// Index of the receipts tree the receipt lives in.
     pub tree_index: u64,
     /// Current root of the receipts merkle tree.
@@ -37,11 +44,19 @@ pub struct CloseWorkReceiptV1Args {
     pub asset_data_hash: [u8; 32],
     /// Leaf flags.
     pub flags: u8,
+    /// Padding to align the `u64` field that follows.
+    #[padding]
+    pub _pad2: [u8; 7],
     /// Receipt leaf's nonce within its tree.
     pub nonce: u64,
     /// Receipt leaf's index within its tree.
     pub index: u32,
+    /// Tail padding for 8-byte alignment.
+    #[padding]
+    pub _pad3: [u8; 4],
 }
+const _: () = assert!(core::mem::size_of::<CloseWorkReceiptV1Args>() == 168);
+const _: () = assert!(core::mem::size_of::<CloseWorkReceiptV1Args>() % 8 == 0);
 
 /// Number of named accounts in `CloseWorkReceiptV1` (everything before
 /// the merkle proof remaining accounts). Must stay in sync with the
@@ -56,7 +71,7 @@ const CLOSE_WORK_RECEIPT_NAMED_ACCOUNTS: usize = 12;
 /// close their own receipts (typical use: cleaning up spam).
 pub fn close_work_receipt_v1<'a>(
     accounts: &'a [AccountInfo<'a>],
-    args: CloseWorkReceiptV1Args,
+    args: &CloseWorkReceiptV1Args,
 ) -> ProgramResult {
     let ctx = CloseWorkReceiptV1Accounts::context(accounts)?;
     let proof_accounts = if accounts.len() > CLOSE_WORK_RECEIPT_NAMED_ACCOUNTS {
@@ -123,9 +138,11 @@ pub fn close_work_receipt_v1<'a>(
     Ok(())
 }
 
-pub fn deserialize_close_work_receipt_args(
-    data: &[u8],
-) -> Result<CloseWorkReceiptV1Args, ProgramError> {
-    CloseWorkReceiptV1Args::try_from_slice(data)
-        .map_err(|_| MplAgentToolsError::InvalidInstructionData.into())
+pub fn cast_close_work_receipt_args(data: &[u8]) -> Result<&CloseWorkReceiptV1Args, ProgramError> {
+    if data.len() < core::mem::size_of::<CloseWorkReceiptV1Args>() {
+        return Err(MplAgentToolsError::InvalidInstructionData.into());
+    }
+    Ok(bytemuck::from_bytes(
+        &data[..core::mem::size_of::<CloseWorkReceiptV1Args>()],
+    ))
 }

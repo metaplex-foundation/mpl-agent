@@ -16,6 +16,7 @@ import {
 } from '@metaplex-foundation/umi';
 import {
   Serializer,
+  array,
   bytes,
   mapSerializer,
   struct,
@@ -64,14 +65,17 @@ export type CloseWorkReceiptV1InstructionAccounts = {
 // Data.
 export type CloseWorkReceiptV1InstructionData = {
   discriminator: number;
+  pad: Array<number>;
   treeIndex: bigint;
   root: Uint8Array;
   dataHash: Uint8Array;
   creatorHash: Uint8Array;
   assetDataHash: Uint8Array;
   flags: number;
+  pad2: Array<number>;
   nonce: bigint;
   index: number;
+  pad3: Array<number>;
 };
 
 export type CloseWorkReceiptV1InstructionDataArgs = {
@@ -97,18 +101,27 @@ export function getCloseWorkReceiptV1InstructionDataSerializer(): Serializer<
     struct<CloseWorkReceiptV1InstructionData>(
       [
         ['discriminator', u8()],
+        ['pad', array(u8(), { size: 7 })],
         ['treeIndex', u64()],
         ['root', bytes({ size: 32 })],
         ['dataHash', bytes({ size: 32 })],
         ['creatorHash', bytes({ size: 32 })],
         ['assetDataHash', bytes({ size: 32 })],
         ['flags', u8()],
+        ['pad2', array(u8(), { size: 7 })],
         ['nonce', u64()],
         ['index', u32()],
+        ['pad3', array(u8(), { size: 4 })],
       ],
       { description: 'CloseWorkReceiptV1InstructionData' }
     ),
-    (value) => ({ ...value, discriminator: 6 })
+    (value) => ({
+      ...value,
+      discriminator: 6,
+      pad: [0, 0, 0, 0, 0, 0, 0],
+      pad2: [0, 0, 0, 0, 0, 0, 0],
+      pad3: [0, 0, 0, 0],
+    })
   ) as Serializer<
     CloseWorkReceiptV1InstructionDataArgs,
     CloseWorkReceiptV1InstructionData

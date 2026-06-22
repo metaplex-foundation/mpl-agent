@@ -116,11 +116,19 @@ impl CloseWorkReceiptV1 {
 #[cfg_attr(feature = "anchor", derive(AnchorSerialize, AnchorDeserialize))]
 pub struct CloseWorkReceiptV1InstructionData {
     discriminator: u8,
+    pad: [u8; 7],
+    pad2: [u8; 7],
+    pad3: [u8; 4],
 }
 
 impl CloseWorkReceiptV1InstructionData {
     pub fn new() -> Self {
-        Self { discriminator: 6 }
+        Self {
+            discriminator: 6,
+            pad: [0, 0, 0, 0, 0, 0, 0],
+            pad2: [0, 0, 0, 0, 0, 0, 0],
+            pad3: [0, 0, 0, 0],
+        }
     }
 }
 

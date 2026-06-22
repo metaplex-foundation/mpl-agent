@@ -12,7 +12,7 @@ use crate::error::MplAgentToolsError;
 use crate::instruction::MplAgentToolsInstructionDiscriminant;
 
 pub use close_work_receipt_v1::{
-    close_work_receipt_v1, deserialize_close_work_receipt_args, CloseWorkReceiptV1Args,
+    cast_close_work_receipt_args, close_work_receipt_v1, CloseWorkReceiptV1Args,
 };
 pub use create_receipts_collection_v1::{
     cast_create_receipts_collection_args, create_receipts_collection_v1,
@@ -79,7 +79,7 @@ pub fn process_instruction<'a>(
         }
         Ok(MplAgentToolsInstructionDiscriminant::CloseWorkReceiptV1) => {
             msg!("Instruction: CloseWorkReceiptV1");
-            let args = deserialize_close_work_receipt_args(&instruction_data[1..])?;
+            let args = cast_close_work_receipt_args(instruction_data)?;
             close_work_receipt_v1(accounts, args)
         }
         Err(_) => Err(MplAgentToolsError::InvalidInstructionData.into()),
