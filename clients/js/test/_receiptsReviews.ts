@@ -47,14 +47,32 @@ export const DEFAULT_ASSET_DATA_HASH = new Uint8Array([
 export const TREE_MAX_DEPTH = 5;
 export const TREE_MAX_BUFFER = 8;
 
-/** Best-effort: swallow "already initialized" errors from idempotent bootstrap. */
-async function maybe<T>(p: Promise<T>): Promise<void> {
+/**
+ * Run an idempotent bootstrap call, swallowing ONLY the
+ * "already-initialized" custom-program error for the given code. Any
+ * other failure rethrows so real regressions don't silently pass.
+ */
+async function maybe<T>(p: Promise<T>, expectedHex: string): Promise<void> {
   try {
     await p;
-  } catch {
-    // Already done — fine.
+  } catch (e: any) {
+    const needle = `custom program error: ${expectedHex}`;
+    const msg = String(e?.message ?? '');
+    const causeMsg = String(e?.cause?.message ?? '');
+    const logs: string[] = (e?.logs ?? e?.cause?.logs ?? []) as string[];
+    if (
+      msg.includes(needle) ||
+      causeMsg.includes(needle) ||
+      logs.some((l) => l.includes(needle))
+    ) {
+      return;
+    }
+    throw e;
   }
 }
+
+/** Custom program error code for MplAgentToolsError::ReceiptsCollectionAlreadyInitialized. */
+const RECEIPTS_COLLECTION_ALREADY_INITIALIZED_HEX = '0x14';
 
 export interface ReceiptsBootstrap {
   receiptsCollection: PublicKey;
@@ -71,7 +89,10 @@ export interface ReceiptsBootstrap {
 export async function bootstrapReceipts(umi: Umi): Promise<ReceiptsBootstrap> {
   const receiptsCollection = publicKey(findReceiptsCollectionPda(umi));
 
-  await maybe(createReceiptsCollectionV1(umi, {}).sendAndConfirm(umi));
+  await maybe(
+    createReceiptsCollectionV1(umi, {}).sendAndConfirm(umi),
+    RECEIPTS_COLLECTION_ALREADY_INITIALIZED_HEX
+  );
 
   const receiptsTreeIndex = randomU64();
   const receiptsTree = publicKey(
