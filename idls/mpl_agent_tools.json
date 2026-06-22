@@ -466,6 +466,119 @@
         "type": "u8",
         "value": 5
       }
+    },
+    {
+      "name": "CloseWorkReceiptV1",
+      "accounts": [
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Pays for the tx"
+          ]
+        },
+        {
+          "name": "leafOwner",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "The wallet that owns the receipt being closed"
+          ]
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Receipts authority PDA at [\"receipts_authority\"] — signs the BurnV2 CPI via invoke_signed"
+          ]
+        },
+        {
+          "name": "treeConfig",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Bubblegum tree config PDA for the receipts tree"
+          ]
+        },
+        {
+          "name": "merkleTree",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Receipts merkle tree at PDA [\"receipts_tree\", tree_index_le]"
+          ]
+        },
+        {
+          "name": "coreCollection",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Canonical receipts collection PDA at [\"receipts_collection\"]"
+          ]
+        },
+        {
+          "name": "mplCoreCpiSigner",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Bubblegum's mpl-core CPI signer PDA"
+          ]
+        },
+        {
+          "name": "logWrapper",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "MPL Noop / log wrapper program"
+          ]
+        },
+        {
+          "name": "compressionProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "MPL Account Compression program"
+          ]
+        },
+        {
+          "name": "mplCoreProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The MPL Core program"
+          ]
+        },
+        {
+          "name": "bubblegumProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The MPL Bubblegum program"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The system program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "closeWorkReceiptV1Args",
+          "type": {
+            "defined": "CloseWorkReceiptV1Args"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 6
+      }
     }
   ],
   "accounts": [
@@ -549,6 +662,66 @@
     }
   ],
   "types": [
+    {
+      "name": "CloseWorkReceiptV1Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "treeIndex",
+            "type": "u64"
+          },
+          {
+            "name": "root",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "dataHash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "creatorHash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "assetDataHash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "flags",
+            "type": "u8"
+          },
+          {
+            "name": "nonce",
+            "type": "u64"
+          },
+          {
+            "name": "index",
+            "type": "u32"
+          }
+        ]
+      }
+    },
     {
       "name": "CreateReceiptsCollectionV1Args",
       "type": {

@@ -1,8 +1,9 @@
 use shank::{ShankContext, ShankInstruction};
 
 use crate::processor::{
-    CreateReceiptsCollectionV1Args, DelegateExecutionV1Args, MintWorkReceiptV1Args,
-    RegisterExecutiveV1Args, RegisterReceiptsTreeV1Args, RevokeExecutionV1Args,
+    CloseWorkReceiptV1Args, CreateReceiptsCollectionV1Args, DelegateExecutionV1Args,
+    MintWorkReceiptV1Args, RegisterExecutiveV1Args, RegisterReceiptsTreeV1Args,
+    RevokeExecutionV1Args,
 };
 
 /// Instruction discriminants for routing.
@@ -15,6 +16,7 @@ pub enum MplAgentToolsInstructionDiscriminant {
     MintWorkReceiptV1 = 3,
     CreateReceiptsCollectionV1 = 4,
     RegisterReceiptsTreeV1 = 5,
+    CloseWorkReceiptV1 = 6,
 }
 
 impl TryFrom<u8> for MplAgentToolsInstructionDiscriminant {
@@ -28,6 +30,7 @@ impl TryFrom<u8> for MplAgentToolsInstructionDiscriminant {
             3 => Ok(MplAgentToolsInstructionDiscriminant::MintWorkReceiptV1),
             4 => Ok(MplAgentToolsInstructionDiscriminant::CreateReceiptsCollectionV1),
             5 => Ok(MplAgentToolsInstructionDiscriminant::RegisterReceiptsTreeV1),
+            6 => Ok(MplAgentToolsInstructionDiscriminant::CloseWorkReceiptV1),
             _ => Err(()),
         }
     }
@@ -114,4 +117,26 @@ pub enum MplAgentToolsInstruction {
     #[account(6, name="bubblegum_program", desc = "The MPL Bubblegum program")]
     #[account(7, name="system_program", desc = "The system program")]
     RegisterReceiptsTreeV1(RegisterReceiptsTreeV1Args),
+
+    /// Burn (close) a work-receipt cNFT. The caller signs as the leaf
+    /// owner; the receipts_authority PDA signs the Bubblegum BurnV2 via
+    /// the collection's PermanentBurnDelegate plugin. Typical use:
+    /// cleaning up spam receipts a wallet didn't ask for. Closing is
+    /// permitted regardless of whether the receipt has been reviewed —
+    /// review cNFTs live in a separate tree and persist independently.
+    /// Any accounts beyond `system_program` are treated as the merkle
+    /// proof path passed through to BurnV2.
+    #[account(0, writable, signer, name="payer", desc = "Pays for the tx")]
+    #[account(1, signer, name="leaf_owner", desc = "The wallet that owns the receipt being closed")]
+    #[account(2, name="authority", desc = "Receipts authority PDA at [\"receipts_authority\"] — signs the BurnV2 CPI via invoke_signed")]
+    #[account(3, writable, name="tree_config", desc = "Bubblegum tree config PDA for the receipts tree")]
+    #[account(4, writable, name="merkle_tree", desc = "Receipts merkle tree at PDA [\"receipts_tree\", tree_index_le]")]
+    #[account(5, writable, name="core_collection", desc = "Canonical receipts collection PDA at [\"receipts_collection\"]")]
+    #[account(6, name="mpl_core_cpi_signer", desc = "Bubblegum's mpl-core CPI signer PDA")]
+    #[account(7, name="log_wrapper", desc = "MPL Noop / log wrapper program")]
+    #[account(8, name="compression_program", desc = "MPL Account Compression program")]
+    #[account(9, name="mpl_core_program", desc = "The MPL Core program")]
+    #[account(10, name="bubblegum_program", desc = "The MPL Bubblegum program")]
+    #[account(11, name="system_program", desc = "The system program")]
+    CloseWorkReceiptV1(CloseWorkReceiptV1Args),
 }

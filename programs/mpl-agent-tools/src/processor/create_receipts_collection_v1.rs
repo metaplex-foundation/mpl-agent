@@ -1,7 +1,10 @@
 use bytemuck::{Pod, Zeroable};
 use mpl_core::{
     instructions::CreateCollectionV2CpiBuilder,
-    types::{BubblegumV2, PermanentFreezeDelegate, Plugin, PluginAuthority, PluginAuthorityPair},
+    types::{
+        BubblegumV2, PermanentBurnDelegate, PermanentFreezeDelegate, Plugin, PluginAuthority,
+        PluginAuthorityPair,
+    },
 };
 use mpl_utils::assert_signer;
 use shank::ShankType;
@@ -83,6 +86,14 @@ pub fn create_receipts_collection_v1<'a>(
             // ever thaw — and it never exposes a thaw path.
             PluginAuthorityPair {
                 plugin: Plugin::PermanentFreezeDelegate(PermanentFreezeDelegate { frozen: true }),
+                authority: Some(PluginAuthority::UpdateAuthority),
+            },
+            // Spam burn: the leaf owner can close (burn) unwanted
+            // receipts via CloseWorkReceiptV1. Authority = UpdateAuthority
+            // so the program's receipts_authority PDA signs the burn CPI
+            // on behalf of the consenting owner.
+            PluginAuthorityPair {
+                plugin: Plugin::PermanentBurnDelegate(PermanentBurnDelegate {}),
                 authority: Some(PluginAuthority::UpdateAuthority),
             },
         ])

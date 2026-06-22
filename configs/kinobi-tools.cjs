@@ -171,6 +171,34 @@ kinobi.update(
                 },
             },
         },
+        closeWorkReceiptV1: {
+            accounts: {
+                authority: {
+                    defaultValue: k.pdaValueNode("receiptsAuthority"),
+                },
+                coreCollection: {
+                    defaultValue: k.pdaValueNode("receiptsCollection"),
+                },
+                mplCoreProgram: {
+                    defaultValue: k.publicKeyValueNode(MPL_CORE_ID, "mplCore"),
+                },
+                bubblegumProgram: {
+                    defaultValue: k.publicKeyValueNode(
+                        BUBBLEGUM_ID,
+                        "mplBubblegum",
+                    ),
+                },
+                logWrapper: {
+                    defaultValue: k.publicKeyValueNode(MPL_NOOP_ID, "mplNoop"),
+                },
+                compressionProgram: {
+                    defaultValue: k.publicKeyValueNode(
+                        COMPRESSION_ID,
+                        "mplAccountCompression",
+                    ),
+                },
+            },
+        },
     }),
 );
 

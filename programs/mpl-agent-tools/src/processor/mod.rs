@@ -1,3 +1,4 @@
+mod close_work_receipt_v1;
 mod create_receipts_collection_v1;
 mod delegate_execution_v1;
 mod mint_work_receipt_v1;
@@ -10,6 +11,9 @@ use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, msg, 
 use crate::error::MplAgentToolsError;
 use crate::instruction::MplAgentToolsInstructionDiscriminant;
 
+pub use close_work_receipt_v1::{
+    close_work_receipt_v1, deserialize_close_work_receipt_args, CloseWorkReceiptV1Args,
+};
 pub use create_receipts_collection_v1::{
     cast_create_receipts_collection_args, create_receipts_collection_v1,
     CreateReceiptsCollectionV1Args,
@@ -72,6 +76,11 @@ pub fn process_instruction<'a>(
             msg!("Instruction: RegisterReceiptsTreeV1");
             let args = cast_register_receipts_tree_args(instruction_data)?;
             register_receipts_tree_v1(accounts, args)
+        }
+        Ok(MplAgentToolsInstructionDiscriminant::CloseWorkReceiptV1) => {
+            msg!("Instruction: CloseWorkReceiptV1");
+            let args = deserialize_close_work_receipt_args(&instruction_data[1..])?;
+            close_work_receipt_v1(accounts, args)
         }
         Err(_) => Err(MplAgentToolsError::InvalidInstructionData.into()),
     }

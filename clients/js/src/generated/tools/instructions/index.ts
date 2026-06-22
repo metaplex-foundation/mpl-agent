@@ -6,6 +6,7 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
+export * from './closeWorkReceiptV1';
 export * from './createReceiptsCollectionV1';
 export * from './delegateExecutionV1';
 export * from './mintWorkReceiptV1';

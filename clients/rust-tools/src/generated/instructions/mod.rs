@@ -5,6 +5,7 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
+pub(crate) mod r#close_work_receipt_v1;
 pub(crate) mod r#create_receipts_collection_v1;
 pub(crate) mod r#delegate_execution_v1;
 pub(crate) mod r#mint_work_receipt_v1;
@@ -12,6 +13,7 @@ pub(crate) mod r#register_executive_v1;
 pub(crate) mod r#register_receipts_tree_v1;
 pub(crate) mod r#revoke_execution_v1;
 
+pub use self::r#close_work_receipt_v1::*;
 pub use self::r#create_receipts_collection_v1::*;
 pub use self::r#delegate_execution_v1::*;
 pub use self::r#mint_work_receipt_v1::*;
