@@ -63,6 +63,38 @@ pub enum MplAgentToolsError {
     /// 14 - Executive Profile must be initialized
     #[error("Executive Profile must be initialized")]
     ExecutiveProfileMustBeInitialized,
+
+    /// 15 - Invalid Bubblegum Program
+    #[error("Invalid Bubblegum Program")]
+    InvalidBubblegumProgram,
+
+    /// 16 - Executive authority does not match delegate record
+    #[error("Executive authority does not match the delegate record's authority")]
+    ExecutiveAuthorityMismatch,
+
+    /// 17 - Receipt URI missing or too long
+    #[error("Receipt URI must be non-empty and within size limits")]
+    ReceiptUriInvalid,
+
+    /// 18 - Invalid receipts collection PDA / address
+    #[error("Supplied collection is not the canonical receipts collection PDA")]
+    InvalidReceiptsCollection,
+
+    /// 19 - Invalid receipts authority PDA
+    #[error("Supplied authority is not the canonical receipts authority PDA")]
+    InvalidReceiptsAuthority,
+
+    /// 20 - Receipts collection already initialized
+    #[error("Receipts collection already exists")]
+    ReceiptsCollectionAlreadyInitialized,
+
+    /// 21 - Invalid receipts tree PDA derivation
+    #[error("Invalid receipts tree PDA derivation")]
+    InvalidReceiptsTreeDerivation,
+
+    /// 22 - Invalid MPL Account Compression Program
+    #[error("Invalid MPL Account Compression Program")]
+    InvalidCompressionProgram,
 }
 
 impl From<MplAgentToolsError> for ProgramError {

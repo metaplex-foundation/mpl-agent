@@ -3345,6 +3345,7 @@ version = "0.1.0"
 dependencies = [
  "bytemuck",
  "mpl-agent-identity",
+ "mpl-bubblegum",
  "mpl-core",
  "mpl-utils",
  "num-derive",
@@ -3388,6 +3389,21 @@ dependencies = [
  "solana-program",
  "solana-system-interface 2.0.0",
  "thiserror 2.0.18",
+]
+
+[[package]]
+name = "mpl-bubblegum"
+version = "3.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6b7374bd011e34c910bc63e7341076dfd7e769eaf7544979b1de476110394d0c"
+dependencies = [
+ "borsh 1.6.1",
+ "modular-bitfield 0.11.2",
+ "num-derive",
+ "num-traits",
+ "solana-program",
+ "solana-program-error",
+ "thiserror 1.0.69",
 ]
 
 [[package]]
