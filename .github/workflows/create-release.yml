@@ -79,6 +79,10 @@ jobs:
       run: |
         git fetch --tags --all
         VERSION=`git tag -l --sort -version:refname "release/${{ inputs.program }}@*" | head -n 1 | sed 's|release/${{ inputs.program }}@||'`
+        # First release for this program: start from 0.0.0 so the bump below produces a valid semver.
+        if [ -z "${VERSION}" ]; then
+          VERSION="0.0.0"
+        fi
         MAJOR=`echo ${VERSION} | cut -d. -f1`
         MINOR=`echo ${VERSION} | cut -d. -f2`
         PATCH=`echo ${VERSION} | cut -d. -f3`

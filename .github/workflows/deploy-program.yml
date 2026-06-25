@@ -50,12 +50,16 @@ jobs:
     steps:
     - name: Check tag
       id: set_program
+      env:
+        GIT_REF: ${{ inputs.git_ref }}
+        PROGRAM: ${{ inputs.program }}
       run: |
-        echo program="${{ inputs.program }}" >> $GITHUB_OUTPUT
-        if [[ "${{ inputs.git_ref }}" =~ ^release/${{ inputs.program }}@* ]]; then
-          echo type="release" >> $GITHUB_OUTPUT
+        echo "program=${PROGRAM}" >> $GITHUB_OUTPUT
+        # Require literal `release/<program>@<...>` — `@*` regex would match `release/<program>` with no version.
+        if [[ "${GIT_REF}" == "release/${PROGRAM}@"* ]]; then
+          echo "type=release" >> $GITHUB_OUTPUT
         else
-          echo type="ref" >> $GITHUB_OUTPUT
+          echo "type=ref" >> $GITHUB_OUTPUT
         fi
   build_programs:
     name: Programs
@@ -112,6 +116,10 @@ jobs:
           token: ${{ secrets.SVC_TOKEN }}
           ref: ${{ inputs.git_ref }}
 
+      - name: Resolve checked-out commit
+        id: resolved
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
       - name: Load environment variables
         run: cat .github/.env >> $GITHUB_ENV
 
@@ -152,40 +160,49 @@ jobs:
           fi
 
       - name: Identify Program
+        env:
+          PROGRAM: ${{ inputs.program }}
+          CLUSTER: ${{ inputs.cluster }}
+          IDENTITY_PROGRAM_ID: ${{ secrets.IDENTITY_PROGRAM_ID }}
+          REPUTATION_PROGRAM_ID: ${{ secrets.REPUTATION_PROGRAM_ID }}
+          VALIDATION_PROGRAM_ID: ${{ secrets.VALIDATION_PROGRAM_ID }}
+          TOOLS_PROGRAM_ID: ${{ secrets.TOOLS_PROGRAM_ID }}
+          PROGRAM_SOLANA_DEPLOY_KEY: ${{ secrets.PROGRAM_SOLANA_DEPLOY_KEY }}
+          PROGRAM_SONIC_DEPLOY_KEY: ${{ secrets.PROGRAM_SONIC_DEPLOY_KEY }}
+          PROGRAM_ECLIPSE_DEPLOY_KEY: ${{ secrets.PROGRAM_ECLIPSE_DEPLOY_KEY }}
         run: |
-          PROGRAM_NAME=$(echo "${{ inputs.program }}" | tr - _)
+          PROGRAM_NAME=$(echo "${PROGRAM}" | tr - _)
           echo PROGRAM_NAME="${PROGRAM_NAME}" >> $GITHUB_ENV
 
           # Per-program program-id keypair secret (waterfall — github actions does not allow dynamic access to secrets)
-          if [ "${{ inputs.program }}" == "mpl-agent-identity" ]; then
-            echo ${{ secrets.IDENTITY_PROGRAM_ID }} > ./program-id.json
-          elif [ "${{ inputs.program }}" == "mpl-agent-reputation" ]; then
-            echo ${{ secrets.REPUTATION_PROGRAM_ID }} > ./program-id.json
-          elif [ "${{ inputs.program }}" == "mpl-agent-validation" ]; then
-            echo ${{ secrets.VALIDATION_PROGRAM_ID }} > ./program-id.json
-          elif [ "${{ inputs.program }}" == "mpl-agent-tools" ]; then
-            echo ${{ secrets.TOOLS_PROGRAM_ID }} > ./program-id.json
-          else
-            echo "Invalid program: ${{ inputs.program }}"
+          case "${PROGRAM}" in
+            mpl-agent-identity)   PROGRAM_ID_KEYPAIR="${IDENTITY_PROGRAM_ID}" ;;
+            mpl-agent-reputation) PROGRAM_ID_KEYPAIR="${REPUTATION_PROGRAM_ID}" ;;
+            mpl-agent-validation) PROGRAM_ID_KEYPAIR="${VALIDATION_PROGRAM_ID}" ;;
+            mpl-agent-tools)      PROGRAM_ID_KEYPAIR="${TOOLS_PROGRAM_ID}" ;;
+            *) echo "Invalid program: ${PROGRAM}"; exit 1 ;;
+          esac
+
+          if [ -z "${PROGRAM_ID_KEYPAIR}" ]; then
+            echo "Missing program-id secret for ${PROGRAM} (set IDENTITY_PROGRAM_ID / REPUTATION_PROGRAM_ID / VALIDATION_PROGRAM_ID / TOOLS_PROGRAM_ID)."
             exit 1
           fi
+          echo "${PROGRAM_ID_KEYPAIR}" > ./program-id.json
 
-          if [[ "${{ inputs.cluster }}" == "sonic"* ]]; then
-            echo ${{ secrets.PROGRAM_SONIC_DEPLOY_KEY }} > ./deployer-key.json
-            echo DEPLOY_TYPE="direct" >> $GITHUB_ENV
-          elif [[ "${{ inputs.cluster }}" == "eclipse"* ]]; then
-            echo ${{ secrets.PROGRAM_ECLIPSE_DEPLOY_KEY }} > ./deployer-key.json
-            echo DEPLOY_TYPE="direct" >> $GITHUB_ENV
-          elif [[ "${{ inputs.cluster }}" == "devnet" ]]; then
-            echo ${{ secrets.PROGRAM_SOLANA_DEPLOY_KEY }} > ./deployer-key.json
-            echo DEPLOY_TYPE="direct" >> $GITHUB_ENV
-          elif [[ "${{ inputs.cluster }}" == "mainnet-beta" ]]; then
-            echo ${{ secrets.PROGRAM_SOLANA_DEPLOY_KEY }} > ./deployer-key.json
-            echo DEPLOY_TYPE="direct" >> $GITHUB_ENV
-          else
-            echo "Invalid cluster: ${{ inputs.cluster }}"
+          case "${CLUSTER}" in
+            sonic*)       DEPLOYER_KEY="${PROGRAM_SONIC_DEPLOY_KEY}" ;;
+            eclipse*)     DEPLOYER_KEY="${PROGRAM_ECLIPSE_DEPLOY_KEY}" ;;
+            devnet)       DEPLOYER_KEY="${PROGRAM_SOLANA_DEPLOY_KEY}" ;;
+            mainnet-beta) DEPLOYER_KEY="${PROGRAM_SOLANA_DEPLOY_KEY}" ;;
+            *) echo "Invalid cluster: ${CLUSTER}"; exit 1 ;;
+          esac
+
+          if [ -z "${DEPLOYER_KEY}" ]; then
+            echo "Missing deployer-key secret for cluster ${CLUSTER}."
             exit 1
-          fi          
+          fi
+          echo "${DEPLOYER_KEY}" > ./deployer-key.json
+          echo DEPLOY_TYPE="direct" >> $GITHUB_ENV
 
       - name: Sanitize Ref
         id: sanitize
@@ -277,28 +294,47 @@ jobs:
       - name: Create env tag
         uses: actions/github-script@v7
         if: github.event.inputs.dry_run == 'false'
+        env:
+          REF_TYPE: ${{ needs.check_tag.outputs.type }}
+          GIT_REF: ${{ inputs.git_ref }}
+          PROGRAM: ${{ needs.check_tag.outputs.program }}
+          CLUSTER: ${{ inputs.cluster }}
+          RESOLVED_SHA: ${{ steps.resolved.outputs.sha }}
         with:
           github-token: ${{ secrets.GH_TAGGER_TOKEN }}
           script: |
-            const refData = await github.rest.git.getRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: '${{ (needs.check_tag.outputs.type == 'release' && format('tags/{0}', inputs.git_ref)) || inputs.git_ref }}'
-            });
-            if (refData.status !== 200) {
-              throw new Error('Failed to fetch existing tag');
-            }
-            await github.rest.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: 'refs/tags/${{ needs.check_tag.outputs.program }}-${{ inputs.cluster }}',
-              sha: refData.data.object.sha
-            }).catch(err => {
-              if (err.status !== 422) throw err;
-              github.rest.git.updateRef({
+            // For release tags we can dereference via the GitHub API. For ref inputs
+            // (branch names, SHAs) getRef won't accept a bare value, so use the SHA
+            // we resolved from the checked-out workspace instead.
+            let sha;
+            if (process.env.REF_TYPE === 'release') {
+              const refData = await github.rest.git.getRef({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                ref: 'tags/${{ needs.check_tag.outputs.program }}-${{ inputs.cluster }}',
-                sha: refData.data.object.sha
+                ref: `tags/${process.env.GIT_REF}`,
               });
-            })
+              sha = refData.data.object.sha;
+            } else {
+              sha = process.env.RESOLVED_SHA;
+              if (!sha) {
+                throw new Error('Resolved checkout SHA is empty');
+              }
+            }
+
+            const envRef = `${process.env.PROGRAM}-${process.env.CLUSTER}`;
+            try {
+              await github.rest.git.createRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `refs/tags/${envRef}`,
+                sha,
+              });
+            } catch (err) {
+              if (err.status !== 422) throw err;
+              await github.rest.git.updateRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `tags/${envRef}`,
+                sha,
+              });
+            }
