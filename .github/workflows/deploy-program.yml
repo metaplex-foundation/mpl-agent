@@ -4,17 +4,20 @@ on:
   workflow_dispatch:
     inputs:
       git_ref:
-        description: Release tag (release/mpl-agent-identity@0.1.0) or commit to deploy
+        description: Release tag (release/<program>@<version>) or commit to deploy
         required: true
         type: string
-        default: release/mpl-agent-identity@0.1.0
+        default: main
       program:
         description: Program
         required: true
-        default: core
+        default: mpl-agent-identity
         type: choice
         options:
-          - core
+          - mpl-agent-identity
+          - mpl-agent-reputation
+          - mpl-agent-validation
+          - mpl-agent-tools
       cluster:
         description: Cluster environment
         required: true
@@ -48,8 +51,8 @@ jobs:
     - name: Check tag
       id: set_program
       run: |
-        echo program="mpl-agent-identity" >> $GITHUB_OUTPUT
-        if [[ "${{ inputs.git_ref }}" =~ ^release/mpl-agent-identity@* ]]; then
+        echo program="${{ inputs.program }}" >> $GITHUB_OUTPUT
+        if [[ "${{ inputs.git_ref }}" =~ ^release/${{ inputs.program }}@* ]]; then
           echo type="release" >> $GITHUB_OUTPUT
         else
           echo type="ref" >> $GITHUB_OUTPUT
@@ -70,7 +73,7 @@ jobs:
     needs: [build_programs, check_tag]
     if: needs.check_tag.outputs.type == 'ref'
     with:
-      program_matrix: '["mpl-${{ inputs.program }}"]'
+      program_matrix: '["${{ inputs.program }}"]'
       git_ref: ${{ inputs.git_ref }}
 
   test_js:
@@ -150,9 +153,23 @@ jobs:
 
       - name: Identify Program
         run: |
-          echo PROGRAM_NAME="mpl_agent_identity" >> $GITHUB_ENV
-          echo ${{ secrets.PROGRAM_ID }} > ./program-id.json
-          
+          PROGRAM_NAME=$(echo "${{ inputs.program }}" | tr - _)
+          echo PROGRAM_NAME="${PROGRAM_NAME}" >> $GITHUB_ENV
+
+          # Per-program program-id keypair secret (waterfall — github actions does not allow dynamic access to secrets)
+          if [ "${{ inputs.program }}" == "mpl-agent-identity" ]; then
+            echo ${{ secrets.IDENTITY_PROGRAM_ID }} > ./program-id.json
+          elif [ "${{ inputs.program }}" == "mpl-agent-reputation" ]; then
+            echo ${{ secrets.REPUTATION_PROGRAM_ID }} > ./program-id.json
+          elif [ "${{ inputs.program }}" == "mpl-agent-validation" ]; then
+            echo ${{ secrets.VALIDATION_PROGRAM_ID }} > ./program-id.json
+          elif [ "${{ inputs.program }}" == "mpl-agent-tools" ]; then
+            echo ${{ secrets.TOOLS_PROGRAM_ID }} > ./program-id.json
+          else
+            echo "Invalid program: ${{ inputs.program }}"
+            exit 1
+          fi
+
           if [[ "${{ inputs.cluster }}" == "sonic"* ]]; then
             echo ${{ secrets.PROGRAM_SONIC_DEPLOY_KEY }} > ./deployer-key.json
             echo DEPLOY_TYPE="direct" >> $GITHUB_ENV

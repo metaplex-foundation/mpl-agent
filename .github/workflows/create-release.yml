@@ -10,6 +10,9 @@ on:
         type: choice
         options:
           - mpl-agent-identity
+          - mpl-agent-reputation
+          - mpl-agent-validation
+          - mpl-agent-tools
       bump:
         description: Version bump
         required: true
@@ -42,7 +45,7 @@ jobs:
     uses: ./.github/workflows/test-programs.yml
     secrets: inherit
     with:
-      program_matrix: '["mpl-${{ inputs.program }}"]'
+      program_matrix: '["${{ inputs.program }}"]'
       git_ref: ${{ inputs.git_ref }}
 
   test_js:
@@ -113,7 +116,8 @@ jobs:
     
     - name: Identify Program
       run: |
-        echo PROGRAM_NAME="mpl_${{ inputs.program }}" >> $GITHUB_ENV
+        PROGRAM_NAME=$(echo "${{ inputs.program }}" | tr - _)
+        echo PROGRAM_NAME="${PROGRAM_NAME}" >> $GITHUB_ENV
 
     - name: Create Release
       id: create_release
