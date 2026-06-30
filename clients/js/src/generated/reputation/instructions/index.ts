@@ -6,4 +6,6 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-export * from './registerReputationV1';
+export * from './createReviewsCollectionV1';
+export * from './leaveReviewV1';
+export * from './registerReviewsTreeV1';

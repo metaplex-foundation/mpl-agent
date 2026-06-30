@@ -30,102 +30,100 @@ import {
 } from '@metaplex-foundation/umi/serializers';
 import { Key, KeyArgs, getKeySerializer } from '../types';
 
-export type AgentReputationV1 = Account<AgentReputationV1AccountData>;
+export type ReviewRecordV1 = Account<ReviewRecordV1AccountData>;
 
-export type AgentReputationV1AccountData = {
+export type ReviewRecordV1AccountData = {
   key: Key;
   bump: number;
   padding: Array<number>;
-  asset: PublicKey;
+  reviewer: PublicKey;
+  receiptAssetId: PublicKey;
 };
 
-export type AgentReputationV1AccountDataArgs = {
+export type ReviewRecordV1AccountDataArgs = {
   key: KeyArgs;
   bump: number;
-  asset: PublicKey;
+  reviewer: PublicKey;
+  receiptAssetId: PublicKey;
 };
 
-export function getAgentReputationV1AccountDataSerializer(): Serializer<
-  AgentReputationV1AccountDataArgs,
-  AgentReputationV1AccountData
+export function getReviewRecordV1AccountDataSerializer(): Serializer<
+  ReviewRecordV1AccountDataArgs,
+  ReviewRecordV1AccountData
 > {
   return mapSerializer<
-    AgentReputationV1AccountDataArgs,
+    ReviewRecordV1AccountDataArgs,
     any,
-    AgentReputationV1AccountData
+    ReviewRecordV1AccountData
   >(
-    struct<AgentReputationV1AccountData>(
+    struct<ReviewRecordV1AccountData>(
       [
         ['key', getKeySerializer()],
         ['bump', u8()],
         ['padding', array(u8(), { size: 6 })],
-        ['asset', publicKeySerializer()],
+        ['reviewer', publicKeySerializer()],
+        ['receiptAssetId', publicKeySerializer()],
       ],
-      { description: 'AgentReputationV1AccountData' }
+      { description: 'ReviewRecordV1AccountData' }
     ),
     (value) => ({ ...value, padding: [0, 0, 0, 0, 0, 0] })
-  ) as Serializer<
-    AgentReputationV1AccountDataArgs,
-    AgentReputationV1AccountData
-  >;
+  ) as Serializer<ReviewRecordV1AccountDataArgs, ReviewRecordV1AccountData>;
 }
 
-export function deserializeAgentReputationV1(
+export function deserializeReviewRecordV1(
   rawAccount: RpcAccount
-): AgentReputationV1 {
+): ReviewRecordV1 {
   return deserializeAccount(
     rawAccount,
-    getAgentReputationV1AccountDataSerializer()
+    getReviewRecordV1AccountDataSerializer()
   );
 }
 
-export async function fetchAgentReputationV1(
+export async function fetchReviewRecordV1(
   context: Pick<Context, 'rpc'>,
   publicKey: PublicKey | Pda,
   options?: RpcGetAccountOptions
-): Promise<AgentReputationV1> {
+): Promise<ReviewRecordV1> {
   const maybeAccount = await context.rpc.getAccount(
     toPublicKey(publicKey, false),
     options
   );
-  assertAccountExists(maybeAccount, 'AgentReputationV1');
-  return deserializeAgentReputationV1(maybeAccount);
+  assertAccountExists(maybeAccount, 'ReviewRecordV1');
+  return deserializeReviewRecordV1(maybeAccount);
 }
 
-export async function safeFetchAgentReputationV1(
+export async function safeFetchReviewRecordV1(
   context: Pick<Context, 'rpc'>,
   publicKey: PublicKey | Pda,
   options?: RpcGetAccountOptions
-): Promise<AgentReputationV1 | null> {
+): Promise<ReviewRecordV1 | null> {
   const maybeAccount = await context.rpc.getAccount(
     toPublicKey(publicKey, false),
     options
   );
-  return maybeAccount.exists
-    ? deserializeAgentReputationV1(maybeAccount)
-    : null;
+  return maybeAccount.exists ? deserializeReviewRecordV1(maybeAccount) : null;
 }
 
-export async function fetchAllAgentReputationV1(
+export async function fetchAllReviewRecordV1(
   context: Pick<Context, 'rpc'>,
   publicKeys: Array<PublicKey | Pda>,
   options?: RpcGetAccountsOptions
-): Promise<AgentReputationV1[]> {
+): Promise<ReviewRecordV1[]> {
   const maybeAccounts = await context.rpc.getAccounts(
     publicKeys.map((key) => toPublicKey(key, false)),
     options
   );
   return maybeAccounts.map((maybeAccount) => {
-    assertAccountExists(maybeAccount, 'AgentReputationV1');
-    return deserializeAgentReputationV1(maybeAccount);
+    assertAccountExists(maybeAccount, 'ReviewRecordV1');
+    return deserializeReviewRecordV1(maybeAccount);
   });
 }
 
-export async function safeFetchAllAgentReputationV1(
+export async function safeFetchAllReviewRecordV1(
   context: Pick<Context, 'rpc'>,
   publicKeys: Array<PublicKey | Pda>,
   options?: RpcGetAccountsOptions
-): Promise<AgentReputationV1[]> {
+): Promise<ReviewRecordV1[]> {
   const maybeAccounts = await context.rpc.getAccounts(
     publicKeys.map((key) => toPublicKey(key, false)),
     options
@@ -133,11 +131,11 @@ export async function safeFetchAllAgentReputationV1(
   return maybeAccounts
     .filter((maybeAccount) => maybeAccount.exists)
     .map((maybeAccount) =>
-      deserializeAgentReputationV1(maybeAccount as RpcAccount)
+      deserializeReviewRecordV1(maybeAccount as RpcAccount)
     );
 }
 
-export function getAgentReputationV1GpaBuilder(
+export function getReviewRecordV1GpaBuilder(
   context: Pick<Context, 'rpc' | 'programs'>
 ) {
   const programId = context.programs.getPublicKey(
@@ -149,27 +147,29 @@ export function getAgentReputationV1GpaBuilder(
       key: KeyArgs;
       bump: number;
       padding: Array<number>;
-      asset: PublicKey;
+      reviewer: PublicKey;
+      receiptAssetId: PublicKey;
     }>({
       key: [0, getKeySerializer()],
       bump: [1, u8()],
       padding: [2, array(u8(), { size: 6 })],
-      asset: [8, publicKeySerializer()],
+      reviewer: [8, publicKeySerializer()],
+      receiptAssetId: [40, publicKeySerializer()],
     })
-    .deserializeUsing<AgentReputationV1>((account) =>
-      deserializeAgentReputationV1(account)
+    .deserializeUsing<ReviewRecordV1>((account) =>
+      deserializeReviewRecordV1(account)
     );
 }
 
-export function getAgentReputationV1Size(): number {
-  return 40;
+export function getReviewRecordV1Size(): number {
+  return 72;
 }
 
-export function findAgentReputationV1Pda(
+export function findReviewRecordV1Pda(
   context: Pick<Context, 'eddsa' | 'programs'>,
   seeds: {
-    /** The address of the asset */
-    asset: PublicKey;
+    /** Bubblegum asset id of the work receipt */
+    receiptAssetId: PublicKey;
   }
 ): Pda {
   const programId = context.programs.getPublicKey(
@@ -177,31 +177,31 @@ export function findAgentReputationV1Pda(
     'REPREG5c1gPHuHukEyANpksLdHFaJCiTrm6zJgNhRZR'
   );
   return context.eddsa.findPda(programId, [
-    string({ size: 'variable' }).serialize('agent_reputation'),
-    publicKeySerializer().serialize(seeds.asset),
+    string({ size: 'variable' }).serialize('review_record'),
+    publicKeySerializer().serialize(seeds.receiptAssetId),
   ]);
 }
 
-export async function fetchAgentReputationV1FromSeeds(
+export async function fetchReviewRecordV1FromSeeds(
   context: Pick<Context, 'eddsa' | 'programs' | 'rpc'>,
-  seeds: Parameters<typeof findAgentReputationV1Pda>[1],
+  seeds: Parameters<typeof findReviewRecordV1Pda>[1],
   options?: RpcGetAccountOptions
-): Promise<AgentReputationV1> {
-  return fetchAgentReputationV1(
+): Promise<ReviewRecordV1> {
+  return fetchReviewRecordV1(
     context,
-    findAgentReputationV1Pda(context, seeds),
+    findReviewRecordV1Pda(context, seeds),
     options
   );
 }
 
-export async function safeFetchAgentReputationV1FromSeeds(
+export async function safeFetchReviewRecordV1FromSeeds(
   context: Pick<Context, 'eddsa' | 'programs' | 'rpc'>,
-  seeds: Parameters<typeof findAgentReputationV1Pda>[1],
+  seeds: Parameters<typeof findReviewRecordV1Pda>[1],
   options?: RpcGetAccountOptions
-): Promise<AgentReputationV1 | null> {
-  return safeFetchAgentReputationV1(
+): Promise<ReviewRecordV1 | null> {
+  return safeFetchReviewRecordV1(
     context,
-    findAgentReputationV1Pda(context, seeds),
+    findReviewRecordV1Pda(context, seeds),
     options
   );
 }

@@ -10,7 +10,7 @@ import { Serializer, scalarEnum } from '@metaplex-foundation/umi/serializers';
 
 export enum Key {
   Uninitialized,
-  AgentReputationV1,
+  ReviewRecordV1,
 }
 
 export type KeyArgs = Key;

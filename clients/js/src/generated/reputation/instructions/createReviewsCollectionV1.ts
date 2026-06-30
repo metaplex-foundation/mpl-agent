@@ -21,26 +21,21 @@ import {
   struct,
   u8,
 } from '@metaplex-foundation/umi/serializers';
-import { findAgentReputationV1Pda } from '../accounts';
+import { findReviewsAuthorityPda, findReviewsCollectionPda } from '../accounts';
 import {
   ResolvedAccount,
   ResolvedAccountsWithIndices,
-  expectPublicKey,
   getAccountMetasAndSigners,
 } from '../shared';
 
 // Accounts.
-export type RegisterReputationV1InstructionAccounts = {
-  /** The agent reputation PDA */
-  agentReputation?: PublicKey | Pda;
-  /** The address of the Core asset */
-  asset: PublicKey | Pda;
-  /** The address of the collection */
-  collection?: PublicKey | Pda;
-  /** The payer for additional rent */
+export type CreateReviewsCollectionV1InstructionAccounts = {
+  /** Funds the collection's rent */
   payer?: Signer;
-  /** Authority for the collection. If not provided, the payer will be used. */
-  authority?: Signer;
+  /** Reviews collection PDA at ["reviews_collection"] */
+  collection?: PublicKey | Pda;
+  /** Reviews authority PDA at ["reviews_authority"] — becomes the collection's update_authority */
+  authority?: PublicKey | Pda;
   /** The MPL Core program */
   mplCoreProgram?: PublicKey | Pda;
   /** The system program */
@@ -48,43 +43,43 @@ export type RegisterReputationV1InstructionAccounts = {
 };
 
 // Data.
-export type RegisterReputationV1InstructionData = {
+export type CreateReviewsCollectionV1InstructionData = {
   discriminator: number;
   padding: Array<number>;
 };
 
-export type RegisterReputationV1InstructionDataArgs = {};
+export type CreateReviewsCollectionV1InstructionDataArgs = {};
 
-export function getRegisterReputationV1InstructionDataSerializer(): Serializer<
-  RegisterReputationV1InstructionDataArgs,
-  RegisterReputationV1InstructionData
+export function getCreateReviewsCollectionV1InstructionDataSerializer(): Serializer<
+  CreateReviewsCollectionV1InstructionDataArgs,
+  CreateReviewsCollectionV1InstructionData
 > {
   return mapSerializer<
-    RegisterReputationV1InstructionDataArgs,
+    CreateReviewsCollectionV1InstructionDataArgs,
     any,
-    RegisterReputationV1InstructionData
+    CreateReviewsCollectionV1InstructionData
   >(
-    struct<RegisterReputationV1InstructionData>(
+    struct<CreateReviewsCollectionV1InstructionData>(
       [
         ['discriminator', u8()],
         ['padding', array(u8(), { size: 7 })],
       ],
-      { description: 'RegisterReputationV1InstructionData' }
+      { description: 'CreateReviewsCollectionV1InstructionData' }
     ),
-    (value) => ({ ...value, discriminator: 0, padding: [0, 0, 0, 0, 0, 0, 0] })
+    (value) => ({ ...value, discriminator: 1, padding: [0, 0, 0, 0, 0, 0, 0] })
   ) as Serializer<
-    RegisterReputationV1InstructionDataArgs,
-    RegisterReputationV1InstructionData
+    CreateReviewsCollectionV1InstructionDataArgs,
+    CreateReviewsCollectionV1InstructionData
   >;
 }
 
 // Instruction discriminator.
-export const registerReputationV1InstructionDiscriminator = 0;
+export const createReviewsCollectionV1InstructionDiscriminator = 1;
 
 // Instruction.
-export function registerReputationV1(
+export function createReviewsCollectionV1(
   context: Pick<Context, 'eddsa' | 'payer' | 'programs'>,
-  input: RegisterReputationV1InstructionAccounts
+  input: CreateReviewsCollectionV1InstructionAccounts
 ): TransactionBuilder {
   // Program ID.
   const programId = context.programs.getPublicKey(
@@ -94,51 +89,42 @@ export function registerReputationV1(
 
   // Accounts.
   const resolvedAccounts = {
-    agentReputation: {
-      index: 0,
-      isWritable: true as boolean,
-      value: input.agentReputation ?? null,
-    },
-    asset: {
-      index: 1,
-      isWritable: true as boolean,
-      value: input.asset ?? null,
-    },
-    collection: {
-      index: 2,
-      isWritable: true as boolean,
-      value: input.collection ?? null,
-    },
     payer: {
-      index: 3,
+      index: 0,
       isWritable: true as boolean,
       value: input.payer ?? null,
     },
+    collection: {
+      index: 1,
+      isWritable: true as boolean,
+      value: input.collection ?? null,
+    },
     authority: {
-      index: 4,
+      index: 2,
       isWritable: false as boolean,
       value: input.authority ?? null,
     },
     mplCoreProgram: {
-      index: 5,
+      index: 3,
       isWritable: false as boolean,
       value: input.mplCoreProgram ?? null,
     },
     systemProgram: {
-      index: 6,
+      index: 4,
       isWritable: false as boolean,
       value: input.systemProgram ?? null,
     },
   } satisfies ResolvedAccountsWithIndices;
 
   // Default values.
-  if (!resolvedAccounts.agentReputation.value) {
-    resolvedAccounts.agentReputation.value = findAgentReputationV1Pda(context, {
-      asset: expectPublicKey(resolvedAccounts.asset.value),
-    });
-  }
   if (!resolvedAccounts.payer.value) {
     resolvedAccounts.payer.value = context.payer;
+  }
+  if (!resolvedAccounts.collection.value) {
+    resolvedAccounts.collection.value = findReviewsCollectionPda(context);
+  }
+  if (!resolvedAccounts.authority.value) {
+    resolvedAccounts.authority.value = findReviewsAuthorityPda(context);
   }
   if (!resolvedAccounts.mplCoreProgram.value) {
     resolvedAccounts.mplCoreProgram.value = context.programs.getPublicKey(
@@ -168,7 +154,8 @@ export function registerReputationV1(
   );
 
   // Data.
-  const data = getRegisterReputationV1InstructionDataSerializer().serialize({});
+  const data =
+    getCreateReviewsCollectionV1InstructionDataSerializer().serialize({});
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

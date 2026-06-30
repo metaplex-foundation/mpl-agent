@@ -16,7 +16,7 @@ use solana_program::pubkey::Pubkey;
 #[cfg_attr(not(feature = "anchor"), derive(BorshSerialize, BorshDeserialize))]
 #[cfg_attr(feature = "anchor", derive(AnchorSerialize, AnchorDeserialize))]
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct AgentReputationV1 {
+pub struct ReviewRecordV1 {
     pub key: Key,
     pub bump: u8,
     pub padding: [u8; 6],
@@ -24,33 +24,42 @@ pub struct AgentReputationV1 {
         feature = "serde",
         serde(with = "serde_with::As::<serde_with::DisplayFromStr>")
     )]
-    pub asset: Pubkey,
+    pub reviewer: Pubkey,
+    #[cfg_attr(
+        feature = "serde",
+        serde(with = "serde_with::As::<serde_with::DisplayFromStr>")
+    )]
+    pub receipt_asset_id: Pubkey,
 }
 
-impl AgentReputationV1 {
-    pub const LEN: usize = 40;
+impl ReviewRecordV1 {
+    pub const LEN: usize = 72;
 
     /// Prefix values used to generate a PDA for this account.
     ///
     /// Values are positional and appear in the following order:
     ///
-    ///   0. `AgentReputationV1::PREFIX`
-    ///   1. asset (`Pubkey`)
-    pub const PREFIX: &'static [u8] = "agent_reputation".as_bytes();
+    ///   0. `ReviewRecordV1::PREFIX`
+    ///   1. receipt_asset_id (`Pubkey`)
+    pub const PREFIX: &'static [u8] = "review_record".as_bytes();
 
     pub fn create_pda(
-        asset: Pubkey,
+        receipt_asset_id: Pubkey,
         bump: u8,
     ) -> Result<solana_program::pubkey::Pubkey, solana_program::pubkey::PubkeyError> {
         solana_program::pubkey::Pubkey::create_program_address(
-            &["agent_reputation".as_bytes(), asset.as_ref(), &[bump]],
+            &[
+                "review_record".as_bytes(),
+                receipt_asset_id.as_ref(),
+                &[bump],
+            ],
             &crate::MPL_AGENT_REPUTATION_ID,
         )
     }
 
-    pub fn find_pda(asset: &Pubkey) -> (solana_program::pubkey::Pubkey, u8) {
+    pub fn find_pda(receipt_asset_id: &Pubkey) -> (solana_program::pubkey::Pubkey, u8) {
         solana_program::pubkey::Pubkey::find_program_address(
-            &["agent_reputation".as_bytes(), asset.as_ref()],
+            &["review_record".as_bytes(), receipt_asset_id.as_ref()],
             &crate::MPL_AGENT_REPUTATION_ID,
         )
     }
@@ -62,7 +71,7 @@ impl AgentReputationV1 {
     }
 }
 
-impl<'a> TryFrom<&solana_program::account_info::AccountInfo<'a>> for AgentReputationV1 {
+impl<'a> TryFrom<&solana_program::account_info::AccountInfo<'a>> for ReviewRecordV1 {
     type Error = std::io::Error;
 
     fn try_from(
