@@ -11,24 +11,20 @@ use anchor_lang::prelude::{AnchorDeserialize, AnchorSerialize};
 use borsh::{BorshDeserialize, BorshSerialize};
 
 /// Accounts.
-pub struct RegisterReputationV1 {
-    /// The agent reputation PDA
-    pub agent_reputation: solana_program::pubkey::Pubkey,
-    /// The address of the Core asset
-    pub asset: solana_program::pubkey::Pubkey,
-    /// The address of the collection
-    pub collection: Option<solana_program::pubkey::Pubkey>,
-    /// The payer for additional rent
+pub struct CreateReviewsCollectionV1 {
+    /// Funds the collection's rent
     pub payer: solana_program::pubkey::Pubkey,
-    /// Authority for the collection. If not provided, the payer will be used.
-    pub authority: Option<solana_program::pubkey::Pubkey>,
+    /// Reviews collection PDA at ["reviews_collection"]
+    pub collection: solana_program::pubkey::Pubkey,
+    /// Reviews authority PDA at ["reviews_authority"] — becomes the collection's update_authority
+    pub authority: solana_program::pubkey::Pubkey,
     /// The MPL Core program
     pub mpl_core_program: solana_program::pubkey::Pubkey,
     /// The system program
     pub system_program: solana_program::pubkey::Pubkey,
 }
 
-impl RegisterReputationV1 {
+impl CreateReviewsCollectionV1 {
     pub fn instruction(&self) -> solana_program::instruction::Instruction {
         self.instruction_with_remaining_accounts(&[])
     }
@@ -37,37 +33,18 @@ impl RegisterReputationV1 {
         &self,
         remaining_accounts: &[solana_program::instruction::AccountMeta],
     ) -> solana_program::instruction::Instruction {
-        let mut accounts = Vec::with_capacity(7 + remaining_accounts.len());
-        accounts.push(solana_program::instruction::AccountMeta::new(
-            self.agent_reputation,
-            false,
-        ));
-        accounts.push(solana_program::instruction::AccountMeta::new(
-            self.asset, false,
-        ));
-        if let Some(collection) = self.collection {
-            accounts.push(solana_program::instruction::AccountMeta::new(
-                collection, false,
-            ));
-        } else {
-            accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-                crate::MPL_AGENT_REPUTATION_ID,
-                false,
-            ));
-        }
+        let mut accounts = Vec::with_capacity(5 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new(
             self.payer, true,
         ));
-        if let Some(authority) = self.authority {
-            accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-                authority, true,
-            ));
-        } else {
-            accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-                crate::MPL_AGENT_REPUTATION_ID,
-                false,
-            ));
-        }
+        accounts.push(solana_program::instruction::AccountMeta::new(
+            self.collection,
+            false,
+        ));
+        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+            self.authority,
+            false,
+        ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
             self.mpl_core_program,
             false,
@@ -77,7 +54,7 @@ impl RegisterReputationV1 {
             false,
         ));
         accounts.extend_from_slice(remaining_accounts);
-        let data = borsh::to_vec(&(RegisterReputationV1InstructionData::new())).unwrap();
+        let data = borsh::to_vec(&(CreateReviewsCollectionV1InstructionData::new())).unwrap();
 
         solana_program::instruction::Instruction {
             program_id: crate::MPL_AGENT_REPUTATION_ID,
@@ -89,80 +66,59 @@ impl RegisterReputationV1 {
 
 #[cfg_attr(not(feature = "anchor"), derive(BorshSerialize, BorshDeserialize))]
 #[cfg_attr(feature = "anchor", derive(AnchorSerialize, AnchorDeserialize))]
-pub struct RegisterReputationV1InstructionData {
+pub struct CreateReviewsCollectionV1InstructionData {
     discriminator: u8,
     padding: [u8; 7],
 }
 
-impl RegisterReputationV1InstructionData {
+impl CreateReviewsCollectionV1InstructionData {
     pub fn new() -> Self {
         Self {
-            discriminator: 0,
+            discriminator: 1,
             padding: [0, 0, 0, 0, 0, 0, 0],
         }
     }
 }
 
-/// Instruction builder for `RegisterReputationV1`.
+/// Instruction builder for `CreateReviewsCollectionV1`.
 ///
 /// ### Accounts:
 ///
-///   0. `[writable]` agent_reputation
-///   1. `[writable]` asset
-///   2. `[writable, optional]` collection
-///   3. `[writable, signer]` payer
-///   4. `[signer, optional]` authority
-///   5. `[optional]` mpl_core_program (default to `CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d`)
-///   6. `[optional]` system_program (default to `11111111111111111111111111111111`)
+///   0. `[writable, signer]` payer
+///   1. `[writable]` collection
+///   2. `[]` authority
+///   3. `[optional]` mpl_core_program (default to `CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d`)
+///   4. `[optional]` system_program (default to `11111111111111111111111111111111`)
 #[derive(Default)]
-pub struct RegisterReputationV1Builder {
-    agent_reputation: Option<solana_program::pubkey::Pubkey>,
-    asset: Option<solana_program::pubkey::Pubkey>,
-    collection: Option<solana_program::pubkey::Pubkey>,
+pub struct CreateReviewsCollectionV1Builder {
     payer: Option<solana_program::pubkey::Pubkey>,
+    collection: Option<solana_program::pubkey::Pubkey>,
     authority: Option<solana_program::pubkey::Pubkey>,
     mpl_core_program: Option<solana_program::pubkey::Pubkey>,
     system_program: Option<solana_program::pubkey::Pubkey>,
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
 }
 
-impl RegisterReputationV1Builder {
+impl CreateReviewsCollectionV1Builder {
     pub fn new() -> Self {
         Self::default()
     }
-    /// The agent reputation PDA
-    #[inline(always)]
-    pub fn agent_reputation(
-        &mut self,
-        agent_reputation: solana_program::pubkey::Pubkey,
-    ) -> &mut Self {
-        self.agent_reputation = Some(agent_reputation);
-        self
-    }
-    /// The address of the Core asset
-    #[inline(always)]
-    pub fn asset(&mut self, asset: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.asset = Some(asset);
-        self
-    }
-    /// `[optional account]`
-    /// The address of the collection
-    #[inline(always)]
-    pub fn collection(&mut self, collection: Option<solana_program::pubkey::Pubkey>) -> &mut Self {
-        self.collection = collection;
-        self
-    }
-    /// The payer for additional rent
+    /// Funds the collection's rent
     #[inline(always)]
     pub fn payer(&mut self, payer: solana_program::pubkey::Pubkey) -> &mut Self {
         self.payer = Some(payer);
         self
     }
-    /// `[optional account]`
-    /// Authority for the collection. If not provided, the payer will be used.
+    /// Reviews collection PDA at ["reviews_collection"]
     #[inline(always)]
-    pub fn authority(&mut self, authority: Option<solana_program::pubkey::Pubkey>) -> &mut Self {
-        self.authority = authority;
+    pub fn collection(&mut self, collection: solana_program::pubkey::Pubkey) -> &mut Self {
+        self.collection = Some(collection);
+        self
+    }
+    /// Reviews authority PDA at ["reviews_authority"] — becomes the collection's update_authority
+    #[inline(always)]
+    pub fn authority(&mut self, authority: solana_program::pubkey::Pubkey) -> &mut Self {
+        self.authority = Some(authority);
         self
     }
     /// `[optional account, default to 'CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d']`
@@ -202,12 +158,10 @@ impl RegisterReputationV1Builder {
     }
     #[allow(clippy::clone_on_copy)]
     pub fn instruction(&self) -> solana_program::instruction::Instruction {
-        let accounts = RegisterReputationV1 {
-            agent_reputation: self.agent_reputation.expect("agent_reputation is not set"),
-            asset: self.asset.expect("asset is not set"),
-            collection: self.collection,
+        let accounts = CreateReviewsCollectionV1 {
             payer: self.payer.expect("payer is not set"),
-            authority: self.authority,
+            collection: self.collection.expect("collection is not set"),
+            authority: self.authority.expect("authority is not set"),
             mpl_core_program: self.mpl_core_program.unwrap_or(solana_program::pubkey!(
                 "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d"
             )),
@@ -220,55 +174,45 @@ impl RegisterReputationV1Builder {
     }
 }
 
-/// `register_reputation_v1` CPI accounts.
-pub struct RegisterReputationV1CpiAccounts<'a, 'b> {
-    /// The agent reputation PDA
-    pub agent_reputation: &'b solana_program::account_info::AccountInfo<'a>,
-    /// The address of the Core asset
-    pub asset: &'b solana_program::account_info::AccountInfo<'a>,
-    /// The address of the collection
-    pub collection: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    /// The payer for additional rent
+/// `create_reviews_collection_v1` CPI accounts.
+pub struct CreateReviewsCollectionV1CpiAccounts<'a, 'b> {
+    /// Funds the collection's rent
     pub payer: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Authority for the collection. If not provided, the payer will be used.
-    pub authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    /// Reviews collection PDA at ["reviews_collection"]
+    pub collection: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Reviews authority PDA at ["reviews_authority"] — becomes the collection's update_authority
+    pub authority: &'b solana_program::account_info::AccountInfo<'a>,
     /// The MPL Core program
     pub mpl_core_program: &'b solana_program::account_info::AccountInfo<'a>,
     /// The system program
     pub system_program: &'b solana_program::account_info::AccountInfo<'a>,
 }
 
-/// `register_reputation_v1` CPI instruction.
-pub struct RegisterReputationV1Cpi<'a, 'b> {
+/// `create_reviews_collection_v1` CPI instruction.
+pub struct CreateReviewsCollectionV1Cpi<'a, 'b> {
     /// The program to invoke.
     pub __program: &'b solana_program::account_info::AccountInfo<'a>,
-    /// The agent reputation PDA
-    pub agent_reputation: &'b solana_program::account_info::AccountInfo<'a>,
-    /// The address of the Core asset
-    pub asset: &'b solana_program::account_info::AccountInfo<'a>,
-    /// The address of the collection
-    pub collection: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    /// The payer for additional rent
+    /// Funds the collection's rent
     pub payer: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Authority for the collection. If not provided, the payer will be used.
-    pub authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    /// Reviews collection PDA at ["reviews_collection"]
+    pub collection: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Reviews authority PDA at ["reviews_authority"] — becomes the collection's update_authority
+    pub authority: &'b solana_program::account_info::AccountInfo<'a>,
     /// The MPL Core program
     pub mpl_core_program: &'b solana_program::account_info::AccountInfo<'a>,
     /// The system program
     pub system_program: &'b solana_program::account_info::AccountInfo<'a>,
 }
 
-impl<'a, 'b> RegisterReputationV1Cpi<'a, 'b> {
+impl<'a, 'b> CreateReviewsCollectionV1Cpi<'a, 'b> {
     pub fn new(
         program: &'b solana_program::account_info::AccountInfo<'a>,
-        accounts: RegisterReputationV1CpiAccounts<'a, 'b>,
+        accounts: CreateReviewsCollectionV1CpiAccounts<'a, 'b>,
     ) -> Self {
         Self {
             __program: program,
-            agent_reputation: accounts.agent_reputation,
-            asset: accounts.asset,
-            collection: accounts.collection,
             payer: accounts.payer,
+            collection: accounts.collection,
             authority: accounts.authority,
             mpl_core_program: accounts.mpl_core_program,
             system_program: accounts.system_program,
@@ -307,41 +251,19 @@ impl<'a, 'b> RegisterReputationV1Cpi<'a, 'b> {
             bool,
         )],
     ) -> solana_program::entrypoint::ProgramResult {
-        let mut accounts = Vec::with_capacity(7 + remaining_accounts.len());
-        accounts.push(solana_program::instruction::AccountMeta::new(
-            *self.agent_reputation.key,
-            false,
-        ));
-        accounts.push(solana_program::instruction::AccountMeta::new(
-            *self.asset.key,
-            false,
-        ));
-        if let Some(collection) = self.collection {
-            accounts.push(solana_program::instruction::AccountMeta::new(
-                *collection.key,
-                false,
-            ));
-        } else {
-            accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-                crate::MPL_AGENT_REPUTATION_ID,
-                false,
-            ));
-        }
+        let mut accounts = Vec::with_capacity(5 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new(
             *self.payer.key,
             true,
         ));
-        if let Some(authority) = self.authority {
-            accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-                *authority.key,
-                true,
-            ));
-        } else {
-            accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-                crate::MPL_AGENT_REPUTATION_ID,
-                false,
-            ));
-        }
+        accounts.push(solana_program::instruction::AccountMeta::new(
+            *self.collection.key,
+            false,
+        ));
+        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+            *self.authority.key,
+            false,
+        ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
             *self.mpl_core_program.key,
             false,
@@ -357,24 +279,18 @@ impl<'a, 'b> RegisterReputationV1Cpi<'a, 'b> {
                 is_signer: remaining_account.2,
             })
         });
-        let data = borsh::to_vec(&(RegisterReputationV1InstructionData::new())).unwrap();
+        let data = borsh::to_vec(&(CreateReviewsCollectionV1InstructionData::new())).unwrap();
 
         let instruction = solana_program::instruction::Instruction {
             program_id: crate::MPL_AGENT_REPUTATION_ID,
             accounts,
             data,
         };
-        let mut account_infos = Vec::with_capacity(7 + 1 + remaining_accounts.len());
+        let mut account_infos = Vec::with_capacity(5 + 1 + remaining_accounts.len());
         account_infos.push(self.__program.clone());
-        account_infos.push(self.agent_reputation.clone());
-        account_infos.push(self.asset.clone());
-        if let Some(collection) = self.collection {
-            account_infos.push(collection.clone());
-        }
         account_infos.push(self.payer.clone());
-        if let Some(authority) = self.authority {
-            account_infos.push(authority.clone());
-        }
+        account_infos.push(self.collection.clone());
+        account_infos.push(self.authority.clone());
         account_infos.push(self.mpl_core_program.clone());
         account_infos.push(self.system_program.clone());
         remaining_accounts
@@ -389,29 +305,25 @@ impl<'a, 'b> RegisterReputationV1Cpi<'a, 'b> {
     }
 }
 
-/// Instruction builder for `RegisterReputationV1` via CPI.
+/// Instruction builder for `CreateReviewsCollectionV1` via CPI.
 ///
 /// ### Accounts:
 ///
-///   0. `[writable]` agent_reputation
-///   1. `[writable]` asset
-///   2. `[writable, optional]` collection
-///   3. `[writable, signer]` payer
-///   4. `[signer, optional]` authority
-///   5. `[]` mpl_core_program
-///   6. `[]` system_program
-pub struct RegisterReputationV1CpiBuilder<'a, 'b> {
-    instruction: Box<RegisterReputationV1CpiBuilderInstruction<'a, 'b>>,
+///   0. `[writable, signer]` payer
+///   1. `[writable]` collection
+///   2. `[]` authority
+///   3. `[]` mpl_core_program
+///   4. `[]` system_program
+pub struct CreateReviewsCollectionV1CpiBuilder<'a, 'b> {
+    instruction: Box<CreateReviewsCollectionV1CpiBuilderInstruction<'a, 'b>>,
 }
 
-impl<'a, 'b> RegisterReputationV1CpiBuilder<'a, 'b> {
+impl<'a, 'b> CreateReviewsCollectionV1CpiBuilder<'a, 'b> {
     pub fn new(program: &'b solana_program::account_info::AccountInfo<'a>) -> Self {
-        let instruction = Box::new(RegisterReputationV1CpiBuilderInstruction {
+        let instruction = Box::new(CreateReviewsCollectionV1CpiBuilderInstruction {
             __program: program,
-            agent_reputation: None,
-            asset: None,
-            collection: None,
             payer: None,
+            collection: None,
             authority: None,
             mpl_core_program: None,
             system_program: None,
@@ -419,45 +331,28 @@ impl<'a, 'b> RegisterReputationV1CpiBuilder<'a, 'b> {
         });
         Self { instruction }
     }
-    /// The agent reputation PDA
-    #[inline(always)]
-    pub fn agent_reputation(
-        &mut self,
-        agent_reputation: &'b solana_program::account_info::AccountInfo<'a>,
-    ) -> &mut Self {
-        self.instruction.agent_reputation = Some(agent_reputation);
-        self
-    }
-    /// The address of the Core asset
-    #[inline(always)]
-    pub fn asset(&mut self, asset: &'b solana_program::account_info::AccountInfo<'a>) -> &mut Self {
-        self.instruction.asset = Some(asset);
-        self
-    }
-    /// `[optional account]`
-    /// The address of the collection
-    #[inline(always)]
-    pub fn collection(
-        &mut self,
-        collection: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    ) -> &mut Self {
-        self.instruction.collection = collection;
-        self
-    }
-    /// The payer for additional rent
+    /// Funds the collection's rent
     #[inline(always)]
     pub fn payer(&mut self, payer: &'b solana_program::account_info::AccountInfo<'a>) -> &mut Self {
         self.instruction.payer = Some(payer);
         self
     }
-    /// `[optional account]`
-    /// Authority for the collection. If not provided, the payer will be used.
+    /// Reviews collection PDA at ["reviews_collection"]
+    #[inline(always)]
+    pub fn collection(
+        &mut self,
+        collection: &'b solana_program::account_info::AccountInfo<'a>,
+    ) -> &mut Self {
+        self.instruction.collection = Some(collection);
+        self
+    }
+    /// Reviews authority PDA at ["reviews_authority"] — becomes the collection's update_authority
     #[inline(always)]
     pub fn authority(
         &mut self,
-        authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+        authority: &'b solana_program::account_info::AccountInfo<'a>,
     ) -> &mut Self {
-        self.instruction.authority = authority;
+        self.instruction.authority = Some(authority);
         self
     }
     /// The MPL Core program
@@ -519,21 +414,14 @@ impl<'a, 'b> RegisterReputationV1CpiBuilder<'a, 'b> {
         &self,
         signers_seeds: &[&[&[u8]]],
     ) -> solana_program::entrypoint::ProgramResult {
-        let instruction = RegisterReputationV1Cpi {
+        let instruction = CreateReviewsCollectionV1Cpi {
             __program: self.instruction.__program,
-
-            agent_reputation: self
-                .instruction
-                .agent_reputation
-                .expect("agent_reputation is not set"),
-
-            asset: self.instruction.asset.expect("asset is not set"),
-
-            collection: self.instruction.collection,
 
             payer: self.instruction.payer.expect("payer is not set"),
 
-            authority: self.instruction.authority,
+            collection: self.instruction.collection.expect("collection is not set"),
+
+            authority: self.instruction.authority.expect("authority is not set"),
 
             mpl_core_program: self
                 .instruction
@@ -552,12 +440,10 @@ impl<'a, 'b> RegisterReputationV1CpiBuilder<'a, 'b> {
     }
 }
 
-struct RegisterReputationV1CpiBuilderInstruction<'a, 'b> {
+struct CreateReviewsCollectionV1CpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
-    agent_reputation: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    asset: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    collection: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     payer: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    collection: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     mpl_core_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     system_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,

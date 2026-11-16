@@ -6,4 +6,5 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-export * from './agentReputationV1';
+export * from './reviewRecordV1';
+export * from './standalonePdas';

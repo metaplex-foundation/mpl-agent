@@ -3308,6 +3308,7 @@ name = "mpl-agent-reputation-program"
 version = "0.1.0"
 dependencies = [
  "bytemuck",
+ "mpl-bubblegum",
  "mpl-core",
  "mpl-utils",
  "num-derive",
